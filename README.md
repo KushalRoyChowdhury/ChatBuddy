@@ -3,7 +3,7 @@
 Welcome to ChatBuddy, a feature-rich, application that brings the power of advanced AI model access directly to your desktop (AI Models connected through Gemini API. Those models are not for self-hosting). Built with React, it offers a persistent, configurable, and highly interactive chat experience.
 
 
-Try Live Now: 👉[Click](#)👈
+Try Live Now: 👉[Click](https://chatbuddy2025.onrender.com)👈
 
 ![ChatBuddy Homepage](frontend/public/screenshot/home.png)
 
