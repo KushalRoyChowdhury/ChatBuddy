@@ -126,9 +126,9 @@ The application comes with a default API key that has strict rate limits to ensu
 > **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
 
 **How to get your key:**
-1.  Go to Google AI Studio.
+1.  Go to [Google AI Studio](https://aistudio.google.com).
 2.  Click "Create API key".
-3.  Copy the key and paste it into the "Gemini API Key" field in the ChatBuddy **Options** menu.
+3.  Copy the key and paste it into the "Gemini API Key" field in the [ChatBuddy](https://chatbuddy2025.onrender.com/) **Options** menu.
 
 ## 🛠️ How the Memory System Works
 
