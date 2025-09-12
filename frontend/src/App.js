@@ -581,7 +581,7 @@ export default function App() {
                     <br /><br />Thank You for using ChatBuddy.
                   </p>
                 </div>
-                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.0<br />By: KushalRoyChowdhury</div>
+                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.1<br />By: KushalRoyChowdhury</div>
               </div>
               <div className="p-5 border-t flex justify-end">
                 <button onClick={() => setShowOptions(false)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
