@@ -14,7 +14,9 @@ const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4; // Approx. 1k tokens for temporary mem
 // Backend API endpoint for the language model.
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}/model`;
 
+
 export default function App() {
+  useEffect(() => { fetch(`${BACKEND_URL}/health`, { method: 'GET' }) }, []);
   // --- State Management ---
 
   // Core application state, initialized from localStorage to persist across sessions.
@@ -34,22 +36,22 @@ export default function App() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [advanceReasoning, setAdvanceReasoning] = useState(false);
-  
+
   // State for import/export modals
-  const [showImportExportOptions, setShowImportExportOptions] = useState(false); // NEW: Primary modal
-  const [showExportOptions, setShowExportOptions] = useState(false); // For TXT/JSON choice
-  const [showImportConfirm, setShowImportConfirm] = useState(false); // For import warning
+  const [showImportExportOptions, setShowImportExportOptions] = useState(false);
+  const [showExportOptions, setShowExportOptions] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
+  const [showMemoriesImportExport, setShowMemoriesImportExport] = useState(false);
 
 
-  // Ref to the end of the chat for auto-scrolling.
+  // Refs
   const chatEndRef = useRef(null);
-  // Ref for the hidden file input
   const fileInputRef = useRef(null);
+  const memoryFileInputRef = useRef(null);
 
 
   // --- State Persistence Effects ---
-  // These useEffect hooks save the application state to localStorage whenever they change.
   useEffect(() => { localStorage.setItem('chatHistory', JSON.stringify(messages)); }, [messages]);
   useEffect(() => { localStorage.setItem('selectedModel', model); }, [model]);
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
@@ -59,9 +61,6 @@ export default function App() {
 
   // --- Event Handlers & Logic ---
 
-  /**
-   * Resets the entire application state to its default values and clears localStorage.
-   */
   const handleResetApp = () => {
     setMessages([]);
     setMemories([]);
@@ -84,61 +83,40 @@ export default function App() {
     </svg>
   );
 
-  /**
-   * Clears only the temporary memories.
-   */
   const handleClearTempMemory = () => {
     setTempMemories([]);
     localStorage.removeItem('chatTempMemories');
   };
 
-  /**
-   * Deletes a specific permanent memory item by its index.
-   * @param {number} indexToDelete The index of the memory to delete.
-   */
   const deleteMemory = (memToDelete) => {
     setMemories(prevMemories => prevMemories.filter(mem => mem !== memToDelete));
   };
 
-  /**
-   * Confirms and clears the chat history.
-   */
   const handleConfirmClearChat = () => {
     setMessages([]);
     setShowClearConfirm(false);
   };
 
-  /**
-   * Toggles between the 'Advanced' and 'Basic' models.
-   */
   const handleModelToggle = () => {
     setModel(prev => prev === 'gemini-2.5-flash-lite' ? 'gemma-3-27b-it' : 'gemini-2.5-flash-lite');
   };
 
-  /**
-   * Opens the confirmation modal for clearing the chat.
-   */
   const handleClearChatClick = () => {
     setShowClearConfirm(true);
     setIsMenuOpen(false);
   };
 
-  /**
-   * Opens the options modal.
-   */
   const handleOptionsClick = () => {
     setShowOptions(true);
     setIsMenuOpen(false);
   };
 
-  /**
-   * Opens the saved memories modal.
-   */
   const handleMemoriesClick = () => {
     setShowMemories(true);
     setIsMenuOpen(false);
   };
 
+  // --- Chat Import/Export Functions ---
   const exportChatAsTxt = () => {
     const header = `Chat Exported on ${new Date().toLocaleString()}\nSystem Prompt: ${systemPrompt || 'None'}\n------------------------------------------\n\n`;
     const chatContent = messages.map(msg => {
@@ -213,37 +191,84 @@ export default function App() {
 
   const confirmImport = () => {
     if (!fileToImport) return;
-
     const backupPrompt = systemPrompt;
     const backupMessages = messages;
-
     try {
       const importedData = JSON.parse(fileToImport);
       if (!importedData.chatHistory || !Array.isArray(importedData.chatHistory)) {
         throw new Error("Invalid file format: 'chatHistory' is missing or not an array.");
       }
-
       setSystemPrompt(importedData.systemPrompt || '');
       setMessages(importedData.chatHistory);
-
       setShowImportConfirm(false);
       setFileToImport(null);
     } catch (error) {
       console.error("Import Error:", error);
       alert(`File integrity invalid. Import failed.\n\nDetails: ${error.message}`);
-
       setSystemPrompt(backupPrompt);
       setMessages(backupMessages);
-
       setShowImportConfirm(false);
       setFileToImport(null);
     }
   };
 
+  // --- Memory Import/Export Functions ---
+  const exportMemoriesAsJson = () => {
+    if (memories.length === 0) {
+      alert("There are no memories to export.");
+      return;
+    }
+    const jsonString = JSON.stringify(memories, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chatbuddy-memories-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setShowMemoriesImportExport(false);
+  };
 
-  /**
-   * Sends a message to the backend, handles the response, and updates the UI.
-   */
+  const handleImportMemoriesClick = () => {
+    memoryFileInputRef.current.click();
+  };
+
+  const handleMemoryFileSelected = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const jsonString = e.target.result;
+        try {
+          const importedMemories = JSON.parse(jsonString);
+          if (!Array.isArray(importedMemories)) {
+            throw new Error("Invalid format: The JSON file must contain an array of strings.");
+          }
+          const existingMemoriesSet = new Set(memories);
+          const newUniqueMemories = importedMemories.filter(mem =>
+            typeof mem === 'string' && mem.trim() !== '' && !existingMemoriesSet.has(mem)
+          );
+          if (newUniqueMemories.length > 0) {
+            setMemories(prevMemories => [...prevMemories, ...newUniqueMemories]);
+          } else {
+            alert("Import complete. No new memories were found to add.");
+          }
+          setShowMemoriesImportExport(false);
+        } catch (error) {
+          console.error("Memory Import Error:", error);
+          alert(`Memory import failed: ${error.message}`);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert("Import failed: Please select a valid .json file.");
+    }
+    event.target.value = null;
+  };
+
+  // --- Core Message Sending Function ---
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -310,7 +335,7 @@ export default function App() {
           });
         }
       } catch (e) {
-        // Not a valid JSON command, do nothing.
+        // Not a valid JSON command
       }
 
       const assistantMessage = {
@@ -331,6 +356,7 @@ export default function App() {
     }
   };
 
+  // --- Helper & Utility Functions ---
   const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
   useEffect(() => { scrollToBottom(); }, [messages, loading]);
 
@@ -385,14 +411,12 @@ export default function App() {
   };
 
   // --- JSX Rendering ---
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="bg-white shadow-sm p-4 sticky top-0 z-20">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-800">ChatBuddy</h1>
           <div className="hidden md:flex items-center space-x-3">
-            {/* MODIFIED: Conditionally render Import or Import/Export button */}
             {messages.length > 0 ? (
               <button onClick={() => setShowImportExportOptions(true)} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200">Import/Export Chat</button>
             ) : (
@@ -412,7 +436,6 @@ export default function App() {
                 <button onClick={() => { handleModelToggle(); }} className={`w-full text-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${model === 'gemini-2.5-flash-lite' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</button>
                 <button onClick={() => { handleOptionsClick(); setIsMenuOpen(false); }} className={`w-full px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 ${systemPrompt.trim() || apiKey.trim() ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-600'}`}>Options</button>
                 <button onClick={() => { handleMemoriesClick(); setIsMenuOpen(false); }} className="w-full px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 bg-yellow-50 text-yellow-800">Saved Memories</button>
-                {/* MODIFIED: Mobile menu button logic */}
                 {messages.length > 0 ? (
                   <button onClick={() => { setShowImportExportOptions(true); setIsMenuOpen(false); }} className="w-full px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 bg-gray-100 text-gray-600">Import/Export Chat</button>
                 ) : (
@@ -424,27 +447,16 @@ export default function App() {
           )}
         </AnimatePresence>
       </header>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelected}
-        accept="application/json"
-        className="hidden"
-      />
+      <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept="application/json" className="hidden" />
+      <input type="file" ref={memoryFileInputRef} onChange={handleMemoryFileSelected} accept="application/json" className="hidden" />
 
       {/* --- Modals Section --- */}
       <AnimatePresence>
-        {/* Primary Import/Export Modal */}
         {showImportExportOptions && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportExportOptions(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Manage Chat</h3>
-                <p className="text-sm text-gray-600 mt-2 mb-4">
-                  Import a previous chat session or export the current one.
-                </p>
-              </div>
+              <div className="p-6"><h3 className="text-lg font-bold text-gray-800">Manage Chat</h3><p className="text-sm text-gray-600 mt-2 mb-4">Import a previous chat session or export the current one.</p></div>
               <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
                 <button onClick={() => setShowImportExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
                 <button onClick={() => { setShowImportExportOptions(false); handleImportClick(); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Chat</button>
@@ -454,19 +466,11 @@ export default function App() {
           </motion.div>
         )}
 
-        {/* Export Options Modal (TXT/JSON) */}
         {showExportOptions && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowExportOptions(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Choose Export Format</h3>
-                <p className="text-sm text-gray-600 mt-2 mb-4">
-                  <b>Export as JSON</b> for a complete, lossless backup that can be imported later.
-                  <br />
-                  <b>Export as TXT</b> for a simple, human-readable version.
-                </p>
-              </div>
+              <div className="p-6"><h3 className="text-lg font-bold text-gray-800">Choose Export Format</h3><p className="text-sm text-gray-600 mt-2 mb-4"><b>Export as JSON</b> for a complete, lossless backup that can be imported later.<br /><b>Export as TXT</b> for a simple, human-readable version.</p></div>
               <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
                 <button onClick={() => setShowExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
                 <button onClick={exportChatAsTxt} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Export as TXT</button>
@@ -476,19 +480,13 @@ export default function App() {
           </motion.div>
         )}
 
-        {/* Import Confirmation Modal */}
         {showImportConfirm && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportConfirm(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
               <div className="p-6 text-center">
                 <svg className="mx-auto mb-4 text-orange-400 w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-                <h3 className="text-lg font-bold">Import Chat?</h3>
-                <p className="text-sm text-gray-500 mt-2">
-                  This will <b>replace</b> your current chat and system prompt. This action cannot be undone.
-                  <br /><br />
-                  Please export your current chat first if you wish to save it.
-                </p>
+                <h3 className="text-lg font-bold">Import Chat?</h3><p className="text-sm text-gray-500 mt-2">This will <b>replace</b> your current chat and system prompt. This action cannot be undone.<br /><br />Please export your current chat first if you wish to save it.</p>
               </div>
               <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
                 <button onClick={() => { setShowImportConfirm(false); setFileToImport(null); }} className="px-6 py-2 border rounded-lg">Cancel</button>
@@ -497,8 +495,24 @@ export default function App() {
             </motion.div>
           </motion.div>
         )}
-        
-        {/* --- Saved Memories Modal --- */}
+
+        {showMemoriesImportExport && (
+          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemoriesImportExport(false)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-800">Manage Memories</h3>
+                <p className="text-sm text-gray-600 mt-2 mb-4">Import a list of memories to append them to your current list, or export your current list to a JSON file.</p>
+              </div>
+              <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+                <button onClick={() => setShowMemoriesImportExport(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
+                <button onClick={handleImportMemoriesClick} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Memories</button>
+                <button onClick={exportMemoriesAsJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export Memories</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
         {showMemories && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemories(false)} />
@@ -513,44 +527,24 @@ export default function App() {
                 {memories.length > 0 ? (
                   <ul className="space-y-3 text-sm text-gray-700">
                     {[...memories].reverse().map((mem) => (
-                      <li
-                        key={mem}
-                        className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50"
-                      >
-                        <span className="flex-1 prose prose-sm max-w-none m-0 text-gray-700">
-                          {mem}
-                        </span>
-                        <button
-                          onClick={() => deleteMemory(mem)}
-                          className="text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 focus:outline-none transition-colors"
-                          aria-label="Delete memory"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="align-middle"
-                          >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
+                      <li key={mem} className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50">
+                        <span className="flex-1 prose prose-sm max-w-none m-0 text-gray-700">{mem}</span>
+                        <button onClick={() => deleteMemory(mem)} className="text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 focus:outline-none transition-colors" aria-label="Delete memory">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                       </li>
                     ))}
                   </ul>
                 ) : <p className="text-gray-500 text-center py-8">The AI has no saved memories yet.</p>}
               </div>
-              <div className="p-5 border-t flex justify-end gap-3"><button onClick={() => setShowMemories(false)} className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Close</button></div>
+              <div className="p-5 border-t flex justify-end gap-3">
+                <button onClick={() => { setShowMemoriesImportExport(true); setShowMemories(false); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import/Export Memories</button>
+                <button onClick={() => setShowMemories(false)} className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Close</button>
+              </div>
             </motion.div>
           </motion.div>
         )}
-        {/* --- Options Modal --- */}
+
         {showOptions && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowOptions(false)} />
@@ -577,32 +571,17 @@ export default function App() {
                   <h3 className="font-medium text-gray-800 mb-2">About ChatBuddy</h3>
                   <p className="text-sm text-gray-600">
                     ChatBuddy is a Free for All AI Chatapp. Available with 2 AI models (Basic and Advanced).
-                    <br />
-                    Basic model: <span className='font-medium'>Gemma3 27b.</span> Best for Conversation & Role-Plays.
-                    <br />
-                    <br />
-                    Advanced model: <span className='font-medium'>Gemini 2.5 Flash.</span> Best for Coding & Reasoning Tasks.
-                    <br />
-                    <br />
-                    You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
-                    <br />
-                    <br />
-                    Basic Model Supports 6k Context Window (API Limitation). Advance Model Supports 64k Context Window (Default Key).
-                    <br />
-                    <br />
-                    With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD).
-                    <br />
-                    <br />
-                    With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD) for FREE.
-                    <br />
-                    <br />
-                    Aditionally the app Source Code is available on GitHub 👉<span className='font-medium'>[<a href="https://github.com/KushalRoyChowdhury/ChatBuddy" target="_blank" rel="noopener noreferrer">HERE</a>]</span>👈 . Fork It, Modify it.. I don't care. Just Star it before touching.
-                    <br />
-                    <br />
-                    Thank You for using ChatBuddy.
+                    <br />Basic model: <span className='font-medium'>Gemma3 27b.</span> Best for Conversation & Role-Plays.
+                    <br /><br />Advanced model: <span className='font-medium'>Gemini 2.5 Flash.</span> Best for Coding & Reasoning Tasks.
+                    <br /><br />You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
+                    <br /><br />Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
+                    <br /><br />With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD).
+                    <br /><br />With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD) for FREE.
+                    <br /><br />Aditionally the app Source Code is available on GitHub 👉<span className='font-medium'>[<a href="https://github.com/KushalRoyChowdhury/ChatBuddy" target="_blank" rel="noopener noreferrer">HERE</a>]</span>👈 . Fork It, Modify it.. I don't care. Just Star it before touching.
+                    <br /><br />Thank You for using ChatBuddy.
                   </p>
                 </div>
-                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.1<br />By: KushalRoyChowdhury</div>
+                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.0<br />By: KushalRoyChowdhury</div>
               </div>
               <div className="p-5 border-t flex justify-end">
                 <button onClick={() => setShowOptions(false)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
@@ -610,9 +589,9 @@ export default function App() {
             </motion.div>
           </motion.div>
         )}
-        {/* --- Clear Chat Confirmation Modal --- */}
+
         {showClearConfirm && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowClearConfirm(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6 text-center"><h3 className="text-lg font-bold">Clear Chat?</h3><p className="text-sm text-gray-500">This cannot be undone.</p></div><div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl"><button onClick={() => setShowClearConfirm(false)} className="px-6 py-2 border rounded-lg">Cancel</button><button onClick={handleConfirmClearChat} className="px-6 py-2 bg-red-600 text-white rounded-lg">Yes, Clear</button></div></motion.div></motion.div>)}
-        {/* --- Reset App Confirmation Modal --- */}
+
         {showResetConfirm && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowResetConfirm(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6 text-center"><svg className="mx-auto mb-4 text-red-400 w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><h3 className="mb-2 text-lg font-bold text-gray-800">Reset App?</h3><p className="text-sm text-gray-500">This will delete all chats, memories, and settings. This action is irreversible.</p></div><div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl"><button onClick={() => setShowResetConfirm(false)} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">Cancel</button><button onClick={handleResetApp} className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">Yes, Reset</button></div></motion.div></motion.div>)}
       </AnimatePresence>
 
@@ -625,9 +604,7 @@ export default function App() {
                 <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
                     <div className="prose prose-sm max-w-none prose-p:text-inherit">
-                      <ReactMarkdown components={CodeBlock}>
-                        {getTextToRender(msg)}
-                      </ReactMarkdown>
+                      <ReactMarkdown components={CodeBlock}>{getTextToRender(msg)}</ReactMarkdown>
                     </div>
                     {msg.role === 'assistant' && (
                       <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
@@ -643,62 +620,35 @@ export default function App() {
               ))}
             </AnimatePresence>
           )}
-          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{model === 'gemini-2.5-flash-lite' ? advanceReasoning ? 'Thinking Deeply...' : "Thinking..." : 'Responding...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
+          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{model === 'gemini-2.5-flash-lite' ? 'Thinking Deeply...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
           <div ref={chatEndRef} />
         </div>
       </main>
 
       <footer className="bg-white border-t p-4 sticky bottom-0">
-
-        <form
-          onSubmit={(e) => { e.preventDefault(); sendMessage(advanceReasoning); }}
-          className="max-w-4xl w-full mx-auto"
-        >
+        <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="max-w-4xl w-full mx-auto">
           <div className="relative">
             <TextareaAutosize
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage(advanceReasoning);
-                }
-              }}
+              onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
               placeholder={`Ask anything... (${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}
               className={`w-full flex items-center px-4 py-3 pr-40 border rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all`}
               minRows={1}
               maxRows={5}
             />
-
             <div className="absolute right-[6px] bottom-[6px] flex items-center gap-2">
               {model === 'gemini-2.5-flash-lite' && (
-                <motion.button
-                  type="button"
-                  title="Thinking"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setAdvanceReasoning(!advanceReasoning)}
-                  className={`p-2 rounded-lg transition-colors ${advanceReasoning
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                    }`}
-                >
+                <motion.button type="button" title="Thinking" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setAdvanceReasoning(!advanceReasoning)} className={`p-2 rounded-lg transition-colors ${advanceReasoning ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                   <ReasoningIcon />
                 </motion.button>
               )}
-
-              <motion.button
-                type="submit"
-                whileTap={{ scale: 0.98 }}
-                disabled={loading || !input.trim()}
-                className={`px-6 py-2 rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors`}
-              >
+              <motion.button type="submit" whileTap={{ scale: 0.98 }} disabled={loading || !input.trim()} className={`px-6 py-2 rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors`}>
                 Send
               </motion.button>
             </div>
           </div>
         </form>
-
         <div className="max-w-4xl mx-auto mt-2 text-xs text-gray-500 px-1 flex justify-between items-center">
           <p>Models: Basic (Gemma 3) / Advanced (Gemini 2.5)</p>
           {systemPrompt.trim() && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">System prompt active</span>}
