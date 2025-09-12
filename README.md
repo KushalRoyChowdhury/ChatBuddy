@@ -38,6 +38,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🛠️ Utility Features**:
     -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
     -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
+    -   **Import Export Memories**: Take backup or add new memories from other devices.
     -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
     -   **Full App Reset**: A one-click option to reset the entire application to its default state.
 
