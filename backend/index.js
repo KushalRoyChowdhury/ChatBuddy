@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(cors());
-
 app.use(express.json());
 app.set('trust proxy', 1);
 
@@ -19,21 +18,30 @@ const MODELS = [
     'gemma-3-27b-it',
     'gemini-2.5-flash-lite'
 ];
-const GEMMA_HISTORY_LIMIT_CHARS = 8000 * 4;
+const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
-const GEMINI_PRO_HISTORY_LIMIT_CHARS = 896000 * 4;
+const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
-// Assuming your internal prompt is in this file path
 const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalMemoryPrompt');
 
-// --- Rate Limiting Middleware (RPM and RPD) ---
-const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 7, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moments. Switch to other Models or your Own API Key' } } });
-const basicDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 500, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other Models or your Own API Key' } } });
-const advancedMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 3, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moments. Switch to Basic Model or your Own API Key' } } });
-const advancedDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Baisc Model or your Own API Key' } } });
+// --- Rate Limiting Middleware (RPM and RPD) Default Key ---
+const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 7, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
+const basicDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 500, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
+const advancedMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 3, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
+const advancedDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
 
 const basicLimiters = [basicMinuteLimiter, basicDayLimiter];
 const advancedLimiters = [advancedMinuteLimiter, advancedDayLimiter];
+
+// --- Rate Limiting Middleware (RPM and RPD) User Key (Rate Limited safely under Google Default Free Tier) ---
+const basicMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 30, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
+const basicDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 14350, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
+const advancedMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 15, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
+const advancedDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 1000, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
+
+
+const basicLimitersUser = [basicMinuteLimiterUSER, basicDayLimiterUSER];
+const advancedLimitersUser = [advancedMinuteLimiterUSER, advancedDayLimiterUSER];
 
 // --- Helper Function for History Truncation ---
 const getTruncatedHistory = (fullHistory, limit) => {
@@ -53,23 +61,47 @@ const getTruncatedHistory = (fullHistory, limit) => {
 const applyRateLimiter = (req, res, next) => {
     const { apiKey: userApiKey, modelIndex } = req.body;
     if (userApiKey) {
-        return next(); // Skip if user provides their own key
+        if (modelIndex === 0) {
+            // Sequentially apply the basic limiters
+            express.Router().use(basicLimitersUser)(req, res, next);
+        } else if (modelIndex === 1) {
+            // Sequentially apply the advanced limiters
+            express.Router().use(advancedLimitersUser)(req, res, next);
+        } else {
+            next();
+        }
     }
-
-    if (modelIndex === 0) {
-        // Sequentially apply the basic limiters
-        express.Router().use(basicLimiters)(req, res, next);
-    } else if (modelIndex === 1) {
-        // Sequentially apply the advanced limiters
-        express.Router().use(advancedLimiters)(req, res, next);
-    } else {
-        next();
+    else {
+        if (modelIndex === 0) {
+            // Sequentially apply the basic limiters
+            express.Router().use(basicLimiters)(req, res, next);
+        } else if (modelIndex === 1) {
+            // Sequentially apply the advanced limiters
+            express.Router().use(advancedLimiters)(req, res, next);
+        } else {
+            next();
+        }
     }
 };
 
-app.post('/', (req, res) =>{
-    res.send("Don't Sniff this /dev/null void.");
+// --- Troll ---
+app.get('/', (req, res) => {
+    const roasts = [
+        "Don't Sniff this /dev/null. Its all underlying Truma.. 😵‍💫😵‍💫😵‍💫",
+        "You really typed this URL? Touch some grass, bro 🌱",
+        "Congrats. You just found nothing. Literally. 🚮",
+        "404? Nah, you get 100% psychological damage instead 💀",
+        "This is not an API, this is your life choices flashing before your eyes. 😭"
+    ];
+    console.warn(`'${req.ip} Sniffed.'`)
+    res.status(418).send(roasts[Math.floor(Math.random() * roasts.length)]);
 });
+
+// --- Health Check ---
+app.get('/health', (req, res) => {
+    res.status(200).send();
+});
+
 
 // --- Main API Endpoint ---
 app.post("/model", applyRateLimiter, async (req, res) => {
@@ -119,7 +151,14 @@ app.post("/model", applyRateLimiter, async (req, res) => {
 
         if (modelIndex === 0) { // Gemma logic
             latestUserMessage = `${finalSystemPrompt}\n\n--- CURRENT CONVERSATION ---\nUSER: ${latestUserMessage}`;
-            genModel = genAI.getGenerativeModel({ model: selectedModel });
+            genModel = genAI.getGenerativeModel({
+                model: selectedModel,
+                generationConfig: {
+                    temperature: 2,
+                    topP: 1,
+                    topK: 0,
+                },
+            });
         } else { // Gemini logic
 
             genModel = genAI.getGenerativeModel({

@@ -29,14 +29,15 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **🔧 Full Configurability**: Tailor the AI's behavior to your exact needs through the **Options** menu.
     -   **Custom System Prompt**: Define the AI's personality, rules, and objectives to tune its responses.
-    -   **Bring Your Own API Key**: Use your personal Gemini API key to unlock higher rate limits and a massive context window (up to 896k tokens with the Advanced model).
+    -   **Bring Your Own API Key**: Use your personal Gemini API key to unlock higher rate limits and a massive context window (up to 128k tokens with the Advanced model).
 
 -   **💻 Rich Markdown & Code Rendering**:
     -   Full Markdown support for formatting responses.
     -   Beautiful, syntax-highlighted code blocks with a one-click "Copy" button.
 
 -   **🛠️ Utility Features**:
-    -   **Export Chat**: Save your entire conversation history to a `.txt` file.
+    -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
+    -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
     -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
     -   **Full App Reset**: A one-click option to reset the entire application to its default state.
 
@@ -117,13 +118,15 @@ The application comes with a default API key that has strict rate limits to ensu
 
 > **Note:** The default API key is for the developer-hosted public version. When running the application locally, you will need to provide your own API key.
 
-| Feature               | Default Server Key (Free Tier)         | Your Own Key (Free Tier)                 |
-| --------------------- | -------------------------------------- | ---------------------------------------- |
-| **Context Window**    | Basic: 8k / Advanced: 64k              | Basic: 8k / **Advanced: 896k**           |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                 | Basic: 30 / **Advanced: 15**             |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100             | Basic: 14,200 / **Advanced: 1000**       |
+| Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                 |
+| --------------------- | ------------------------------------------ | ---------------------------------------- |
+| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / **Advanced: 128k**           |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / **Advanced: 15**             |
+| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / **Advanced: 1000**       |
 
 > **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
+> **NOTE:** Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
+
 
 **How to get your key:**
 1.  Go to [Google AI Studio](https://aistudio.google.com).
@@ -156,4 +159,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v1.0 - By KushalRoyChowdhury*
+*v1.1 - By KushalRoyChowdhury*
