@@ -126,7 +126,8 @@ The application comes with a default API key that has strict rate limits to ensu
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / **Advanced: 1000**       |
 
 > **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
-> **NOTE:** Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
+
+> Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
 
 
 **How to get your key:**
