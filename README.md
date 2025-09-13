@@ -5,7 +5,7 @@ Welcome to ChatBuddy, a feature-rich, application that brings the power of advan
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
 
-![ChatBuddy Homepage](frontend/public/screenshot/home.png)
+![ChatBuddy Homepage](frontend/public/screenshot/home.png) 
 
 
 ## ✨ Key Features
