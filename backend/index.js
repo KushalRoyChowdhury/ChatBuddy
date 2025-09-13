@@ -163,10 +163,6 @@ app.post("/model", applyRateLimiter, async (req, res) => {
 
             genModel = genAI.getGenerativeModel({
                 model: selectedModel,
-                generationConfig: {
-                    temperature: 1.5,
-                    topK: 0,
-                },
                 systemInstruction: { parts: [{ text: finalSystemPrompt }] },
                 ...(advanceReasoning && {
                     tool_config: {
