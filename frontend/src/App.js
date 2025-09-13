@@ -73,16 +73,6 @@ export default function App() {
     setShowOptions(false);
   };
 
-  const ReasoningIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.5 2.1C9.8 1.8 10.3 1.5 10.8 1.5c.5.1.9.3 1.2.6.4.3.7.7.9 1.2.2.5.2 1.1.1 1.6 M14.5 21.9c-.3.3-.8.5-1.3.5s-1-.2-1.3-.5c-.3-.3-.5-.8-.5-1.3s.2-1 .5-1.3 M17 11.5c.3-.3.5-.8.5-1.3s-.2-1-.5-1.3c-.3-.3-.8-.5-1.3-.5s-1 .2-1.3.5M20 5.5c.3-.3.5-.8.5-1.3s-.2-1-.5-1.3c-.3-.3-.8-.5-1.3-.5s-1 .2-1.3.5M4 18.5c.3-.3.5-.8.5-1.3s-.2-1-.5-1.3c-.3-.3-.8-.5-1.3-.5s-1 .2-1.3.5" />
-      <path d="M12 15a3 3 0 1 0-3-3" />
-      <path d="M16 11.5A3.5 3.5 0 1 0 12.5 8" />
-      <path d="M15 12a3 3 0 1 0-3 3" />
-      <path d="M11.5 16a3.5 3.5 0 1 0 3.5 3.5" />
-    </svg>
-  );
-
   const handleClearTempMemory = () => {
     setTempMemories([]);
     localStorage.removeItem('chatTempMemories');
@@ -410,6 +400,21 @@ export default function App() {
     },
   };
 
+  // Helper to detect mobile devices
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      // On desktop: Enter sends unless Shift is held
+      if (!isMobileDevice() && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+  };
+
   // --- JSX Rendering ---
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -581,7 +586,7 @@ export default function App() {
                     <br /><br />Thank You for using ChatBuddy.
                   </p>
                 </div>
-                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.0<br />By: KushalRoyChowdhury</div>
+                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.1<br />By: KushalRoyChowdhury</div>
               </div>
               <div className="p-5 border-t flex justify-end">
                 <button onClick={() => setShowOptions(false)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
@@ -598,7 +603,7 @@ export default function App() {
       {/* --- Main Chat Area --- */}
       <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => setIsMenuOpen(false)}>
         <div className="space-y-4">
-          {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg max-w-md mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
+          {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
             <AnimatePresence>
               {messages.map((msg) => (
                 <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -620,39 +625,60 @@ export default function App() {
               ))}
             </AnimatePresence>
           )}
-          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{model === 'gemini-2.5-flash-lite' ? 'Thinking Deeply...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
+          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{model === 'gemini-2.5-flash-lite' ? advanceReasoning ? 'Thinking Deeply...' : 'Thinking...' : 'Responding...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
           <div ref={chatEndRef} />
         </div>
       </main>
 
-      <footer className="bg-white border-t p-4 sticky bottom-0">
-        <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="max-w-4xl w-full mx-auto">
-          <div className="relative">
-            <TextareaAutosize
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder={`Ask anything... (${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}
-              className={`w-full flex items-center px-4 py-3 pr-40 border rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all`}
-              minRows={1}
-              maxRows={5}
-            />
-            <div className="absolute right-[6px] bottom-[6px] flex items-center gap-2">
+      <footer className="bg-white border md:border-none md:bg-slate-50 p-1 md:pb-5 sticky bottom-0 rounded-t-2xl md:rounded-none">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+          className="max-w-4xl bg-white w-full mx-auto md:border rounded-2xl md:shadow-lg"
+        >
+
+          <TextareaAutosize
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={`Ask anything... (${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}
+            className={`w-full flex items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
+            minRows={1}
+            maxRows={5}
+          />
+
+          <div className='p-2 flex relative justify-between h-[56px]'>
+            <AnimatePresence>
               {model === 'gemini-2.5-flash-lite' && (
-                <motion.button type="button" title="Thinking" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setAdvanceReasoning(!advanceReasoning)} className={`p-2 rounded-lg transition-colors ${advanceReasoning ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                  <ReasoningIcon />
+                <motion.button
+                  type="button"
+                  title="Advance Multi-Step Reasoning"
+                  initial={{ opacity: 0.5 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => setAdvanceReasoning(!advanceReasoning)}
+                  className={`p-2 rounded-xl w-40 text-center text-nowrap transition-colors ${advanceReasoning
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }`}
+                >
+                  Advance Reasoning
                 </motion.button>
               )}
-              <motion.button type="submit" whileTap={{ scale: 0.98 }} disabled={loading || !input.trim()} className={`px-6 py-2 rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors`}>
-                Send
-              </motion.button>
-            </div>
+            </AnimatePresence>
+            <motion.button
+              type="submit"
+              whileTap={{ scale: 0.99 }}
+              disabled={loading || !input.trim()}
+              className={`px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors duration-500`}
+            >
+              Send
+            </motion.button>
           </div>
         </form>
-        <div className="max-w-4xl mx-auto mt-2 text-xs text-gray-500 px-1 flex justify-between items-center">
-          <p>Models: Basic (Gemma 3) / Advanced (Gemini 2.5)</p>
-          {systemPrompt.trim() && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">System prompt active</span>}
-        </div>
       </footer>
     </div>
   );

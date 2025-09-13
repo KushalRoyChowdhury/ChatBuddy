@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planned]
 
 - Native DarkMode support.
+- Ability to send Images.
+- Image Generation (varies).
+
+## [1.1.2] - 2025-09-13
+
+### Fixed
+- Some UI alignment issues.
+- Improve UX in mobile devices.
+
+### Changed
+- Some UI changes to feel more modern and for future compatibility.
+- Tuned to be more *Creative* and *Accurate*.
 
 ## [1.1.1] - 2025-09-12
 
