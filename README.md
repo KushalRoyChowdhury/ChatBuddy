@@ -38,6 +38,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🛠️ Utility Features**:
     -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
     -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
+    -   **Import Export Memories**: Take backup or add new memories from other devices.
     -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
     -   **Full App Reset**: A one-click option to reset the entire application to its default state.
 
@@ -118,6 +119,9 @@ The application comes with a default API key that has strict rate limits to ensu
 
 > **Note:** The default API key is for the developer-hosted public version. When running the application locally, you will need to provide your own API key.
 
+> **Privacy Notice**: If using the public hosted version, none of your chats or details ate logged. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
+
+
 | Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                 |
 | --------------------- | ------------------------------------------ | ---------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / **Advanced: 128k**           |
@@ -125,7 +129,8 @@ The application comes with a default API key that has strict rate limits to ensu
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / **Advanced: 1000**       |
 
 > **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
-> **NOTE:** Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
+
+> Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
 
 
 **How to get your key:**
