@@ -462,6 +462,7 @@ export default function App() {
           textToRender = parsedData.response;
         }
       } catch (e) {
+        console.log("JSON ERROR: ", e);
         textToRender = "❌ Something went wrong. Please try again. Or Try a new Chat.";
       }
     }
