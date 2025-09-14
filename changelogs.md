@@ -15,9 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Transparency in Model Thinking (Advance Reasoning).
+- Added Google Search Functionality (Advance Model Only).
+- Added a 'Creative Response' button (Basic Model Only).
 
 ### Fixed
-- Bug Fixes.
+- UI Scroll Bug Fixes on mobile devices.
 
 ## [1.1.2] - 2025-09-13
 

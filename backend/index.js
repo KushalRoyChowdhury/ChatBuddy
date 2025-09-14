@@ -22,7 +22,7 @@ const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
-const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalMemoryPrompt');
+const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalSystemPrompt');
 const INTERNAL_THINK_PROMPT = require('./internalModelInstruction/internalThinkInstruction');
 
 // --- Rate Limiting Middleware (RPM and RPD) Default Key ---
@@ -106,9 +106,8 @@ app.get('/health', (req, res) => {
 
 // --- Main API Endpoint ---
 app.post("/model", applyRateLimiter, async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, advanceReasoning } = req.body;
+    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch } = req.body;
     let retry = true;
-
 
     start:
     try {
@@ -159,17 +158,24 @@ app.post("/model", applyRateLimiter, async (req, res) => {
             latestUserMessage = `${finalSystemPrompt}\n\n--- CURRENT CONVERSATION ---\nUSER: ${latestUserMessage}`;
             genModel = genAI.getGenerativeModel({
                 model: selectedModel,
-                generationConfig: {
-                    temperature: 2,
-                    topP: 1,
-                    topK: 0,
-                },
+                ...(creativeRP && {
+                    generationConfig: {
+                        temperature: 2,
+                        topP: 1,
+                        topK: 0,
+                    },
+                })
             });
         } else { // Gemini logic
 
             genModel = genAI.getGenerativeModel({
                 model: selectedModel,
                 systemInstruction: { parts: [{ text: finalSystemPrompt }] },
+                ...(webSearch && {
+                    tools: [{
+                        googleSearch: {}
+                    }]
+                }),
                 ...(advanceReasoning && {
                     tool_config: {
                         reasoning_config: {

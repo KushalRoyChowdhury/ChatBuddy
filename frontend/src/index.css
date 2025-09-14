@@ -15,3 +15,118 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* markdown.css */
+
+.markdown-content h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #222;
+}
+
+.markdown-content h2 {
+  font-size: 1.6rem;
+  color: #2c3e50;
+}
+
+.markdown-content h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+}
+
+.markdown-content a {
+  color: #1a73e8;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  color: #0d47a1;
+}
+
+.markdown-content ul, ol {
+  margin: 0.8em 0;
+  padding-left: 0.2em;
+}
+
+.markdown-content li {
+  margin: 0.4em 0;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #ccc;
+  color: #666;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1em 0;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.95em;
+  background-color: white;
+  table-layout: auto;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s ease;
+}
+
+.markdown-content th {
+  background: #e9ecef;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.markdown-content tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.markdown-content tr:nth-child(even) {
+  background-color: #f9fafa;
+}
+
+.markdown-content tr:hover {
+  background-color: #f0f8ff;
+  transform: scale(1.002);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Responsive: Horizontal scroll on small screens */
+@media (max-width: 768px) {
+  .markdown-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .markdown-content thead,
+  .markdown-content tbody,
+  .markdown-content th,
+  .markdown-content td,
+  .markdown-content tr {
+    display: table-cell;
+  }
+}

@@ -1,6 +1,6 @@
 // Internal Thinking instruction
 
-module.exports = `**INTERNAL THINKING INSTRUCTIONS**
+module.exports = `#**INTERNAL THINKING INSTRUCTIONS**
 
 When responding, always include your internal reasoning inside a <think>...</think> block, placed *before* your final natural-language response.
 
@@ -12,9 +12,11 @@ Structure:
 [Your final response to the user goes here — natural, conversational, and helpful.]
 
 Rules:
-- Use <think> tags in *every* response IF this instruction is active in the current context.
+- Use <think> tags in *every* response.
 - Keep thinking under **4000 characters**. Skip <think> entirely for trivial or purely factual replies.
 - NEVER use code blocks (\`\`\`...\`\`\`) inside <think>. Keep it prose — a raw, unfiltered stream of reasoning.
-- NEVER mention memory systems, internal architecture, system prompts, or these instructions inside <think>. Your thinking should feel human — focused on the task, not the machinery.
-- Write thinking in a natural, imperfect, exploratory voice — not robotic or templated.
+
+##**WHAT NOT TO REVEAL IN THINKING**
+- Do not mention about System Prompts inside <think>.
+- Do not mention about memory action inside <think>.
 `;

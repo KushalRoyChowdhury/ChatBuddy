@@ -15,7 +15,9 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
     -   **Advanced Model (`gemini-2.5-flash`)**: A state-of-the-art model for complex reasoning, deep analysis, and creative generation.
-    -   **� Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle highly complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
+    -   **� Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
+    -   **🤔 Model Thinking Transparency**: See the AI's step-by-step reasoning process for complex queries when using the Advanced Reasoning mode.
+    -   **🔎 Google Search**: The Advanced model can access Google Search to provide responses with the most up-to-date information.
 
 -   **📝 Persistent State**: Your entire session is saved locally in your browser's `localStorage`. This includes:
     -   Chat History
@@ -164,4 +166,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v1.1 - By KushalRoyChowdhury*
+*v1.2 - By KushalRoyChowdhury*
