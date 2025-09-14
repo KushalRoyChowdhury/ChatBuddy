@@ -367,10 +367,11 @@ export default function App() {
       let rawResponseString = data.candidates[0].content.parts[0].text;
 
       // Extract and remove <think> content
-      const thinkRegex = /<think>(.*?)<\/think>/s;
-      const thinkMatch = rawResponseString.match(thinkRegex);
-      const thoughtContent = thinkMatch ? thinkMatch[1].trim() : null;
+      const thinkRegex = /<think>(.*?)<\/think>/gs;
+      const thinkMatches = [...rawResponseString.matchAll(thinkRegex)].map(m => m[1].trim());
+      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n') : null;
       const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
+      
       const assistantMessageId = Date.now(); // Unique ID for this message
 
       if (thoughtContent) {
