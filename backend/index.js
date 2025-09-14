@@ -23,6 +23,7 @@ const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
 const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalMemoryPrompt');
+const INTERNAL_THINK_PROMPT = require('./internalModelInstruction/internalThinkInstruction');
 
 // --- Rate Limiting Middleware (RPM and RPD) Default Key ---
 const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 7, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
@@ -112,6 +113,11 @@ app.post("/model", applyRateLimiter, async (req, res) => {
     start:
     try {
         const finalApiKey = userApiKey || SERVER_API_KEY;
+        let INTERNAL_SYSTEM_PROMPT = INTERNAL_MEMORY_PROMPT;
+
+        if (modelIndex === 1 && advanceReasoning) {
+            INTERNAL_SYSTEM_PROMPT += INTERNAL_THINK_PROMPT;
+        }
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'API key is not configured.' } });
         }
@@ -127,7 +133,7 @@ app.post("/model", applyRateLimiter, async (req, res) => {
 
         const selectedModel = MODELS[modelIndex];
 
-        let finalSystemPrompt = INTERNAL_MEMORY_PROMPT;
+        let finalSystemPrompt = INTERNAL_SYSTEM_PROMPT;
         if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}`;
         if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- TEMPORARY NOTES ---\n- ${temp.join('\n- ')}`;
         if (sys && sys.trim()) finalSystemPrompt += `\n\n--- USER'S SYSTEM PROMPT ---\n${sys.trim()}`;

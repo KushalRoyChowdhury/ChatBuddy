@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ability to send Images.
 - Image Generation (varies).
 
+## [1.2] - 2025-09-14
+
+### Added
+- Transparency in Model Thinking (Advance Reasoning).
+
+### Fixed
+- Bug Fixes.
+
 ## [1.1.2] - 2025-09-13
 
 ### Fixed

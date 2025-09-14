@@ -1,55 +1,91 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'; // Component for syntax highlighting
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Theme for syntax highlighting
-import TextareaAutosize from 'react-textarea-autosize'; // Text Area
+import remarkGfm from 'remark-gfm'; // Import GFM plugin
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import TextareaAutosize from 'react-textarea-autosize';
 
 // --- Application Constants ---
+const MEMORY_LIMIT_CHARS = 2000 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4;
+const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
-// Maximum character limits for different types of memory, approximating token counts.
-const MEMORY_LIMIT_CHARS = 2000 * 4; // Approx. 2k tokens for permanent memory
-const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4; // Approx. 1k tokens for temporary memory
+// --- Helper Component for Collapsible "Thinking Process" ---
+const CollapsibleThought = ({ thoughtContent }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-// Backend API endpoint for the language model.
-const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}/model`;
+  if (!thoughtContent) return null;
+
+  // REGEX FIX: Replace all occurrences of the literal string "\\n" with a real newline character "\n"
+  const formattedContent = thoughtContent.replace(/\\n/g, '\n');
+
+  return (
+    <div className="mb-2 border-b border-dashed border-gray-300 pb-2">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full text-left text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
+        Thinking Process
+      </button>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginTop: '8px' }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="prose prose-sm max-w-none p-2 bg-gray-100 rounded-md">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {formattedContent}
+              </ReactMarkdown>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 
 export default function App() {
   useEffect(() => { fetch(`${BACKEND_URL}/health`, { method: 'GET' }) }, []);
-  // --- State Management ---
 
-  // Core application state, initialized from localStorage to persist across sessions.
+  // --- State Management ---
   const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem('chatHistory')) || []);
   const [input, setInput] = useState('');
   const [model, setModel] = useState(() => localStorage.getItem('selectedModel') || 'gemma-3-27b-it');
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('systemPrompt') || '');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('geminiApiKey') || '');
   const [memories, setMemories] = useState(() => JSON.parse(localStorage.getItem('chatMemories')) || []);
-  const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []);
   const [loading, setLoading] = useState(false);
 
-  // UI-related state for controlling modals and menus.
+  // --- New/Modified State ---
+  const [chatId, setChatId] = useState(() => localStorage.getItem('chatId') || crypto.randomUUID());
+  const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []); // Now an array of objects
+  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || []); // For <think> content
+
+  // UI-related state
   const [showOptions, setShowOptions] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showMemories, setShowMemories] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [advanceReasoning, setAdvanceReasoning] = useState(false);
-
-  // State for import/export modals
   const [showImportExportOptions, setShowImportExportOptions] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
   const [showMemoriesImportExport, setShowMemoriesImportExport] = useState(false);
-
+  const [modelUsed, setModelUsed] = useState("");
 
   // Refs
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const memoryFileInputRef = useRef(null);
-
 
   // --- State Persistence Effects ---
   useEffect(() => { localStorage.setItem('chatHistory', JSON.stringify(messages)); }, [messages]);
@@ -57,18 +93,31 @@ export default function App() {
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
   useEffect(() => { localStorage.setItem('geminiApiKey', apiKey); }, [apiKey]);
   useEffect(() => { localStorage.setItem('chatMemories', JSON.stringify(memories)); }, [memories]);
+  // --- Modified Persistence ---
   useEffect(() => { localStorage.setItem('chatTempMemories', JSON.stringify(tempMemories)); }, [tempMemories]);
+  useEffect(() => { localStorage.setItem('thinkingProcesses', JSON.stringify(thinkingProcesses)); }, [thinkingProcesses]);
+  useEffect(() => { localStorage.setItem('chatId', chatId); }, [chatId]);
+
+  // Effect to generate a new chatId when the chat is cleared or reset
+  useEffect(() => {
+    if (messages.length === 0 && !loading) { // Check loading to prevent reset during initial message send
+      const newChatId = crypto.randomUUID();
+      setChatId(newChatId);
+    }
+  }, [messages.length]);
+
 
   // --- Event Handlers & Logic ---
-
   const handleResetApp = () => {
     setMessages([]);
     setMemories([]);
     setTempMemories([]);
+    setThinkingProcesses([]); // Clear thinking processes
     setSystemPrompt('');
     setApiKey('');
     setModel('gemma-3-27b-it');
     localStorage.clear();
+    // A new chat ID will be generated by the useEffect for messages.length
     setShowResetConfirm(false);
     setShowOptions(false);
   };
@@ -84,7 +133,9 @@ export default function App() {
 
   const handleConfirmClearChat = () => {
     setMessages([]);
+    setThinkingProcesses([]); // Also clear thinking processes associated with the chat
     setShowClearConfirm(false);
+    // A new chat ID will be generated by the useEffect for messages.length
   };
 
   const handleModelToggle = () => {
@@ -190,6 +241,7 @@ export default function App() {
       }
       setSystemPrompt(importedData.systemPrompt || '');
       setMessages(importedData.chatHistory);
+      setThinkingProcesses([]); // Clear old thinking processes on import
       setShowImportConfirm(false);
       setFileToImport(null);
     } catch (error) {
@@ -258,7 +310,8 @@ export default function App() {
     event.target.value = null;
   };
 
-  // --- Core Message Sending Function ---
+
+  // --- Core Message Sending Function (MODIFIED) ---
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -269,17 +322,32 @@ export default function App() {
     setLoading(true);
 
     try {
+      // Filter tempMemories: send only memories from OTHER chats
+      const memoriesForModel = tempMemories
+        .filter(mem => mem.id !== chatId)
+        .map(mem => mem.memory); // Send only the string content
+
       const modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
+      if (modelIndex === 0) {
+        setModelUsed("basic");
+      }
+      else if (modelIndex === 1 && advanceReasoning) {
+        setModelUsed("advance+");
+      }
+      else {
+        setModelUsed("advance");
+      }
       const payload = {
         history: currentMessagesWithUser.map(({ id, ...rest }) => rest),
         memory: memories,
-        temp: tempMemories,
+        temp: memoriesForModel, // Use filtered memories
         sys: systemPrompt,
         apiKey: apiKey || "",
         modelIndex: modelIndex,
         advanceReasoning: advanceReasoning
       };
-      const response = await fetch(BACKEND_URL, {
+
+      const response = await fetch(`${BACKEND_URL}/model`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -292,12 +360,23 @@ export default function App() {
         throw new Error("Invalid or empty response from Backend.");
       }
 
-      const rawJsonString = data.candidates[0].content.parts[0].text;
+      let rawResponseString = data.candidates[0].content.parts[0].text;
+
+      // Extract and remove <think> content
+      const thinkRegex = /<think>(.*?)<\/think>/s;
+      const thinkMatch = rawResponseString.match(thinkRegex);
+      const thoughtContent = thinkMatch ? thinkMatch[1].trim() : null;
+      const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
+      const assistantMessageId = Date.now(); // Unique ID for this message
+
+      if (thoughtContent) {
+        setThinkingProcesses(prev => [...prev, { id: assistantMessageId, content: thoughtContent }]);
+      }
 
       let permanentMemoryChanged = false;
       let tempMemoryChanged = false;
       try {
-        const parsedResponse = JSON.parse(rawJsonString);
+        const parsedResponse = JSON.parse(cleanJsonString);
         const { action, target } = parsedResponse;
 
         if (action === 'remember' && target && !memories.includes(target)) {
@@ -312,27 +391,34 @@ export default function App() {
             permanentMemoryChanged = true;
             setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
           }
-        } else if (action === 'temp' && target && !tempMemories.includes(target)) {
-          tempMemoryChanged = true;
-          setTempMemories(prev => {
-            const updatedTempMemories = [...prev, target];
-            let totalChars = updatedTempMemories.join('\n').length;
-            while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
-              const removedItem = updatedTempMemories.shift();
-              totalChars -= (removedItem.length + 1);
-            }
-            return updatedTempMemories;
-          });
+        } else if (action === 'temp' && target) {
+          // Add temp memory as an object with the current chatId
+          const newTempMemory = { memory: target, id: chatId };
+          const alreadyExists = tempMemories.some(m => m.memory === target && m.id === chatId);
+
+          if (!alreadyExists) {
+            tempMemoryChanged = true;
+            setTempMemories(prev => {
+              const updatedTempMemories = [...prev, newTempMemory];
+              // Recalculate size based on memory string length
+              let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
+              while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
+                const removedItem = updatedTempMemories.shift();
+                totalChars -= (removedItem.memory.length + 1);
+              }
+              return updatedTempMemories;
+            });
+          }
         }
       } catch (e) {
-        // Not a valid JSON command
+        // Not a valid JSON command, which is normal for regular chat responses
       }
 
       const assistantMessage = {
         role: 'assistant',
-        content: rawJsonString,
+        content: cleanJsonString, // Use the cleaned string
         model: model,
-        id: Date.now(),
+        id: assistantMessageId, // Use the generated ID
         memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
       };
       setMessages(prev => [...prev, assistantMessage]);
@@ -372,6 +458,7 @@ export default function App() {
           textToRender = parsedData.response;
         }
       } catch (e) {
+        // It's not a JSON command, so the content is the text itself.
         textToRender = msg.content;
       }
     }
@@ -400,14 +487,12 @@ export default function App() {
     },
   };
 
-  // Helper to detect mobile devices
   const isMobileDevice = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      // On desktop: Enter sends unless Shift is held
       if (!isMobileDevice() && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
@@ -419,6 +504,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="bg-white shadow-sm p-4 sticky top-0 z-20">
+        {/* Header content remains the same */}
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-800">ChatBuddy</h1>
           <div className="hidden md:flex items-center space-x-3">
@@ -457,180 +543,217 @@ export default function App() {
 
       {/* --- Modals Section --- */}
       <AnimatePresence>
-        {showImportExportOptions && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportExportOptions(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6"><h3 className="text-lg font-bold text-gray-800">Manage Chat</h3><p className="text-sm text-gray-600 mt-2 mb-4">Import a previous chat session or export the current one.</p></div>
-              <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
-                <button onClick={() => setShowImportExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
-                <button onClick={() => { setShowImportExportOptions(false); handleImportClick(); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Chat</button>
-                <button onClick={() => { setShowImportExportOptions(false); setShowExportOptions(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export Chat</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showExportOptions && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowExportOptions(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6"><h3 className="text-lg font-bold text-gray-800">Choose Export Format</h3><p className="text-sm text-gray-600 mt-2 mb-4"><b>Export as JSON</b> for a complete, lossless backup that can be imported later.<br /><b>Export as TXT</b> for a simple, human-readable version.</p></div>
-              <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
-                <button onClick={() => setShowExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
-                <button onClick={exportChatAsTxt} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Export as TXT</button>
-                <button onClick={exportChatAsJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export as JSON</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showImportConfirm && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportConfirm(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6 text-center">
-                <svg className="mx-auto mb-4 text-orange-400 w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-                <h3 className="text-lg font-bold">Import Chat?</h3><p className="text-sm text-gray-500 mt-2">This will <b>replace</b> your current chat and system prompt. This action cannot be undone.<br /><br />Please export your current chat first if you wish to save it.</p>
-              </div>
-              <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
-                <button onClick={() => { setShowImportConfirm(false); setFileToImport(null); }} className="px-6 py-2 border rounded-lg">Cancel</button>
-                <button onClick={confirmImport} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Yes, Import</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showMemoriesImportExport && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemoriesImportExport(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Manage Memories</h3>
-                <p className="text-sm text-gray-600 mt-2 mb-4">Import a list of memories to append them to your current list, or export your current list to a JSON file.</p>
-              </div>
-              <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
-                <button onClick={() => setShowMemoriesImportExport(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button>
-                <button onClick={handleImportMemoriesClick} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Memories</button>
-                <button onClick={exportMemoriesAsJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export Memories</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showMemories && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemories(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-              <div className="p-5 border-b flex justify-between items-center"><h2 className="text-xl font-bold text-gray-800">Saved Memories</h2><button onClick={() => setShowMemories(false)} className="text-gray-500 hover:text-gray-700">&times;</button></div>
-              <div className="p-5 overflow-y-auto flex-grow">
-                <div className="mb-4 p-3 border rounded-lg bg-gray-50">
-                  <div className="flex justify-between items-center text-sm text-gray-600 mb-1"><span>Memory Usage</span><span>{memoryUsagePercent.toFixed(1)}%</span></div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5"><div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${memoryUsagePercent}%` }}></div></div>
-                  <div className="text-right text-xs text-gray-500 mt-1">{memories.join('\n').length} / {MEMORY_LIMIT_CHARS} characters</div>
-                </div>
-                {memories.length > 0 ? (
-                  <ul className="space-y-3 text-sm text-gray-700">
-                    {[...memories].reverse().map((mem) => (
-                      <li key={mem} className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50">
-                        <span className="flex-1 prose prose-sm max-w-none m-0 text-gray-700">{mem}</span>
-                        <button onClick={() => deleteMemory(mem)} className="text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 focus:outline-none transition-colors" aria-label="Delete memory">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : <p className="text-gray-500 text-center py-8">The AI has no saved memories yet.</p>}
-              </div>
-              <div className="p-5 border-t flex justify-end gap-3">
-                <button onClick={() => { setShowMemoriesImportExport(true); setShowMemories(false); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import/Export Memories</button>
-                <button onClick={() => setShowMemories(false)} className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Close</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
+        {showImportExportOptions && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportExportOptions(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6"><h3 className="text-lg font-bold text-gray-800">Manage Chat</h3><p className="text-sm text-gray-600 mt-2 mb-4">Import a previous chat session or export the current one.</p></div><div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl"><button onClick={() => setShowImportExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button><button onClick={() => { setShowImportExportOptions(false); handleImportClick(); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Chat</button><button onClick={() => { setShowImportExportOptions(false); setShowExportOptions(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export Chat</button></div></motion.div></motion.div>)}
+        {showExportOptions && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowExportOptions(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6"><h3 className="text-lg font-bold text-gray-800">Choose Export Format</h3><p className="text-sm text-gray-600 mt-2 mb-4"><b>Export as JSON</b> for a complete, lossless backup that can be imported later.<br /><b>Export as TXT</b> for a simple, human-readable version.</p></div><div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl"><button onClick={() => setShowExportOptions(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button><button onClick={exportChatAsTxt} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Export as TXT</button><button onClick={exportChatAsJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export as JSON</button></div></motion.div></motion.div>)}
+        {showImportConfirm && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowImportConfirm(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6 text-center"><svg className="mx-auto mb-4 text-orange-400 w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><h3 className="text-lg font-bold">Import Chat?</h3><p className="text-sm text-gray-500 mt-2">This will <b>replace</b> your current chat and system prompt. This action cannot be undone.<br /><br />Please export your current chat first if you wish to save it.</p></div><div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl"><button onClick={() => { setShowImportConfirm(false); setFileToImport(null); }} className="px-6 py-2 border rounded-lg">Cancel</button><button onClick={confirmImport} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Yes, Import</button></div></motion.div></motion.div>)}
+        {showMemoriesImportExport && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemoriesImportExport(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6"><h3 className="text-lg font-bold text-gray-800">Manage Memories</h3><p className="text-sm text-gray-600 mt-2 mb-4">Import a list of memories to append them to your current list, or export your current list to a JSON file.</p></div><div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl"><button onClick={() => setShowMemoriesImportExport(false)} className="px-4 py-2 border rounded-lg text-sm font-medium">Cancel</button><button onClick={handleImportMemoriesClick} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import Memories</button><button onClick={exportMemoriesAsJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Export Memories</button></div></motion.div></motion.div>)}
+        {showMemories && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMemories(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"><div className="p-5 border-b flex justify-between items-center"><h2 className="text-xl font-bold text-gray-800">Saved Memories</h2><button onClick={() => setShowMemories(false)} className="text-gray-500 hover:text-gray-700">&times;</button></div><div className="p-5 overflow-y-auto flex-grow"><div className="mb-4 p-3 border rounded-lg bg-gray-50"><div className="flex justify-between items-center text-sm text-gray-600 mb-1"><span>Memory Usage</span><span>{memoryUsagePercent.toFixed(1)}%</span></div><div className="w-full bg-gray-200 rounded-full h-2.5"><div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${memoryUsagePercent}%` }}></div></div><div className="text-right text-xs text-gray-500 mt-1">{memories.join('\n').length} / {MEMORY_LIMIT_CHARS} characters</div></div>{memories.length > 0 ? (<ul className="space-y-3 text-sm text-gray-700">{[...memories].reverse().map((mem) => (<li key={mem} className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50"><span className="flex-1 prose prose-sm max-w-none m-0 text-gray-700">{mem}</span><button onClick={() => deleteMemory(mem)} className="text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 focus:outline-none transition-colors" aria-label="Delete memory"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></li>))}</ul>) : <p className="text-gray-500 text-center py-8">The AI has no saved memories yet.</p>}</div><div className="p-5 border-t flex justify-end gap-3"><button onClick={() => { setShowMemoriesImportExport(true); setShowMemories(false); }} className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Import/Export Memories</button><button onClick={() => setShowMemories(false)} className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Close</button></div></motion.div></motion.div>)}
         {showOptions && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowOptions(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-              <div className="p-5 border-b flex justify-between items-center"><h2 className="text-xl font-bold text-gray-800">Options & Settings</h2><button onClick={() => setShowOptions(false)} className="text-gray-500 hover:text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black bg-opacity-50"
+              onClick={() => setShowOptions(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            >
+              {/* Modal Header */}
+              <div className="p-5 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Options & Settings</h2>
+                <button
+                  onClick={() => setShowOptions(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Body */}
               <div className="p-5 overflow-y-auto flex-grow space-y-6">
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100"><p className="text-sm text-blue-800">The system prompt sets the behavior and rules for the AI.</p></div>
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-sm text-blue-800">
+                    The system prompt sets the behavior and rules for the AI.
+                  </p>
+                </div>
+
                 <div className="relative">
-                  <textarea value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} maxLength="400" className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm" placeholder="Enter system instructions..." />
-                  <div className="absolute bottom-2 right-2 text-xs text-gray-400">{systemPrompt.length} / 400</div>
-                  {systemPrompt && (<button onClick={() => setSystemPrompt('')} className="absolute top-3 right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Clear</button>)}
+                  <textarea
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    maxLength="400"
+                    className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
+                    placeholder="Enter system instructions..."
+                  />
+                  <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+                    {systemPrompt.length} / 400
+                  </div>
+                  {systemPrompt && (
+                    <button
+                      onClick={() => setSystemPrompt('')}
+                      className="absolute top-3 right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
-                  <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Optional: Use your own key" />
-                  <p className="text-xs text-gray-500 mt-1">Get your Gemini key for free: Google AI Studio {'>'} API Keys {'>'} Generate</p>
-                  <p className="text-xs text-gray-500 mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400">NOTE: Use your own API key to use the app with Higher Limits and greater Context Window. Default Key has stricter Rate Limits and Context Window. Changing API KEY does not change model behavior.</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gemini API Key
+                  </label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    placeholder="Optional: Use your own key"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Get your Gemini key for free: Google AI Studio {'>'} API Keys {'>'} Generate
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400">
+                    NOTE: Use your own API key to use the app with Higher Limits and
+                    greater Context Window. Default Key has stricter Rate Limits and
+                    Context Window. Changing API KEY does not change model behavior.
+                  </p>
                 </div>
+
                 <div className="space-y-2 pt-4 border-t">
-                  <button onClick={handleClearTempMemory} className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm">Clear Temporary Memory</button>
-                  <button onClick={() => { setShowResetConfirm(true); setShowOptions(false); }} className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">Reset App</button>
+                  <button
+                    onClick={handleClearTempMemory}
+                    className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm"
+                  >
+                    Clear Temporary Memory
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowResetConfirm(true);
+                      setShowOptions(false);
+                    }}
+                    className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                  >
+                    Reset App
+                  </button>
                 </div>
+
                 <div className="p-4 bg-gray-50 rounded-lg mt-4">
                   <h3 className="font-medium text-gray-800 mb-2">About ChatBuddy</h3>
                   <p className="text-sm text-gray-600">
                     ChatBuddy is a Free for All AI Chatapp. Available with 2 AI models (Basic and Advanced).
-                    <br />Basic model: <span className='font-medium'>Gemma3 27b.</span> Best for Conversation & Role-Plays.
-                    <br /><br />Advanced model: <span className='font-medium'>Gemini 2.5 Flash.</span> Best for Coding & Reasoning Tasks.
-                    <br /><br />You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
-                    <br /><br />Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
-                    <br /><br />With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD).
-                    <br /><br />With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD) for FREE.
-                    <br /><br />Aditionally the app Source Code is available on GitHub 👉<span className='font-medium'>[<a href="https://github.com/KushalRoyChowdhury/ChatBuddy" target="_blank" rel="noopener noreferrer">HERE</a>]</span>👈 . Fork It, Modify it.. I don't care. Just Star it before touching.
-                    <br /><br />Thank You for using ChatBuddy.
+                    <br />
+                    Basic model: <span className="font-medium">Gemma3 27b.</span> Best for Conversation & Role-Plays.
+                    <br />
+                    <br />
+                    Advanced model: <span className="font-medium">Gemini 2.5 Flash.</span> Best for Coding & Reasoning Tasks.
+                    <br />
+                    <br />
+                    <span className='font-semibold'>NOTE</span>: Advance Reasoning Mode can take significatly longer time to respond on complex tasks.
+                    <br />
+                    <br />
+                    You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
+                    <br />
+                    <br />
+                    Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
+                    <br />
+                    <br />
+                    With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD).
+                    <br />
+                    <br />
+                    With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD) for FREE.
+                    <br />
+                    <br />
+                    Aditionally the app Source Code is available on GitHub 👉
+                    <span className="font-medium">
+                      [<a href="https://github.com/KushalRoyChowdhury/ChatBuddy" target="_blank" rel="noopener noreferrer">HERE</a>]
+                    </span>
+                    👈 . Fork It, Modify it.. I don't care. Just Star it before touching.
+                    <br />
+                    <br />
+                    Thank You for using ChatBuddy.
                   </p>
                 </div>
-                <div className='text-center text-gray-600'>AI can make mistakes.<br />v1.1<br />By: KushalRoyChowdhury</div>
+
+                <div className="text-center text-gray-600">
+                  AI can make mistakes.
+                  <br />
+                  v1.1
+                  <br />
+                  By: KushalRoyChowdhury
+                </div>
               </div>
+
+              {/* Modal Footer */}
               <div className="p-5 border-t flex justify-end">
-                <button onClick={() => setShowOptions(false)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
+                <button
+                  onClick={() => setShowOptions(false)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Close
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
-
         {showClearConfirm && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowClearConfirm(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6 text-center"><h3 className="text-lg font-bold">Clear Chat?</h3><p className="text-sm text-gray-500">This cannot be undone.</p></div><div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl"><button onClick={() => setShowClearConfirm(false)} className="px-6 py-2 border rounded-lg">Cancel</button><button onClick={handleConfirmClearChat} className="px-6 py-2 bg-red-600 text-white rounded-lg">Yes, Clear</button></div></motion.div></motion.div>)}
-
         {showResetConfirm && (<motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowResetConfirm(false)} /><motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-xl shadow-xl w-full max-w-md"><div className="p-6 text-center"><svg className="mx-auto mb-4 text-red-400 w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><h3 className="mb-2 text-lg font-bold text-gray-800">Reset App?</h3><p className="text-sm text-gray-500">This will delete all chats, memories, and settings. This action is irreversible.</p></div><div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl"><button onClick={() => setShowResetConfirm(false)} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">Cancel</button><button onClick={handleResetApp} className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">Yes, Reset</button></div></motion.div></motion.div>)}
       </AnimatePresence>
 
-      {/* --- Main Chat Area --- */}
+
+      {/* --- Main Chat Area (MODIFIED) --- */}
       <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => setIsMenuOpen(false)}>
         <div className="space-y-4">
           {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
             <AnimatePresence>
-              {messages.map((msg) => (
-                <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
-                    <div className="prose prose-sm max-w-none prose-p:text-inherit">
-                      <ReactMarkdown components={CodeBlock}>{getTextToRender(msg)}</ReactMarkdown>
-                    </div>
-                    {msg.role === 'assistant' && (
-                      <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
-                        <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</span>
-                        <div className="flex gap-2">
-                          {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Memory Updated</span> : null}
-                          {msg.memoryStatus === 'temporary' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Temp Memory</span> : null}
-                        </div>
+              {messages.map((msg) => {
+                const thought = thinkingProcesses.find(t => t.id === msg.id);
+                return (
+                  <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
+                      {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
+                      <div className="prose prose-sm max-w-none prose-p:text-inherit">
+                        <ReactMarkdown components={CodeBlock} remarkPlugins={[remarkGfm]}>{getTextToRender(msg)}</ReactMarkdown>
                       </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
+                      {msg.role === 'assistant' && (
+                        <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
+                          <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</span>
+                          <div className="flex gap-2">
+                            {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Memory Updated</span> : null}
+                            {msg.memoryStatus === 'temporary' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Temp Memory</span> : null}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           )}
-          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{model === 'gemini-2.5-flash-lite' ? advanceReasoning ? 'Thinking Deeply...' : 'Thinking...' : 'Responding...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
+          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : 'Thinking...' }</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
           <div ref={chatEndRef} />
         </div>
       </main>
 
       <footer className="bg-white border md:border-none md:bg-slate-50 p-1 md:pb-5 sticky bottom-0 rounded-t-2xl md:rounded-none">
+        {/* Footer content remains the same */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -638,7 +761,6 @@ export default function App() {
           }}
           className="max-w-4xl bg-white w-full mx-auto md:border rounded-2xl md:shadow-lg"
         >
-
           <TextareaAutosize
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -648,7 +770,6 @@ export default function App() {
             minRows={1}
             maxRows={5}
           />
-
           <div className='p-2 flex relative justify-between h-[56px]'>
             <AnimatePresence>
               {model === 'gemini-2.5-flash-lite' && (
@@ -683,4 +804,5 @@ export default function App() {
     </div>
   );
 }
+
 
