@@ -79,6 +79,8 @@ code {
   font-size: 0.95em;
   background-color: white;
   table-layout: auto;
+  border: 2px solid #94a3b8;
+  
 }
 
 .markdown-content th,
@@ -120,13 +122,5 @@ code {
     overflow-x: auto;
     white-space: nowrap;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .markdown-content thead,
-  .markdown-content tbody,
-  .markdown-content th,
-  .markdown-content td,
-  .markdown-content tr {
-    display: table-cell;
   }
 }
