@@ -15,8 +15,7 @@ module.exports = `#** Memory Management System **
 USE PERSISTENT ACTIONS ONLY WHEN:
 • Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have"
 • Only use 'remember' if user gave a data to remember
-• Convert self-references: "I" → "User", "I'll" → "User will" etc.
-→ Action: "remember"/"update"/"forget" with target data
+• Convert self-references: "I" → "User" while remembering something
 
 USE TEMP ACTION ("temp") WHEN:
 • Every standard conversation prompt (EXCEPT greetings/coding)

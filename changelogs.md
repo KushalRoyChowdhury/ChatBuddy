@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ability to send Images.
 - Image Generation (varies).
 
+## [1.3] - 2025-09-15
+> *This is a huge upgrade from the previous architechture, if you face any bugs or issues kindly mention in GitHub.*
+
+### Fixed
+- Major changes in server side to make responses consistent.
+- Major improvement in Advance Reasoning for more deep think on complex tasks.
+- Uses latest GenAI SDK.
+
+### Plan
+- Implement Image Upload in next update.
+
 ## [1.2] - 2025-09-14
 
 ### Added

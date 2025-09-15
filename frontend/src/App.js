@@ -75,7 +75,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [advanceReasoning, setAdvanceReasoning] = useState(false);
   const [creativeRP, setCreativeRP] = useState(false);
-  const [webSearch, setWebSearch] = useState(true);
+  const [webSearch, setWebSearch] = useState(false);
   const [showImportExportOptions, setShowImportExportOptions] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
@@ -369,7 +369,7 @@ export default function App() {
       // Extract and remove <think> content
       const thinkRegex = /<think>(.*?)<\/think>/gs;
       const thinkMatches = [...rawResponseString.matchAll(thinkRegex)].map(m => m[1].trim());
-      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n\n\n') : null;
+      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n \n\n') : null;
       const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
       
       const assistantMessageId = Date.now(); // Unique ID for this message
@@ -384,12 +384,12 @@ export default function App() {
         const parsedResponse = JSON.parse(cleanJsonString);
         const { action, target } = parsedResponse;
 
-        if (action === 'remember' && target && !memories.includes(target)) {
+        if (action === 'remember' && target[0] && !memories.includes(target[0])) {
           permanentMemoryChanged = true;
-          setMemories(prev => [...prev, target]);
-        } else if (action === 'forget' && target) {
-          permanentMemoryChanged = memories.includes(target);
-          setMemories(prev => prev.filter(m => m !== target));
+          setMemories(prev => [...prev, target[0]]);
+        } else if (action === 'forget' && target[0]) {
+          permanentMemoryChanged = memories.includes(target[0]);
+          setMemories(prev => prev.filter(m => m !== target[0]));
         } else if (action === 'update' && Array.isArray(target) && target.length === 2) {
           const [oldMem, newMem] = target;
           if (memories.includes(oldMem)) {

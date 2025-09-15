@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI, Type } = require('@google/genai'); // New SDK
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -121,7 +122,7 @@ app.post("/model", applyRateLimiter, async (req, res) => {
             return res.status(500).json({ error: { message: 'API key is not configured.' } });
         }
 
-        const genAI = new GoogleGenerativeAI(finalApiKey);
+        const ai = new GoogleGenAI({ apiKey: SERVER_API_KEY });
 
         if (modelIndex === undefined || modelIndex < 0 || modelIndex >= MODELS.length) {
             return res.status(400).json({ error: { message: 'A valid model index (0 or 1) must be provided.' } });
@@ -137,9 +138,7 @@ app.post("/model", applyRateLimiter, async (req, res) => {
         if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- TEMPORARY NOTES ---\n- ${temp.join('\n- ')}`;
         if (sys && sys.trim()) finalSystemPrompt += `\n\n--- USER'S SYSTEM PROMPT ---\n${sys.trim()}`;
 
-        let genModel;
         let latestUserMessage;
-        let historyForSDK;
 
         let contextLimit = modelIndex === 0
             ? GEMMA_HISTORY_LIMIT_CHARS
@@ -153,45 +152,71 @@ app.post("/model", applyRateLimiter, async (req, res) => {
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
-
+        let response;
+        latestUserMessage = `${finalSystemPrompt}\n\n--- CURRENT CONVERSATION ---\nUSER: ${latestUserMessage}`;
         if (modelIndex === 0) { // Gemma logic
-            latestUserMessage = `${finalSystemPrompt}\n\n--- CURRENT CONVERSATION ---\nUSER: ${latestUserMessage}`;
-            genModel = genAI.getGenerativeModel({
+
+            response = await ai.models.generateContent({
                 model: selectedModel,
-                ...(creativeRP && {
-                    generationConfig: {
+                contents: latestUserMessage,
+                config: {
+                    ...(creativeRP && {
                         temperature: 2,
                         topP: 1,
                         topK: 0,
-                    },
-                })
+                    }),
+                },
             });
         } else { // Gemini logic
 
-            genModel = genAI.getGenerativeModel({
+            response = await ai.models.generateContent({
                 model: selectedModel,
-                systemInstruction: { parts: [{ text: finalSystemPrompt }] },
-                ...(webSearch && {
-                    tools: [{
-                        googleSearch: {}
-                    }]
-                }),
-                ...(advanceReasoning && {
-                    tool_config: {
-                        reasoning_config: {
-                            mode: 'MULTI_PASS'
-                        }
-                    }
-                })
+                contents: latestUserMessage,
+                config: {
+                    ...(!webSearch && {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                action: {
+                                    type: Type.STRING,
+                                },
+                                target: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.STRING,
+                                    },
+                                },
+                                response: {
+                                    type: Type.STRING,
+                                },
+                            },
+                            required: ["action", "target", "response"],
+                        },
+                    }),
+                    ...(webSearch && {
+
+                        tools: [
+                            { urlContext: {} },
+                            { googleSearch: {} },
+                        ],
+
+
+                    }),
+                    ...(advanceReasoning && {
+
+                        thinkingConfig: {
+                            thinkingBudget: 24576,
+                            includeThoughts: true,
+                        },
+                    })
+                },
             });
         }
 
-        const chat = genModel.startChat({ history: historyForSDK });
-        const result = await chat.sendMessage(latestUserMessage);
-        const response = result.response;
-        let text = response.text();
+        let text = response.text;
         text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-
+        console.log(text);
 
         res.status(200).json({
             candidates: [{ content: { parts: [{ text }], role: 'model' } }]
