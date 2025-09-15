@@ -369,7 +369,7 @@ export default function App() {
       // Extract and remove <think> content
       const thinkRegex = /<think>(.*?)<\/think>/gs;
       const thinkMatches = [...rawResponseString.matchAll(thinkRegex)].map(m => m[1].trim());
-      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n') : null;
+      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n\n\n') : null;
       const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
       
       const assistantMessageId = Date.now(); // Unique ID for this message
