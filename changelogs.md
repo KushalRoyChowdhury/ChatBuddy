@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3] - 2025-09-15
 > **NOTICE:** *The changes were temporarily reverted due to major instability issues*
+
+
 > *This is a huge upgrade from the previous architechture, if you face any bugs or issues kindly mention in GitHub.*
 
 ### Fixed
