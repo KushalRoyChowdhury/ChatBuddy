@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+> **NOTICE:** *The changes (v1.3) were temporarily reverted (v1.2.2) due to major instability issues*
+
+
 ## [Planned]
 
 - Native DarkMode support.
@@ -12,8 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image Generation (varies).
 
 ## [1.3] - 2025-09-15
-> **NOTICE:** *The changes were temporarily reverted due to major instability issues*
-
 
 > *This is a huge upgrade from the previous architechture, if you face any bugs or issues kindly mention in GitHub.*
 
