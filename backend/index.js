@@ -2,7 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI, createUserContent, createPartFromUri, } = require('@google/genai'); // New SDK
+const multer = require('multer');
+
+// Configure multer to store files in memory as a Buffer
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -103,25 +108,18 @@ app.get('/health', (req, res) => {
     res.status(200).send();
 });
 
-
 // --- Main API Endpoint ---
-app.post("/model", applyRateLimiter, async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch } = req.body;
+app.post('/model', applyRateLimiter, async (req, res) => {
+    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch, image } = req.body;
     let retry = true;
-
     start:
     try {
         const finalApiKey = userApiKey || SERVER_API_KEY;
-        let INTERNAL_SYSTEM_PROMPT = INTERNAL_MEMORY_PROMPT;
-
-        if (modelIndex === 1 && advanceReasoning) {
-            INTERNAL_SYSTEM_PROMPT += INTERNAL_THINK_PROMPT;
-        }
         if (!finalApiKey) {
-            return res.status(500).json({ error: { message: 'API key is not configured.' } });
+            return res.status(500).json({ error: { message: 'API Key not valid.' } });
         }
 
-        const genAI = new GoogleGenerativeAI(finalApiKey);
+        const genAI = new GoogleGenAI({ apiKey: finalApiKey });
 
         if (modelIndex === undefined || modelIndex < 0 || modelIndex >= MODELS.length) {
             return res.status(400).json({ error: { message: 'A valid model index (0 or 1) must be provided.' } });
@@ -130,6 +128,8 @@ app.post("/model", applyRateLimiter, async (req, res) => {
             return res.status(400).json({ error: { message: 'A valid chat history must be provided.' } });
         }
 
+        let INTERNAL_SYSTEM_PROMPT = INTERNAL_MEMORY_PROMPT;
+
         const selectedModel = MODELS[modelIndex];
 
         let finalSystemPrompt = INTERNAL_SYSTEM_PROMPT;
@@ -137,69 +137,118 @@ app.post("/model", applyRateLimiter, async (req, res) => {
         if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- TEMPORARY NOTES ---\n- ${temp.join('\n- ')}`;
         if (sys && sys.trim()) finalSystemPrompt += `\n\n--- USER'S SYSTEM PROMPT ---\n${sys.trim()}`;
 
-        let genModel;
-        let latestUserMessage;
-        let historyForSDK;
-
         let contextLimit = modelIndex === 0
             ? GEMMA_HISTORY_LIMIT_CHARS
             : (userApiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
 
         const truncatedHistory = getTruncatedHistory(history, contextLimit);
         const latestUserMessageTurn = truncatedHistory.pop();
-        latestUserMessage = latestUserMessageTurn.content;
 
-        historyForSDK = truncatedHistory.map(msg => ({
+        const historyForSDK = truncatedHistory.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
 
-        if (modelIndex === 0) { // Gemma logic
-            latestUserMessage = `${finalSystemPrompt}\n\n--- CURRENT CONVERSATION ---\nUSER: ${latestUserMessage}`;
-            genModel = genAI.getGenerativeModel({
-                model: selectedModel,
-                ...(creativeRP && {
-                    generationConfig: {
-                        temperature: 2,
-                        topP: 1,
-                        topK: 0,
-                    },
-                })
+        // --- Modified Image Logic ---
+        const latestUserMessageParts = [];
+        if (latestUserMessageTurn && latestUserMessageTurn.content) {
+            latestUserMessageParts.push({ text: latestUserMessageTurn.content });
+        }
+        // This now safely checks if an image exists AND the correct model is selected
+        if (image) {
+            latestUserMessageParts.push({
+                inlineData: {
+                    mimeType: image.inlineData.mimeType,
+                    data: image.inlineData.data,
+                }
             });
-        } else { // Gemini logic
+        }
+        // --- End of Image Logic ---
 
-            genModel = genAI.getGenerativeModel({
+        let result;
+
+        if (modelIndex === 0) { // Gemma logic (now supports images)
+            // The Gemma prompt structure is preserved, prepending the system prompt to the text part.
+            const partsWithSystemPrompt = [...latestUserMessageParts];
+            if (partsWithSystemPrompt.length > 0 && partsWithSystemPrompt[0].text) {
+                partsWithSystemPrompt[0].text = `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER: ${partsWithSystemPrompt[0].text}`;
+            } else {
+                partsWithSystemPrompt.unshift({ text: `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER:` });
+            }
+
+            const gemmaContents = [
+                ...historyForSDK,
+                { role: 'user', parts: partsWithSystemPrompt }
+            ];
+
+            result = await genAI.models.generateContent({
                 model: selectedModel,
-                systemInstruction: { parts: [{ text: finalSystemPrompt }] },
-                ...(webSearch && {
-                    tools: [{
-                        googleSearch: {}
-                    }]
-                }),
-                ...(advanceReasoning && {
-                    tool_config: {
-                        reasoning_config: {
-                            mode: 'MULTI_PASS'
-                        }
-                    }
-                })
+                contents: gemmaContents,
+                config: {
+                    temperature: creativeRP ? 2 : 1,
+                    topP: creativeRP ? 1 : 0.95,
+                    topK: creativeRP ? 0 : 128,
+                }
+            });
+
+        } else { // Gemini logic (updated to send multipart message)
+            const geminiContents = [
+                ...historyForSDK,
+                { role: 'user', parts: latestUserMessageParts } // Use the new parts array
+            ];
+
+            result = await genAI.models.generateContent({
+                model: selectedModel,
+                contents: geminiContents,
+                config: {
+                    systemInstruction: {
+                        role: "system",
+                        parts: [{ text: finalSystemPrompt }]
+                    },
+                    temperature: advanceReasoning ? 0.9 : 1,
+                    topP: advanceReasoning ? 0.9 : 0.98,
+                    topK: advanceReasoning ? 64 : 128,
+                    thinkingConfig: {
+                        thinkingBudget: advanceReasoning ? 24576 : 0,
+                        includeThoughts: advanceReasoning ? true : false,
+                    },
+                    ...(webSearch && {
+                        tools: [
+                            { urlContext: {} },
+                            { googleSearch: {} }
+                        ]
+                    }),
+                }
             });
         }
 
-        const chat = genModel.startChat({ history: historyForSDK });
-        const result = await chat.sendMessage(latestUserMessage);
-        const response = result.response;
-        let text = response.text();
-        text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+        let thought = '';
+        let answer = '';
 
+        for (const part of result.candidates[0].content.parts) {
+            if (!part.text) {
+                continue;
+            }
+            else if (part.thought) {
+                let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
+                thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
+            }
+            else {
+                answer = part.text;
+            }
+        }
+
+        text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+        if (thought.length > 0) {
+            text = thought + text;
+        }
 
         res.status(200).json({
             candidates: [{ content: { parts: [{ text }], role: 'model' } }]
         });
 
     } catch (error) {
-        console.error("Error calling API:", error);
-
+        console.error("GEMINI API ERROR:: ", error);
         if (error.toString().includes('429') && retry) {
             console.log('API-side rate limit reached. Attempting fallback...');
             modelIndex = modelIndex === 1 ? 0 : 1;
@@ -207,10 +256,12 @@ app.post("/model", applyRateLimiter, async (req, res) => {
             break start;
         }
 
+        let errorMessage = error;
         res.status(error.status || 500).json({
-            error: { message: error.statusText || 'An internal server error occurred.' }
+            candidates: [{ content: { parts: [{ errorMessage }], role: 'model' } }]
         });
     }
+
 });
 
 app.listen(PORT);

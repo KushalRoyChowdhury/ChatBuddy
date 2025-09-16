@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import TextareaAutosize from 'react-textarea-autosize';
 
 // --- Application Constants ---
@@ -62,6 +62,7 @@ export default function App() {
   const [memories, setMemories] = useState(() => JSON.parse(localStorage.getItem('chatMemories')) || []);
   const [loading, setLoading] = useState(false);
 
+
   // --- New/Modified State ---
   const [chatId, setChatId] = useState(() => localStorage.getItem('chatId') || crypto.randomUUID());
   const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []); // Now an array of objects
@@ -82,11 +83,14 @@ export default function App() {
   const [fileToImport, setFileToImport] = useState(null);
   const [showMemoriesImportExport, setShowMemoriesImportExport] = useState(false);
   const [modelUsed, setModelUsed] = useState("");
+  const [showAddFiles, setShowAddFiles] = useState(false);
+  const [fileImg, setFileImg] = useState(null);
 
   // Refs
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const memoryFileInputRef = useRef(null);
+  const fileImgInputRef = useRef(null);
 
   // --- State Persistence Effects ---
   useEffect(() => { localStorage.setItem('chatHistory', JSON.stringify(messages)); }, [messages]);
@@ -94,6 +98,8 @@ export default function App() {
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
   useEffect(() => { localStorage.setItem('geminiApiKey', apiKey); }, [apiKey]);
   useEffect(() => { localStorage.setItem('chatMemories', JSON.stringify(memories)); }, [memories]);
+  // uploadedFileInfo
+
   // --- Modified Persistence ---
   useEffect(() => { localStorage.setItem('chatTempMemories', JSON.stringify(tempMemories)); }, [tempMemories]);
   useEffect(() => { localStorage.setItem('thinkingProcesses', JSON.stringify(thinkingProcesses)); }, [thinkingProcesses]);
@@ -313,34 +319,69 @@ export default function App() {
   };
 
 
-  // --- Core Message Sending Function (MODIFIED) ---
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && !fileImg) || loading) return;
 
-    const userMessage = { role: 'user', content: input, model: model, id: Date.now() };
+    const currentFile = fileImg;
+    let imageDataUrl = null;
+
+    // --- MODIFIED PART 1: Read the file into a permanent Data URL first ---
+    // This is done before creating the message so the data can be stored.
+    if (currentFile) {
+      imageDataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(currentFile); // Reads the file as a Base64-encoded Data URL
+        reader.onload = () => resolve(reader.result); // The result is a permanent, self-contained URL
+        reader.onerror = (err) => reject(err);
+      });
+    }
+    // --- End of modification ---
+
+    const userMessage = {
+      role: 'user',
+      content: input,
+      image: imageDataUrl, // Store the permanent Data URL in the message
+      model: model,
+      id: Date.now()
+    };
+
     const currentMessagesWithUser = [...messages, userMessage];
     setMessages(currentMessagesWithUser);
+
     setInput('');
+    setFileImg(null);
     setLoading(true);
 
     try {
-      // Filter tempMemories: send only memories from OTHER chats
       const memoriesForModel = tempMemories
         .filter(mem => mem.id !== chatId)
-        .map(mem => mem.memory); // Send only the string content
+        .map(mem => mem.memory);
 
       const modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
       if (modelIndex === 0) {
         setModelUsed("basic");
-      }
-      else if (modelIndex === 1 && advanceReasoning) {
+      } else if (modelIndex === 1 && advanceReasoning) {
         setModelUsed("advance+");
-      }
-      else {
+      } else {
         setModelUsed("advance");
       }
+
+      // --- MODIFIED PART 2: Prepare the image for the backend ---
+      let imagePart = null;
+      // If we created a Data URL, extract the Base64 part for the payload
+      if (imageDataUrl) {
+        imagePart = {
+          inlineData: {
+            mimeType: currentFile.type,
+            data: imageDataUrl.split(',')[1], // Extract Base64 from the Data URL
+          }
+        };
+      }
+      // --- End of modification ---
+
       const payload = {
-        history: currentMessagesWithUser.map(({ id, ...rest }) => rest),
+        history: currentMessagesWithUser.map(({ id, image, ...rest }) => rest),
+        image: imagePart,
         memory: memories,
         temp: memoriesForModel,
         sys: systemPrompt,
@@ -365,14 +406,11 @@ export default function App() {
       }
 
       let rawResponseString = data.candidates[0].content.parts[0].text;
-
-      // Extract and remove <think> content
       const thinkRegex = /<think>(.*?)<\/think>/gs;
       const thinkMatches = [...rawResponseString.matchAll(thinkRegex)].map(m => m[1].trim());
       const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n \n\n') : null;
       const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
-      
-      const assistantMessageId = Date.now(); // Unique ID for this message
+      const assistantMessageId = Date.now();
 
       if (thoughtContent) {
         setThinkingProcesses(prev => [...prev, { id: assistantMessageId, content: thoughtContent }]);
@@ -396,16 +434,13 @@ export default function App() {
             permanentMemoryChanged = true;
             setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
           }
-        } else if (action === 'temp' && target) {
-          // Add temp memory as an object with the current chatId
-          const newTempMemory = { memory: target, id: chatId };
-          const alreadyExists = tempMemories.some(m => m.memory === target && m.id === chatId);
-
+        } else if (action === 'temp' && target[0]) {
+          const newTempMemory = { memory: target[0], id: chatId };
+          const alreadyExists = tempMemories.some(m => m.memory === target[0] && m.id === chatId);
           if (!alreadyExists) {
             tempMemoryChanged = true;
             setTempMemories(prev => {
               const updatedTempMemories = [...prev, newTempMemory];
-              // Recalculate size based on memory string length
               let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
               while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
                 const removedItem = updatedTempMemories.shift();
@@ -423,7 +458,7 @@ export default function App() {
         role: 'assistant',
         content: cleanJsonString,
         model: model,
-        id: assistantMessageId, // Use the generated ID
+        id: assistantMessageId,
         memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
       };
       setMessages(prev => [...prev, assistantMessage]);
@@ -476,11 +511,11 @@ export default function App() {
       const codeText = String(children).replace(/\n$/, '');
       return !inline && match ? (
         <div className="relative my-2 rounded-lg overflow-hidden font-mono text-sm max-w-full">
-          <div className="px-4 py-2 bg-gray-700 flex justify-between items-center">
-            <span className="text-xs text-gray-300">{match[1]}</span>
-            <button onClick={() => copyToClipboard(codeText)} className="text-xs text-gray-300 hover:text-white">Copy</button>
+          <div className="px-4 py-2 bg-gray-200 flex justify-between items-center">
+            <span className="text-xs text-gray-700">{match[1]}</span>
+            <button onClick={() => copyToClipboard(codeText)} className="text-xs text-gray-700 hover:text-black hover:font-bold transition-all">Copy</button>
           </div>
-          <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div" customStyle={{ margin: 0, overflowX: 'auto' }} {...props}>
+          <SyntaxHighlighter style={oneLight} language={match[1]} PreTag="div" customStyle={{ margin: 0, overflowX: 'auto' }} {...props}>
             {codeText}
           </SyntaxHighlighter>
         </div>
@@ -504,6 +539,25 @@ export default function App() {
       }
     }
   };
+
+  const handleImgUpload = () => fileImgInputRef.current?.click();
+  const handleImgFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (fileImg) {
+      alert("An image has already been uploaded. Please remove it before adding a new one.");
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      alert("Please select a valid image file (JPG, PNG, etc.).");
+      return;
+    }
+
+    setFileImg(file);
+    setShowAddFiles(false);
+  };
+
 
   // --- JSX Rendering ---
   return (
@@ -700,7 +754,7 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.2.2
+                  v1.4
                   <br />
                   By: KushalRoyChowdhury
                 </div>
@@ -724,7 +778,7 @@ export default function App() {
 
 
       {/* --- Main Chat Area --- */}
-      <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => setIsMenuOpen(false)}>
+      <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => { setIsMenuOpen(false); setShowAddFiles(false); }}>
         <div className="space-y-4">
           {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
             <AnimatePresence>
@@ -734,6 +788,11 @@ export default function App() {
                   <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
                       {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
+                      {msg.image && (
+                        <div className="mb-2">
+                          <img src={msg.image} alt="User upload" className="max-w-xs max-h-64 rounded-lg" />
+                        </div>
+                      )}
                       <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
                         <ReactMarkdown components={CodeBlock} remarkPlugins={[remarkGfm]}>{getTextToRender(msg)}</ReactMarkdown>
                       </div>
@@ -753,7 +812,7 @@ export default function App() {
             </AnimatePresence>
           )}
           {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
-          <div ref={chatEndRef} />
+          <div className='w-full h-24 md:h-1 bg-transparent' ref={chatEndRef} />
         </div>
       </main>
 
@@ -765,6 +824,27 @@ export default function App() {
           }}
           className="max-w-4xl bg-white w-full mx-auto md:border rounded-2xl md:shadow-lg"
         >
+
+          {fileImg && (
+            <div className="p-2 border-b border-gray-200">
+              <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
+                <img
+                  src={URL.createObjectURL(fileImg)}
+                  alt="Selected"
+                  className={`h-20 w-20 object-cover rounded-md`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setFileImg(null)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-sm font-bold"
+                  aria-label="Remove image"
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          )}
+
           <TextareaAutosize
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -775,6 +855,47 @@ export default function App() {
             maxRows={5}
           />
           <div className='p-2 flex relative justify-start gap-2 h-[56px]'>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileImgInputRef}
+              onChange={handleImgFileChange}
+            />
+            <AnimatePresence>
+              {showAddFiles &&
+                <motion.div
+                  initial={{ width: 0, height: 0, opacity: 0, x: -30, y: 20 }}
+                  animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
+                  exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
+                  className={`absolute w-max h-max left-9 bottom-16 overflow-hidden bg-slate-200/90 backdrop-blur-[2px] rounded-xl border border-black/30`}>
+                  <button onClick={handleImgUpload} className='p-4 text-nowrap'>Upload Image</button>
+                </motion.div>
+              }
+            </AnimatePresence>
+
+            <motion.button
+              type="button"
+              title="More Creative Responses (can make mistake on factual answers)"
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => { setShowAddFiles(!showAddFiles) }}
+              className='aspect-square flex items-center justify-center'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-7 ${showAddFiles ? 'hidden' : 'block'}`}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`size-7 ${!showAddFiles ? 'hidden' : 'block'}`}>
+                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" />
+              </svg>
+
+
+            </motion.button>
+
+
             <AnimatePresence>
               {model === 'gemma-3-27b-it' && (
                 <motion.button
@@ -853,7 +974,7 @@ export default function App() {
             <motion.button
               type="submit"
               whileTap={{ scale: 0.99 }}
-              disabled={loading || !input.trim()}
+              disabled={loading || (!input.trim())}
               className={`px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors duration-500`}
             >
               Send
@@ -864,5 +985,3 @@ export default function App() {
     </div>
   );
 }
-
-

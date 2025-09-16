@@ -6,14 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-> **NOTICE:** *The changes (v1.3) were temporarily reverted (v1.2.2) due to major instability issues*
-
-
 ## [Planned]
 
 - Native DarkMode support.
-- Ability to send Images.
 - Image Generation (varies).
+
+## [1.4] - 2025-09-16
+
+### Added
+- Added Image Send Feature as compentation for previous issues. 
+
+### Fixed
+- All issues happened with v1.3 are now resolved and tested.
+
 
 ## [1.3] - 2025-09-15
 
@@ -24,8 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Major improvement in Advance Reasoning for more deep think on complex tasks.
 - Uses latest GenAI SDK.
 
-### Plan
-- Implement Image Upload in next update.
 
 ## [1.2] - 2025-09-14
 
@@ -37,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - UI Scroll Bug Fixes on mobile devices.
 
+
 ## [1.1.2] - 2025-09-13
 
 ### Fixed
@@ -47,10 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some UI changes to feel more modern and for future compatibility.
 - Tuned to be more *Creative* and *Accurate*.
 
+
 ## [1.1.1] - 2025-09-12
 
 ### Fixed
 - Import/Export Memory button not showing.
+
 
 ## [1.1.0] - 2025-09-12
 
@@ -60,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Resolved a bug that could cause excessive "thinking" time before the AI responded.
+
 
 ## [1.0.0] - 2025-09-08
 
