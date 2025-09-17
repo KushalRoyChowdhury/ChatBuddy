@@ -1,6 +1,6 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI
 
-Welcome to ChatBuddy, a feature-rich, application that brings the power of advanced AI model access directly to your desktop (AI Models connected through Gemini API. Those models are not for self-hosting). Built with React, it offers a persistent, configurable, and highly interactive chat experience.
+Welcome to ChatBuddy, a feature-rich application that brings the power of advanced AI model access directly to your desktop (AI models can't be run locally). Built with React and powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
@@ -11,6 +11,8 @@ Welcome to ChatBuddy, a feature-rich, application that brings the power of advan
 ## ✨ Key Features
 
 ChatBuddy is more than just a simple chatbot. It's packed with advanced features designed for power users and developers.
+
+-   **🖼️ Image Sharing**: Upload and discuss images directly in the chat. The AI can understand and analyze the content of your images, opening up new possibilities for visual-based conversations.
 
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
@@ -111,7 +113,7 @@ The backend server is required for the AI to function.
 
 ## 🤖 AI Models & API Keys
 
-**Uses Google AI API.**
+**Powered by the official Google AI SDK (`@google/genai`).**
 
 ChatBuddy is designed to be flexible and powerful, giving you control over your AI experience.
 

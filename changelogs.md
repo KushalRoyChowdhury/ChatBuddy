@@ -9,16 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planned]
 
 - Native DarkMode support.
+- Video Sharing.
 - Image Generation (varies).
+
+## [1.4.1] - 2025-09-17
+
+### Fixed
+- Improved stability on image sharing (now support upto 20MB).
+- Minor bug fixes.
+- ReTuned Censorship to maintain expressiveness.
 
 ## [1.4] - 2025-09-16
 
 ### Added
-- Added Image Send Feature as compentation for previous issues. 
+- Added Image Send Feature as compensation for previous issues. 
 
 ### Fixed
 - All issues happened with v1.3 are now resolved and tested.
 
+> **NOTICE:** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 
 ## [1.3] - 2025-09-15
 

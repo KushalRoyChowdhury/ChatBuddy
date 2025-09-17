@@ -1,13 +1,11 @@
+// Update 1.4.1
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-// const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { GoogleGenAI, createUserContent, createPartFromUri, } = require('@google/genai'); // New SDK
-const multer = require('multer');
+const fileUpload = require('express-fileupload');
+const { GoogleGenAI, createUserContent, createPartFromUri, createPartFromText } = require('@google/genai');
 
-// Configure multer to store files in memory as a Buffer
-const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -16,6 +14,11 @@ const PORT = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 app.set('trust proxy', 1);
+app.use(fileUpload({
+    useTempFiles: false,
+    tempFileDir: '/tmp/',
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB per file limit
+}));
 
 // --- Constants ---
 const SERVER_API_KEY = process.env.GEMINI_API_KEY;
@@ -28,10 +31,9 @@ const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
 const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalSystemPrompt');
-const INTERNAL_THINK_PROMPT = require('./internalModelInstruction/internalThinkInstruction');
 
 // --- Rate Limiting Middleware (RPM and RPD) Default Key ---
-const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 7, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
+const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 5, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
 const basicDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 500, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
 const advancedMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 3, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
 const advancedDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
@@ -62,6 +64,29 @@ const getTruncatedHistory = (fullHistory, limit) => {
     }
     return truncatedHistory;
 };
+
+const safetySettings = [
+    {
+        category: "HARM_CATEGORY_HARASSMENT",
+        threshold: "BLOCK_NONE",
+    },
+    {
+        category: "HARM_CATEGORY_HATE_SPEECH",
+        threshold: "BLOCK_NONE",
+    },
+    {
+        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+        threshold: "BLOCK_NONE",
+    },
+    {
+        category: "HARM_CATEGORY_CIVIC_INTEGRITY",
+        threshold: "BLOCK_NONE",
+    },
+    {
+        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        threshold: "BLOCK_NONE",
+    }
+];
 
 // --- Dynamic Rate Limiter Middleware ---
 const applyRateLimiter = (req, res, next) => {
@@ -108,9 +133,53 @@ app.get('/health', (req, res) => {
     res.status(200).send();
 });
 
+// --- Image Upload ---
+app.post('/upload', async (req, res) => {
+    const ai = new GoogleGenAI({});
+    try {
+        // Check if a file was uploaded
+        if (!req.files || !req.files.image) {
+            return res.status(400).json({ error: 'No file uploaded or file field is not named "image".' });
+        }
+
+        const uploadedFile = req.files.image;
+
+        if (!uploadedFile.mimetype.startsWith('image/')) {
+            return res.status(400).json({ error: 'Uploaded file is not an image.' });
+        }
+        const fileBuffer = uploadedFile.data;
+        const fileName = uploadedFile.name;
+        const fileType = uploadedFile.mimetype;
+
+        const fileForUpload = new File([fileBuffer], fileName, {
+            type: fileType,
+            lastModified: Date.now(),
+        });
+
+        const modelFile = await ai.files.upload({
+            file: fileForUpload,
+            config: { mimeType: fileType }
+        });
+
+        if (modelFile.source === 'UPLOADED') {
+            res.status(200).json({ uri: modelFile.uri, mimeType: fileType });
+        }
+        else {
+            res.status(500).send();
+        }
+
+
+    }
+    catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Internal server error during upload.' });
+    }
+
+});
+
 // --- Main API Endpoint ---
 app.post('/model', applyRateLimiter, async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch, image } = req.body;
+    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch, images } = req.body;
     let retry = true;
     start:
     try {
@@ -142,44 +211,41 @@ app.post('/model', applyRateLimiter, async (req, res) => {
             : (userApiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
 
         const truncatedHistory = getTruncatedHistory(history, contextLimit);
+
         const latestUserMessageTurn = truncatedHistory.pop();
+        let latestUserMessage = latestUserMessageTurn.content
 
         const historyForSDK = truncatedHistory.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
 
-        // --- Modified Image Logic ---
-        const latestUserMessageParts = [];
-        if (latestUserMessageTurn && latestUserMessageTurn.content) {
-            latestUserMessageParts.push({ text: latestUserMessageTurn.content });
-        }
-        // This now safely checks if an image exists AND the correct model is selected
-        if (image) {
-            latestUserMessageParts.push({
-                inlineData: {
-                    mimeType: image.inlineData.mimeType,
-                    data: image.inlineData.data,
-                }
-            });
-        }
-        // --- End of Image Logic ---
-
         let result;
 
-        if (modelIndex === 0) { // Gemma logic (now supports images)
-            // The Gemma prompt structure is preserved, prepending the system prompt to the text part.
-            const partsWithSystemPrompt = [...latestUserMessageParts];
-            if (partsWithSystemPrompt.length > 0 && partsWithSystemPrompt[0].text) {
-                partsWithSystemPrompt[0].text = `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER: ${partsWithSystemPrompt[0].text}`;
-            } else {
-                partsWithSystemPrompt.unshift({ text: `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER:` });
+        if (modelIndex === 0) { // Gemma logic
+            // Build the text part
+            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER: ${latestUserMessage}`;
+
+            // Start with the full history
+            let gemmaContents = [...historyForSDK];
+
+            // If there are images, add each one as a separate user message
+            if (images && images.length > 0) {
+                images.forEach(image => {
+                    if (image.uri) {
+                        const imagePart = createUserContent([
+                            createPartFromUri(image.uri, image.mimeType || "image/png")
+                        ]);
+                        gemmaContents.push(imagePart);
+                    }
+                });
             }
 
-            const gemmaContents = [
-                ...historyForSDK,
-                { role: 'user', parts: partsWithSystemPrompt }
-            ];
+            // Finally, add the text message (with system prompt)
+            gemmaContents.push({
+                role: 'user',
+                parts: [createPartFromText(gemmaMessageWithSystemPrompt)]
+            });
 
             result = await genAI.models.generateContent({
                 model: selectedModel,
@@ -188,14 +254,27 @@ app.post('/model', applyRateLimiter, async (req, res) => {
                     temperature: creativeRP ? 2 : 1,
                     topP: creativeRP ? 1 : 0.95,
                     topK: creativeRP ? 0 : 128,
+                    safetySettings: safetySettings
                 }
             });
+        } else { // Gemini logic
+            let geminiContents = [...historyForSDK];
 
-        } else { // Gemini logic (updated to send multipart message)
-            const geminiContents = [
-                ...historyForSDK,
-                { role: 'user', parts: latestUserMessageParts } // Use the new parts array
-            ];
+            if (images && images.length > 0) {
+                images.forEach(image => {
+                    if (image.uri) {
+                        const imagePart = createUserContent([
+                            createPartFromUri(image.uri, image.mimeType || "image/png")
+                        ]);
+                        geminiContents.push(imagePart);
+                    }
+                });
+            }
+
+            geminiContents.push({
+                role: 'user',
+                parts: [createPartFromText(latestUserMessage)]
+            });
 
             result = await genAI.models.generateContent({
                 model: selectedModel,
@@ -208,6 +287,7 @@ app.post('/model', applyRateLimiter, async (req, res) => {
                     temperature: advanceReasoning ? 0.9 : 1,
                     topP: advanceReasoning ? 0.9 : 0.98,
                     topK: advanceReasoning ? 64 : 128,
+                    safetySettings: safetySettings,
                     thinkingConfig: {
                         thinkingBudget: advanceReasoning ? 24576 : 0,
                         includeThoughts: advanceReasoning ? true : false,

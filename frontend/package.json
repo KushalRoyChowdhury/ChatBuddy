@@ -1,7 +1,7 @@
 {
-  "name": "frontend",
-  "version": "1.4",
-  "private": true,
+  "name": "ChatBuddy",
+  "version": "1.4.1",
+  "private": false,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
