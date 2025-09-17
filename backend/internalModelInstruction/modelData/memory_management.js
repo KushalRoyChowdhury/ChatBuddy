@@ -23,8 +23,6 @@ USE TEMP ACTION ("temp") WHEN:
 → Target: Short-term state/personality/action notes
 
 USE "chat" ACTION FOR:
-• Greetings
-• Direct questions
-• Coding requests
+• Greetings (If greeted repeatedly note that)
 → Target: null
 `;
