@@ -25,7 +25,7 @@ const CollapsibleThought = ({ thoughtContent }) => {
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full text-left text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <svg xmlns="http://www.w.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
         Thinking Process
       </button>
       <AnimatePresence>
@@ -48,6 +48,162 @@ const CollapsibleThought = ({ thoughtContent }) => {
     </div>
   );
 };
+
+const CodeBlock = ({ node, inline, className, children, ...props }) => {
+  const match = /language-(\w+)/.exec(className || '');
+  const codeText = String(children).replace(/\n$/, '');
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  return !inline && match ? (
+    <div className="relative my-2 rounded-lg overflow-hidden font-mono text-sm max-w-full">
+      <div className="px-4 py-2 bg-gray-200 flex justify-between items-center">
+        <span className="text-xs text-gray-700">{match[1]}</span>
+        <button onClick={() => copyToClipboard(codeText)} className="text-xs text-gray-700 hover:text-black hover:font-bold transition-all">Copy</button>
+      </div>
+      <SyntaxHighlighter style={oneLight} language={match[1]} PreTag="div" customStyle={{ margin: 0, overflowX: 'auto' }} {...props}>
+        {codeText}
+      </SyntaxHighlighter>
+    </div>
+  ) : (
+    <code className="bg-gray-200 text-red-600 px-1 rounded" {...props}>
+      {children}
+    </code>
+  );
+};
+
+const getTextToRender = (msg) => {
+  let textToRender = msg.content;
+  if (msg.role === 'assistant') {
+    try {
+      const parsedData = JSON.parse(msg.content);
+      if (typeof parsedData.response === 'string') {
+        textToRender = parsedData.response;
+      }
+    } catch (e) {
+      // It's already msg.content, so no action needed
+    }
+  }
+  return textToRender;
+};
+
+const getUserBubbleClass = (msgModel) => {
+  return msgModel === 'gemini-2.5-flash-lite'
+    ? 'bg-blue-100 text-blue-900 rounded-br-none'
+    : msgModel === 'image' ? 'bg-orange-100 text-orange-900 rounded-br-none' : 'bg-green-100 text-green-900 rounded-br-none';
+};
+
+const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, getUserBubbleClass }) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(true);
+  return (
+    <motion.div
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
+        {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
+
+        {msg.role === 'user' && (() => {
+          const fileData = messageImageMap.find(item => item.id === msg.id);
+
+          // Early return if no file data found
+          if (!fileData) return null;
+
+          // Destructure only after confirming fileData exists
+          const { base64Data, mimeType, fileName } = fileData;
+
+          return (
+            <div className="mb-2">
+              {isImageLoaded && (
+                <img
+                  src={`data:${mimeType || 'application/octet-stream'};base64,${base64Data}`}
+                  alt="Uploaded by user"
+                  className="max-w-xs max-h-64 rounded-lg object-cover"
+                  onError={() => setIsImageLoaded(false)}
+                  onLoad={() => setIsImageLoaded(true)}
+                />
+              )}
+              {!isImageLoaded && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <line x1="10" y1="9" x2="8" y2="9"></line>
+                  </svg>
+                  <span className="text-sm cursor-default font-medium text-blue-800">
+                    {fileName || 'Document'}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {(() => {
+          const content = getTextToRender(msg);
+          // Check if content is a data URL (image)
+          if (content.startsWith('image/')) {
+            // Function to download the image
+            const handleDownload = () => {
+              const link = document.createElement('a');
+              link.href = `data:${content}`;
+              link.download = 'ai-generated-image.png';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            };
+
+            return (
+              <div className="mb-2 relative inline-block">
+                {/* Download Button */}
+                <button
+                  onClick={handleDownload}
+                  className="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  aria-label="Download image"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+
+                </button>
+
+                {/* Image */}
+                <img
+                  src={`data:${content}`}
+                  alt="AI Generated"
+                  className="max-w-xs max-h-64 rounded-lg object-cover border border-gray-200 shadow-sm"
+                />
+              </div>
+            );
+          }
+          // Otherwise, render as Markdown
+          return (
+            <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
+              <ReactMarkdown components={{ code: CodeBlock }} remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
+          );
+        })()}
+
+        {msg.role === 'assistant' && (
+          <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
+            <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</span>
+            <div className="flex gap-2">
+              {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Memory Updated</span> : null}
+              {msg.memoryStatus === 'temporary' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Temp Memory</span> : null}
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+});
 
 
 export default function App() {
@@ -96,6 +252,9 @@ export default function App() {
   const [fileImg, setFileImg] = useState(null);
   const [currentBase64Image, setCurrentBase64Image] = useState();
   const [isDragging, setIsDragging] = useState(false);
+  const [fileDoc, setFileDoc] = useState(null);
+  const fileDocInputRef = useRef(null);
+  const [imageGen, setImageGen] = useState(false);
 
   // Refs
   const chatEndRef = useRef(null);
@@ -344,7 +503,7 @@ export default function App() {
     const userMessage = {
       role: 'user',
       content: input,
-      model: model,
+      model: imageGen ? 'image' : model,
       id: Date.now()
     };
 
@@ -365,6 +524,7 @@ export default function App() {
 
     setInput('');
     setFileImg(null);
+    setFileDoc(null);
     setLoading(true);
 
     try {
@@ -381,18 +541,38 @@ export default function App() {
           }
         });
 
-      const modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
+      let modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
+      if (imageGen) {
+        modelIndex = 2;
+      }
       if (modelIndex === 0) {
         setModelUsed("basic");
       } else if (modelIndex === 1 && advanceReasoning) {
         setModelUsed("advance+");
-      } else {
+      } else if (modelIndex === 2) {
+        setModelUsed("image");
+      }
+      else {
         setModelUsed("advance");
       }
 
 
       const payload = {
-        history: currentMessagesWithUser.map(({ id, image, ...rest }) => rest),
+        history: currentMessagesWithUser.map(msg => {
+          // Only check for image in assistant messages
+          if (
+            msg.role === 'assistant' &&
+            typeof msg.content === 'string' &&
+            msg.content.startsWith('image/')
+          ) {
+            return {
+              ...msg,
+              content: '[image omitted]'
+            };
+          }
+          // Otherwise, return message unchanged
+          return msg;
+        }),
         memory: memories,
         temp: memoriesForModel,
         sys: systemPrompt,
@@ -484,59 +664,28 @@ export default function App() {
     }
   };
 
-  // --- Helper & Utility Functions ---
-  const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
+  const chatContainerRef = useRef(); // the scrollable container
+
+  const isAtBottom = () => {
+    const container = chatContainerRef.current;
+    if (!container) return true;
+    return container.scrollHeight - container.scrollTop <= container.clientHeight + 1;
+  };
+
+  const scrollToBottom = () => {
+    if (isAtBottom()) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    // else: user scrolled up — don't auto-scroll
+  };
+
   useEffect(() => { scrollToBottom(); }, [messages, loading]);
 
-  const copyToClipboard = (content) => {
-    navigator.clipboard.writeText(content).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
-  };
-
-  const getUserBubbleClass = (msgModel) => msgModel === 'gemini-2.5-flash-lite' ? 'bg-blue-100 text-blue-900 rounded-br-none' : 'bg-green-100 text-green-900 rounded-br-none';
   const getSendButtonClass = () => {
     if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
-    return model === 'gemini-2.5-flash-lite' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700';
+    return imageGen ? 'bg-orange-600 hover:bg-orange-700' : model === 'gemini-2.5-flash-lite' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700';
   };
   const memoryUsagePercent = (memories.join('\n').length / MEMORY_LIMIT_CHARS) * 100;
-
-  const getTextToRender = (msg) => {
-    let textToRender = msg.content;
-    if (msg.role === 'assistant') {
-      try {
-        const parsedData = JSON.parse(msg.content);
-        if (typeof parsedData.response === 'string') {
-          textToRender = parsedData.response;
-        }
-      } catch (e) {
-        textToRender = msg.content;
-      }
-    }
-    return textToRender;
-  };
-
-  const CodeBlock = {
-    code({ node, inline, className, children, ...props }) {
-      const match = /language-(\w+)/.exec(className || '');
-      const codeText = String(children).replace(/\n$/, '');
-      return !inline && match ? (
-        <div className="relative my-2 rounded-lg overflow-hidden font-mono text-sm max-w-full">
-          <div className="px-4 py-2 bg-gray-200 flex justify-between items-center">
-            <span className="text-xs text-gray-700">{match[1]}</span>
-            <button onClick={() => copyToClipboard(codeText)} className="text-xs text-gray-700 hover:text-black hover:font-bold transition-all">Copy</button>
-          </div>
-          <SyntaxHighlighter style={oneLight} language={match[1]} PreTag="div" customStyle={{ margin: 0, overflowX: 'auto' }} {...props}>
-            {codeText}
-          </SyntaxHighlighter>
-        </div>
-      ) : (
-        <code className="bg-gray-200 text-red-600 px-1 rounded" {...props}>
-          {children}
-        </code>
-      );
-    },
-  };
 
   const isMobileDevice = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -555,7 +704,7 @@ export default function App() {
     setUploading(true);
     const base64String = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]); // Remove data URL prefix
+      reader.onload = () => resolve(reader.result.split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
@@ -570,8 +719,8 @@ export default function App() {
       });
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(errorData.message || `Upload failed with status: ${uploadResponse.status}`);
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || errorData.message || `Upload failed with status: ${uploadResponse.status}`);
       }
 
       const result = await uploadResponse.json();
@@ -588,10 +737,42 @@ export default function App() {
       ]);
 
     } catch (error) {
-      console.error("Image upload error:", error);
-      alert(`Failed to upload image: ${error.message}`);
+      console.error("Image upload error: ", error);
+      alert(`Failed to upload image:\n${error.message}`);
       setFileImg(null);
+      setFileDoc(null);
     }
+  };
+
+  const handleDocFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      e.target.value = null;
+      return;
+    }
+    e.target.value = null;
+    if (model !== 'gemini-2.5-flash-lite') {
+      alert("Document uploads are only available in Advanced mode.");
+      setShowAddFiles(false);
+      return;
+    }
+    const validDocTypes = [
+      'application/pdf',
+      'text/plain',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    setShowAddFiles(false);
+
+    if (!validDocTypes.includes(file.type)) {
+      alert("Please select a valid document (PDF, TXT, DOC, DOCX).");
+      return;
+    }
+
+    // Set the file in state for UI preview
+    setFileDoc(file);
+
+    uploadImg(file);
   };
 
   const handleImgUpload = () => fileImgInputRef.current?.click();
@@ -881,7 +1062,7 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.4.1
+                  v1.5
                   <br />
                   By: KushalRoyChowdhury
                 </div>
@@ -905,57 +1086,30 @@ export default function App() {
 
 
       {/* --- Main Chat Area --- */}
-      <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => { setIsMenuOpen(false); setShowAddFiles(false); }}>
+      <main ref={chatContainerRef} className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => { setIsMenuOpen(false); setShowAddFiles(false); }}>
+
         <div className="space-y-4">
           {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
-
-
             <AnimatePresence>
               {messages.map((msg) => {
                 const thought = thinkingProcesses.find(t => t.id === msg.id);
                 return (
-                  <motion.div key={msg.id} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
-                      {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
-
-                      {msg.role === 'user' && (() => {
-                        const imageData = messageImageMap.find(item => item.id === msg.id)?.base64Data;
-                        if (imageData) {
-                          return (
-                            <div className="mb-2">
-                              <img
-                                src={`data:image/png;base64,${imageData}`}
-                                alt="Uploaded by user"
-                                className="max-w-xs max-h-64 rounded-lg object-cover"
-                              />
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
-
-                      <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
-                        <ReactMarkdown components={CodeBlock} remarkPlugins={[remarkGfm]}>{getTextToRender(msg)}</ReactMarkdown>
-                      </div>
-
-                      {msg.role === 'assistant' && (
-                        <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
-                          <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</span>
-                          <div className="flex gap-2">
-                            {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Memory Updated</span> : null}
-                            {msg.memoryStatus === 'temporary' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Temp Memory</span> : null}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
+                  <ChatMessage
+                    key={msg.id}
+                    msg={msg}
+                    thought={thought}
+                    messageImageMap={messageImageMap}
+                    getTextToRender={getTextToRender}
+                    getUserBubbleClass={getUserBubbleClass}
+                  />
                 );
               })}
             </AnimatePresence>
           )}
-          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
-          <div className='w-full h-24 md:h-1 bg-transparent' ref={chatEndRef} />
+          {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
+          <div className='w-full h-6 md:h-1 bg-transparent' ref={chatEndRef} />
         </div>
+
       </main>
 
       <footer className="bg-white border border-b-0 border-x-0 md:border-none md:bg-slate-50 p-1 md:pb-5 sticky bottom-0 rounded-t-3xl md:rounded-none">
@@ -967,11 +1121,19 @@ export default function App() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`max-w-4xl w-full bg-white mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
+          className={`max-w-4xl relative w-full bg-white mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
         >
+          <button
+            type='button'
+            onClick={() => { scrollToBottom(); }}
+            className='absolute right-0 -top-12 md:right-1 md:-top-12 bg-white rounded-full p-2 active:scale-95 transition-all'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          </button>
 
           {fileImg && (
-            <div className="p-2 border-b border-gray-200">
+            <div className="p-2 border-b-0 border-gray-200">
               <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
                 {uploading ? (
                   <div className="h-20 w-20 flex items-center justify-center">
@@ -1023,17 +1185,76 @@ export default function App() {
             </div>
           )}
 
+          {fileDoc && (
+            <div className="p-2 border-b border-gray-200">
+              <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
+                {uploading ? (
+                  <div className="h-20 w-20 flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-10 w-10 text-gray-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 flex flex-col items-center justify-center p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <line x1="10" y1="9" x2="8" y2="9"></line>
+                    </svg>
+                    <span className="text-xs mt-1 text-center max-w-full truncate">{fileDoc.name}</span>
+                  </div>
+                )}
+                {!uploading && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFileDoc(null);
+                      setUploadedImages(prev => prev.slice(0, -1)); // Pop last uploaded item
+                      if (fileDocInputRef.current) {
+                        fileDocInputRef.current.value = null;
+                      }
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-sm font-bold"
+                    aria-label="Remove document"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           <TextareaAutosize
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             onPaste={handlePaste}
-            placeholder={`Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}
+            placeholder={`${imageGen ? 'Enter Image Generation prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
+
             className={`w-full flex bg-white items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
             minRows={1}
             maxRows={5}
           />
-          <div className='p-2 flex relative justify-start gap-2 h-[56px]'>
+          <div className='p-2 flex relative justify-start gap-2 h-[56px] transition-all'>
             <input
               type="file"
               accept="image/*"
@@ -1041,13 +1262,21 @@ export default function App() {
               ref={fileImgInputRef}
               onChange={handleImgFileChange}
             />
+            <input
+              type="file"
+              accept=".pdf,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              ref={fileDocInputRef}
+              onChange={handleDocFileChange}
+            />
             <AnimatePresence>
               {showAddFiles &&
                 <motion.div
                   initial={{ width: 0, height: 0, opacity: 0, x: -30, y: 20 }}
                   animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
                   exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
-                  className={`absolute w-max h-max left-9 bottom-16 overflow-hidden bg-slate-200/90 backdrop-blur-[2px] rounded-xl border border-black/30`}>
+                  className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-slate-200/90 backdrop-blur-[2px] rounded-xl border border-black/30`}>
+                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 text-nowrap'>Upload Files</button>}
                   <button onClick={handleImgUpload} className='p-4 text-nowrap'>Upload Image</button>
                 </motion.div>
               }
@@ -1074,9 +1303,33 @@ export default function App() {
 
             </motion.button>
 
+            <AnimatePresence>
+              <motion.button
+                type="button"
+                title="Generate Images"
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setImageGen(!imageGen)}
+                className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${imageGen
+                  ? 'bg-orange-100 text-orange-600'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+              >
+                <div className='flex gap-2 items-center justify-center'>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 hidden md:block">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                  </svg>
+
+                  <div className='hidden md:block'>Image Generation</div>
+                  <div className='block md:hidden'>Image</div>
+                </div>
+              </motion.button>
+            </AnimatePresence>
 
             <AnimatePresence>
-              {model === 'gemma-3-27b-it' && (
+              {model === 'gemma-3-27b-it' && !imageGen && (
                 <motion.button
                   type="button"
                   title="More Creative Responses (can make mistake on factual answers)"
@@ -1085,21 +1338,21 @@ export default function App() {
                   exit={{ opacity: 0 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setCreativeRP(!creativeRP)}
-                  className={`p-2 rounded-xl w-40 md:w-48 text-center text-nowrap transition-colors ${creativeRP
+                  className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${creativeRP
                     ? 'bg-green-100 text-green-600'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                     }`}
                 >
-                  <div className='flex gap-2 items-center'>
+                  <div className='flex gap-2 items-center justify-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 hidden md:block">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                     </svg>
-                    <div>Creative Responses</div>
+                    <div>Creative Mode</div>
                   </div>
                 </motion.button>
               )}
 
-              {model === 'gemini-2.5-flash-lite' && (
+              {model === 'gemini-2.5-flash-lite' && !imageGen && (
                 <>
                   <motion.button
                     type="button"
@@ -1119,7 +1372,7 @@ export default function App() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
                       </svg>
                       <div className='hidden md:block'>Advance Reasoning</div>
-                      <div className='block md:hidden'>Deep Think</div>
+                      <div className='block md:hidden'>Reasoning</div>
 
                     </div>
                   </motion.button>
@@ -1150,16 +1403,22 @@ export default function App() {
                 </>
               )}
             </AnimatePresence>
+
             <motion.button
               whileTap={{ scale: 0.99 }}
               disabled={loading || uploading || (!input.trim())}
-              className={`px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex items-center ${getSendButtonClass()} transition-colors duration-500`}
+              className={`px-2 sm:px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${getSendButtonClass()} transition-colors duration-500`}
             >
-              Send
+              <div className='hidden md:block'>
+                SEND
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 md:hidden lg:block">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
             </motion.button>
           </div>
         </form>
       </footer>
-    </div>
+    </div >
   );
 }

@@ -1,6 +1,6 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI
 
-Welcome to ChatBuddy, a feature-rich application that brings the power of advanced AI model access directly to your desktop (AI models can't be run locally). Built with React and powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
+Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
@@ -13,6 +13,10 @@ Welcome to ChatBuddy, a feature-rich application that brings the power of advanc
 ChatBuddy is more than just a simple chatbot. It's packed with advanced features designed for power users and developers.
 
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat. The AI can understand and analyze the content of your images, opening up new possibilities for visual-based conversations.
+
+-   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.) with the Advanced Model. The AI can read and analyze the content of your files, making it perfect for summarizing documents, answering questions about reports, or analyzing data.
+
+-   **🎨 Image Generation**: Create stunning 1024x1024 images from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
 
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
@@ -126,11 +130,11 @@ The application comes with a default API key that has strict rate limits to ensu
 > **Privacy Notice**: If using the public hosted version, none of your chats, memories, API Keys, or other sensitive information are logged/stored. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
 
 
-| Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                 |
-| --------------------- | ------------------------------------------ | ---------------------------------------- |
-| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / **Advanced: 128k**           |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / **Advanced: 15**             |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / **Advanced: 1000**       |
+| Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                        |
+| --------------------- | ------------------------------------------ | ----------------------------------------------- |
+| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k /  *Advanced: 128k*                   |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 1      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
+| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 10 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
 
 > **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
 
@@ -168,4 +172,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v1.2 - By KushalRoyChowdhury*
+*v1.5 - By KushalRoyChowdhury*

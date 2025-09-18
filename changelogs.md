@@ -9,8 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planned]
 
 - Native DarkMode support.
-- Video Sharing.
 - Image Generation (varies).
+
+
+## [1.5] - 2025-09-18
+
+### Added
+- Image Generation (1024x1024).
+- File Sharing Support 'PDF, TXT, DOCX etc' (Advance Model Only).
+
+### Fixed
+- Huge performance Improvement especially on low end hardware.
+- Model Awareness.
 
 ## [1.4.1] - 2025-09-17
 
@@ -22,12 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4] - 2025-09-16
 
 ### Added
-- Added Image Send Feature as compensation for previous issues. 
+- Added Image Sharing Feature (All Models). 
 
 ### Fixed
 - All issues happened with v1.3 are now resolved and tested.
+- Public version updated to latest release.
 
-> **NOTICE:** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
+> **NOTICE: [SEP 15 Update]** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 
 ## [1.3] - 2025-09-15
 

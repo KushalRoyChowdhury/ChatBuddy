@@ -18,13 +18,11 @@ USE PERSISTENT ACTIONS ONLY WHEN:
 • Convert self-references: "I" → "User" while remembering something
 
 USE TEMP ACTION ("temp") WHEN:
-• Every standard conversation prompt (EXCEPT greetings/coding)
+• Every standard conversation prompt (EXCEPT greetings)
 • Implicit context tracking needed
 → Target: Short-term state/personality/action notes
 
 USE "chat" ACTION FOR:
 • Greetings
-• Direct questions
-• Coding requests
 → Target: null
 `;

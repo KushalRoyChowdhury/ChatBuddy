@@ -1,10 +1,10 @@
-// Update 1.4.1
+// Update 1.5
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const fileUpload = require('express-fileupload');
-const { GoogleGenAI, createUserContent, createPartFromUri, createPartFromText } = require('@google/genai');
+const { GoogleGenAI, createUserContent, createPartFromUri, createPartFromText, Modality } = require('@google/genai');
 
 
 const app = express();
@@ -17,39 +17,48 @@ app.set('trust proxy', 1);
 app.use(fileUpload({
     useTempFiles: false,
     tempFileDir: '/tmp/',
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB per file limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
 }));
 
 // --- Constants ---
 const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 const MODELS = [
     'gemma-3-27b-it',
-    'gemini-2.5-flash-lite'
+    'gemini-2.5-flash-lite',
+    'gemini-2.0-flash-preview-image-generation'
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
 const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalSystemPrompt');
+const BASIC_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_BASIC');
+const ADVANCED_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_ADVANCE');
 
 // --- Rate Limiting Middleware (RPM and RPD) Default Key ---
 const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 5, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
 const basicDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 500, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
 const advancedMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 3, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
 const advancedDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
+const imageGenMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 1, message: { error: { message: 'Rate limit exceeded for Image Generation. Try again in a moment or switch to your Own API Key' } } });
+const imageGenDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 10, message: { error: { message: 'Daily Limit on Image generation reached. Try again tomorrow or switch to your Own API Key' } } });
 
 const basicLimiters = [basicMinuteLimiter, basicDayLimiter];
 const advancedLimiters = [advancedMinuteLimiter, advancedDayLimiter];
+const imageGenLimiters = [imageGenMinuteLimiter, imageGenDayLimiter];
+
 
 // --- Rate Limiting Middleware (RPM and RPD) User Key (Rate Limited safely under Google Default Free Tier) ---
 const basicMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 30, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
 const basicDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 14350, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
 const advancedMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 15, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
 const advancedDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 1000, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
-
+const imageGenMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 10, message: { error: { message: 'Rate limit exceeded for Image Generation. Try again in a moment or switch to your Own API Key' } } });
+const imageGenDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily Limit on Image generation reached. Try again tomorrow or switch to your Own API Key' } } });
 
 const basicLimitersUser = [basicMinuteLimiterUSER, basicDayLimiterUSER];
 const advancedLimitersUser = [advancedMinuteLimiterUSER, advancedDayLimiterUSER];
+const imageGenLimitersUser = [imageGenMinuteLimiterUSER, imageGenDayLimiterUSER];
 
 // --- Helper Function for History Truncation ---
 const getTruncatedHistory = (fullHistory, limit) => {
@@ -98,7 +107,11 @@ const applyRateLimiter = (req, res, next) => {
         } else if (modelIndex === 1) {
             // Sequentially apply the advanced limiters
             express.Router().use(advancedLimitersUser)(req, res, next);
-        } else {
+        } else if (modelIndex === 2) {
+            // Sequentially apply the image generation limiters
+            express.Router().use(imageGenLimitersUser)(req, res, next);
+        }
+        else {
             next();
         }
     }
@@ -109,7 +122,11 @@ const applyRateLimiter = (req, res, next) => {
         } else if (modelIndex === 1) {
             // Sequentially apply the advanced limiters
             express.Router().use(advancedLimiters)(req, res, next);
-        } else {
+        } else if (modelIndex === 2) {
+            // Sequentially apply the image generation limiters
+            express.Router().use(imageGenLimiters)(req, res, next);
+        }
+        else {
             next();
         }
     }
@@ -144,9 +161,6 @@ app.post('/upload', async (req, res) => {
 
         const uploadedFile = req.files.image;
 
-        if (!uploadedFile.mimetype.startsWith('image/')) {
-            return res.status(400).json({ error: 'Uploaded file is not an image.' });
-        }
         const fileBuffer = uploadedFile.data;
         const fileName = uploadedFile.name;
         const fileType = uploadedFile.mimetype;
@@ -155,6 +169,33 @@ app.post('/upload', async (req, res) => {
             type: fileType,
             lastModified: Date.now(),
         });
+
+        const fileSize = uploadedFile.size;
+
+        const SIZE_LIMITS = {
+            'image/': 20 * 1024 * 1024,    // 20MB for images
+            'application/pdf': 50 * 1024 * 1024, // 50MB for PDF
+            'text/plain': 1 * 1024 * 1024   // 1MB for TXT
+        };
+
+        // Determine applicable limit
+        let maxFileSize = 20 * 1024 * 1024; // Fallback to global limit
+
+        if (fileType.startsWith('image/')) {
+            maxFileSize = SIZE_LIMITS['image/'];
+        } else if (fileType === 'application/pdf') {
+            maxFileSize = SIZE_LIMITS['application/pdf'];
+        } else if (fileType === 'text/plain') {
+            maxFileSize = SIZE_LIMITS['text/plain'];
+        }
+
+        // Validate file size
+        if (fileSize > maxFileSize) {
+            const maxSizeMB = maxFileSize / (1024 * 1024);
+            return res.status(400).json({
+                error: `File too large. Maximum size for ${fileType} is ${maxSizeMB}MB.`
+            });
+        }
 
         const modelFile = await ai.files.upload({
             file: fileForUpload,
@@ -198,6 +239,11 @@ app.post('/model', applyRateLimiter, async (req, res) => {
         }
 
         let INTERNAL_SYSTEM_PROMPT = INTERNAL_MEMORY_PROMPT;
+        if (modelIndex === 0) {
+            INTERNAL_SYSTEM_PROMPT += BASIC_MODEL_CONTEXT;
+        } else if (modelIndex === 1) {
+            INTERNAL_SYSTEM_PROMPT += ADVANCED_MODEL_CONTEXT;
+        }
 
         const selectedModel = MODELS[modelIndex];
 
@@ -219,7 +265,7 @@ app.post('/model', applyRateLimiter, async (req, res) => {
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
-
+        console.log(historyForSDK)
         let result;
 
         if (modelIndex === 0) { // Gemma logic
@@ -257,14 +303,14 @@ app.post('/model', applyRateLimiter, async (req, res) => {
                     safetySettings: safetySettings
                 }
             });
-        } else { // Gemini logic
+        } else if (modelIndex === 1) { // Gemini logic
             let geminiContents = [...historyForSDK];
 
             if (images && images.length > 0) {
                 images.forEach(image => {
                     if (image.uri) {
                         const imagePart = createUserContent([
-                            createPartFromUri(image.uri, image.mimeType || "image/png")
+                            createPartFromUri(image.uri, image.mimeType)
                         ]);
                         geminiContents.push(imagePart);
                     }
@@ -300,27 +346,52 @@ app.post('/model', applyRateLimiter, async (req, res) => {
                     }),
                 }
             });
+        } else {
+            console.log(latestUserMessage)
+            result = await genAI.models.generateContent({
+                model: selectedModel,
+                contents: latestUserMessage,
+                config: {
+                    responseModalities: [Modality.TEXT, Modality.IMAGE],
+                },
+            });
+
         }
+
 
         let thought = '';
         let answer = '';
+        let generatedImage = null;
 
         for (const part of result.candidates[0].content.parts) {
-            if (!part.text) {
-                continue;
+            if (part.inlineData) {
+                const base64Image = part.inlineData.data;
+                const mimeType = part.inlineData.mimeType || 'image/png';
+                generatedImage = {
+                    base64Data: base64Image,
+                    mimeType: mimeType
+                };
             }
-            else if (part.thought) {
-                let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
-                thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
-            }
-            else {
-                answer = part.text;
+            else if (part.text) {
+                if (part.thought) {
+                    let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
+                    thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
+                } else {
+                    answer = part.text;
+                }
             }
         }
 
-        text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-        if (thought.length > 0) {
-            text = thought + text;
+        let text = '';
+        // If an image was generated, embed it as a data URL in the text
+        if (generatedImage) {
+            text = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
+        } else {
+            // Fallback: use cleaned answer + thought (as before)
+            text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+            if (thought.length > 0) {
+                text = thought + text;
+            }
         }
 
         res.status(200).json({
