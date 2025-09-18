@@ -98,38 +98,50 @@ const safetySettings = [
 ];
 
 // --- Dynamic Rate Limiter Middleware ---
+// --- Helper function to run an array of middleware ---
+const runMiddlewareArray = (middlewares) => {
+    return (req, res, next) => {
+        let index = 0;
+        const runNext = () => {
+            if (index < middlewares.length) {
+                middlewares[index++](req, res, runNext);
+            } else {
+                next(); // All middlewares in the array have run, proceed
+            }
+        };
+        runNext();
+    };
+};
+
+// --- Dynamic Rate Limiter Middleware ---
 const applyRateLimiter = (req, res, next) => {
     const { apiKey: userApiKey, modelIndex } = req.body;
+    let targetLimiters;
+
     if (userApiKey) {
         if (modelIndex === 0) {
-            // Sequentially apply the basic limiters
-            express.Router().use(basicLimitersUser)(req, res, next);
+            targetLimiters = basicLimitersUser;
         } else if (modelIndex === 1) {
-            // Sequentially apply the advanced limiters
-            express.Router().use(advancedLimitersUser)(req, res, next);
+            targetLimiters = advancedLimitersUser;
         } else if (modelIndex === 2) {
-            // Sequentially apply the image generation limiters
-            express.Router().use(imageGenLimitersUser)(req, res, next);
+            targetLimiters = imageGenLimitersUser;
+        } else {
+            return next(); // No matching model, skip limiting
         }
-        else {
-            next();
-        }
-    }
-    else {
+    } else {
         if (modelIndex === 0) {
-            // Sequentially apply the basic limiters
-            express.Router().use(basicLimiters)(req, res, next);
+            targetLimiters = basicLimiters;
         } else if (modelIndex === 1) {
-            // Sequentially apply the advanced limiters
-            express.Router().use(advancedLimiters)(req, res, next);
+            targetLimiters = advancedLimiters;
         } else if (modelIndex === 2) {
-            // Sequentially apply the image generation limiters
-            express.Router().use(imageGenLimiters)(req, res, next);
-        }
-        else {
-            next();
+            targetLimiters = imageGenLimiters;
+        } else {
+            return next(); // No matching model, skip limiting
         }
     }
+
+    // Run the selected array of rate limiters
+    runMiddlewareArray(targetLimiters)(req, res, next);
 };
 
 // --- Troll ---
