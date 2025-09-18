@@ -4,8 +4,6 @@
 /frontend/node_modules
 
 # Environment variables
-# Do not commit .env files as they contain sensitive information.
-# A .env.example file with dummy values should be committed instead.
 /backend/.env
 /frontend/.env
 
