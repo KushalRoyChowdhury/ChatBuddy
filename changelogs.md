@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Planned]
 
 - Native DarkMode support.
-- Image Generation (varies).
 
-
+- 
 ## [1.5] - 2025-09-18
 
 ### Added
