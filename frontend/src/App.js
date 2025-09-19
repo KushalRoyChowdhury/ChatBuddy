@@ -160,7 +160,6 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
 
             return (
               <div className="mb-2 relative inline-block">
-                {/* Download Button */}
                 <button
                   onClick={handleDownload}
                   className="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center"
@@ -193,7 +192,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
 
         {msg.role === 'assistant' && (
           <div className="mt-2 text-xs text-gray-500 italic border-t pt-2 flex justify-between items-center gap-2">
-            <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</span>
+            <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : msg.model === 'image' ? 'ImageGen' : 'Basic'}</span>
             <div className="flex gap-2">
               {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Memory Updated</span> : null}
               {msg.memoryStatus === 'temporary' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Temp Memory</span> : null}
@@ -255,6 +254,28 @@ export default function App() {
   const [fileDoc, setFileDoc] = useState(null);
   const fileDocInputRef = useRef(null);
   const [imageGen, setImageGen] = useState(false);
+
+  // Greetings
+  const userName = memories
+    .map(memory => {
+      if (memory.includes("User's name is")) {
+        return memory.split("User's name is")[1].trim();
+      }
+      if (memory.includes("User prefers to call them")) {
+        return memory.split("user prefers to call them")[1].trim();
+      }
+      return null;
+    })
+    .filter(Boolean)[0] || "legend";
+
+  const greetings = [
+    `Yo! Welcome back, ${userName}.`,
+    "Oh look, you decided to come today 🎉",
+    "Start a Conversation"
+  ];
+  const [noChatGreet] = useState(
+    greetings[Math.floor(Math.random() * greetings.length)]
+  );
 
   // Refs
   const chatEndRef = useRef(null);
@@ -649,7 +670,7 @@ export default function App() {
       const assistantMessage = {
         role: 'assistant',
         content: cleanJsonString,
-        model: model,
+        model: imageGen ? 'image' : model,
         id: assistantMessageId,
         memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
       };
@@ -876,14 +897,14 @@ export default function App() {
           <h1 className="text-xl font-bold text-gray-800">ChatBuddy</h1>
           <div className="hidden md:flex items-center space-x-3">
             {messages.length > 0 ? (
-              <button onClick={() => setShowImportExportOptions(true)} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200">Import/Export Chat</button>
+              <button onClick={() => setShowImportExportOptions(true)} className="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">Import/Export Chat</button>
             ) : (
-              <button onClick={handleImportClick} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200">Import Chat</button>
+              <button onClick={handleImportClick} className="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">Import Chat</button>
             )}
-            {messages.length > 0 && <button onClick={handleClearChatClick} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100">Clear Chat</button>}
-            <button onClick={handleMemoriesClick} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Saved Memories</button>
-            <button onClick={handleOptionsClick} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${systemPrompt.trim() || apiKey.trim() ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-600'}`}>Options</button>
-            <button onClick={handleModelToggle} className={`w-28 text-center px-4 py-1.5 rounded-lg text-sm font-medium ${model === 'gemini-2.5-flash-lite' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</button>
+            {messages.length > 0 && <button onClick={handleClearChatClick} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all active:scale-95 flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100">Clear Chat</button>}
+            <button onClick={handleMemoriesClick} className="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all active:scale-95 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Saved Memories</button>
+            <button onClick={handleOptionsClick} className={`px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all active:scale-95 ${systemPrompt.trim() || apiKey.trim() ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>Options</button>
+            <button onClick={handleModelToggle} className={`w-28 text-center px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${model === 'gemini-2.5-flash-lite' ? 'bg-blue-100 hover:bg-blue-200 active:scale-95 text-blue-800' : 'bg-green-100 hover:bg-green-200 active:scale-95 text-green-800'}`}>{model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}</button>
           </div>
           <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button></div>
         </div>
@@ -1062,7 +1083,7 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.5
+                  v1.5.1
                   <br />
                   By: KushalRoyChowdhury
                 </div>
@@ -1089,7 +1110,7 @@ export default function App() {
       <main ref={chatContainerRef} className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full" onClick={() => { setIsMenuOpen(false); setShowAddFiles(false); }}>
 
         <div className="space-y-4">
-          {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">Start a conversation</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
+          {messages.length === 0 ? (<div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto"><p className="text-lg mb-3">{noChatGreet}</p><div className="flex justify-center gap-4 mt-4"><div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 hover:bg-green-100 active:scale-95 transition-all rounded-lg cursor-pointer"><div className="font-medium w-24 text-green-600">Basic</div></div><div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 hover:bg-blue-100 transition-all active:scale-95 rounded-lg cursor-pointer"><div className="font-medium w-24 text-blue-600">Advanced</div></div></div>{systemPrompt.trim() && <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto"><p className="text-sm text-indigo-700">System prompt is active.</p></div>}</div>) : (
             <AnimatePresence>
               {messages.map((msg) => {
                 const thought = thinkingProcesses.find(t => t.id === msg.id);
@@ -1126,7 +1147,7 @@ export default function App() {
           <button
             type='button'
             onClick={() => { scrollToBottom(); }}
-            className='absolute right-0 -top-12 md:right-1 md:-top-12 bg-white rounded-full p-2 active:scale-95 transition-all'>
+            className='absolute right-0 -top-14 md:right-1 md:-top-14 bg-white hover:bg-slate-100 shadow-lg flex justify-center items-center rounded-full p-2 active:scale-95 transition-all'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
               <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
@@ -1276,21 +1297,22 @@ export default function App() {
                   animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
                   exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
                   className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-slate-200/90 backdrop-blur-[2px] rounded-xl border border-black/30`}>
-                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 text-nowrap'>Upload Files</button>}
-                  <button onClick={handleImgUpload} className='p-4 text-nowrap'>Upload Image</button>
+                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:bg-slate-300 transition-all'>Upload Files</button>}
+                  <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:bg-slate-300 transition-all`}>Upload Image</button>
                 </motion.div>
               }
             </AnimatePresence>
 
             <motion.button
               type="button"
-              title="Upload Images (Exterimental)"
+              title="Upload Images/Files (Experimental)"
               initial={{ opacity: 0.5 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               whileTap={{ scale: 0.92 }}
               onClick={() => { setShowAddFiles(!showAddFiles) }}
-              className='aspect-square flex items-center justify-center'
+              className={`aspect-square flex items-center justify-center ${imageGen && 'cursor-not-allowed text-gray-300'}`}
+              disabled={imageGen}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-7 ${showAddFiles ? 'hidden' : 'block'}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />

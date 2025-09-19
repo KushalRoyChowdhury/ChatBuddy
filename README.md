@@ -127,7 +127,7 @@ The application comes with a default API key that has strict rate limits to ensu
 
 > **Note:** The default API key is for the developer-hosted public version. When running the application locally, you will need to provide your own API key.
 
-> **Privacy Notice**: If using the public hosted version, none of your chats, memories, API Keys, or other sensitive information are logged/stored. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
+> **Privacy Notice**: If using the public hosted version, none of your chats, memories are logged/stored on the server. If you use your own key a HASH of the key will be stored on the server for Rate-Limiting (The HASH is secure as it cant be used anywhere else). All other data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
 
 
 | Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                        |

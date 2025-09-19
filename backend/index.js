@@ -2,7 +2,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const fileUpload = require('express-fileupload');
 const { GoogleGenAI, createUserContent, createPartFromUri, createPartFromText, Modality } = require('@google/genai');
 
@@ -34,31 +33,6 @@ const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalSystemPrompt');
 const BASIC_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_BASIC');
 const ADVANCED_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_ADVANCE');
-
-// --- Rate Limiting Middleware (RPM and RPD) Default Key ---
-const basicMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 5, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
-const basicDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 500, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
-const advancedMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 3, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
-const advancedDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
-const imageGenMinuteLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 1, message: { error: { message: 'Rate limit exceeded for Image Generation. Try again in a moment or switch to your Own API Key' } } });
-const imageGenDayLimiter = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 10, message: { error: { message: 'Daily Limit on Image generation reached. Try again tomorrow or switch to your Own API Key' } } });
-
-const basicLimiters = [basicMinuteLimiter, basicDayLimiter];
-const advancedLimiters = [advancedMinuteLimiter, advancedDayLimiter];
-const imageGenLimiters = [imageGenMinuteLimiter, imageGenDayLimiter];
-
-
-// --- Rate Limiting Middleware (RPM and RPD) User Key (Rate Limited safely under Google Default Free Tier) ---
-const basicMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 30, message: { error: { message: 'Rate limit exceeded for Basic model. Try again in a moment. Switch to other models or your Own API Key' } } });
-const basicDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 14350, message: { error: { message: 'Daily limit reached for Basic model. Try again tomorrow. Switch to other models or your Own API Key' } } });
-const advancedMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 15, message: { error: { message: 'Rate limit exceeded for Advance model. Try again in a moment. Switch to Basic model or your Own API Key' } } });
-const advancedDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 1000, message: { error: { message: 'Daily limit reached for Advance model. Try again tomorrow. Switch to Basic model or your Own API Key' } } });
-const imageGenMinuteLimiterUSER = rateLimit({ windowMs: 1 * 60 * 1000, max: 10, message: { error: { message: 'Rate limit exceeded for Image Generation. Try again in a moment or switch to your Own API Key' } } });
-const imageGenDayLimiterUSER = rateLimit({ windowMs: 24 * 60 * 60 * 1000, max: 100, message: { error: { message: 'Daily Limit on Image generation reached. Try again tomorrow or switch to your Own API Key' } } });
-
-const basicLimitersUser = [basicMinuteLimiterUSER, basicDayLimiterUSER];
-const advancedLimitersUser = [advancedMinuteLimiterUSER, advancedDayLimiterUSER];
-const imageGenLimitersUser = [imageGenMinuteLimiterUSER, imageGenDayLimiterUSER];
 
 // --- Helper Function for History Truncation ---
 const getTruncatedHistory = (fullHistory, limit) => {
@@ -97,52 +71,145 @@ const safetySettings = [
     }
 ];
 
-// --- Dynamic Rate Limiter Middleware ---
-// --- Helper function to run an array of middleware ---
-const runMiddlewareArray = (middlewares) => {
-    return (req, res, next) => {
-        let index = 0;
-        const runNext = () => {
-            if (index < middlewares.length) {
-                middlewares[index++](req, res, runNext);
-            } else {
-                next(); // All middlewares in the array have run, proceed
-            }
-        };
-        runNext();
-    };
-};
+// Rate Limiter
+const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs').promises;
 
-// --- Dynamic Rate Limiter Middleware ---
-const applyRateLimiter = (req, res, next) => {
-    const { apiKey: userApiKey, modelIndex } = req.body;
-    let targetLimiters;
+const RATE_LIMIT_DB_FILE = path.join(__dirname, 'rate-limiter-db.json');
+let rateLimitDB = {}; 
 
-    if (userApiKey) {
-        if (modelIndex === 0) {
-            targetLimiters = basicLimitersUser;
-        } else if (modelIndex === 1) {
-            targetLimiters = advancedLimitersUser;
-        } else if (modelIndex === 2) {
-            targetLimiters = imageGenLimitersUser;
-        } else {
-            return next(); // No matching model, skip limiting
-        }
-    } else {
-        if (modelIndex === 0) {
-            targetLimiters = basicLimiters;
-        } else if (modelIndex === 1) {
-            targetLimiters = advancedLimiters;
-        } else if (modelIndex === 2) {
-            targetLimiters = imageGenLimiters;
-        } else {
-            return next(); // No matching model, skip limiting
-        }
+const loadRateLimitDB = async () => {
+    try {
+        const data = await fs.readFile(RATE_LIMIT_DB_FILE, 'utf8');
+        if (data) rateLimitDB = JSON.parse(data);
+    } catch (err) {
+        if (err.code !== 'ENOENT') console.error('⚠️ Error loading rate limit database:', err.message);
     }
-
-    // Run the selected array of rate limiters
-    runMiddlewareArray(targetLimiters)(req, res, next);
 };
+
+const saveRateLimitDB = async () => {
+    try {
+        await fs.writeFile(RATE_LIMIT_DB_FILE, JSON.stringify(rateLimitDB, null, 2), 'utf8');
+    } catch (err) {
+        console.error('⚠️ Error saving rate limit database:', err.message);
+    }
+};
+
+function getIp(req) {
+    const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+    if (ip && ip.includes('::ffff:')) return ip.split(':').pop();
+    return ip;
+}
+
+const limitConfigs = {
+    basic:        { maxM: 5,   maxD: 500 },
+    advanced:     { maxM: 3,   maxD: 100 },
+    image:        { maxM: 1,   maxD: 10 },
+    basicUser:    { maxM: 30,  maxD: 14350 },
+    advancedUser: { maxM: 15,  maxD: 1000 },
+    imageUser:    { maxM: 10,  maxD: 100 },
+};
+
+async function checkRateLimit(req) {
+    try {
+        if (!req.body || typeof req.body.modelIndex === 'undefined') {
+            return { allowed: false, status: 400, message: 'Invalid request body.' };
+        }
+
+        const { modelIndex, apiKey: userApiKey } = req.body;
+        let userId = userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== ''
+            ? crypto.createHash('sha256').update(userApiKey).digest('hex')
+            : getIp(req);
+        
+        const limitKey = `${userId}:${modelIndex}`;
+        const now = new Date();
+
+        if (!rateLimitDB[limitKey]) {
+            // If the user has no record, they are definitely allowed.
+            return { allowed: true };
+        }
+
+        const limitRecord = rateLimitDB[limitKey];
+        const lastUpdateM = new Date(limitRecord.lastUpdateM);
+        const lastUpdateD = new Date(limitRecord.lastUpdateD);
+
+        // Check if the windows have expired (but don't reset here, just check against the count)
+        const isMinuteExpired = (now.getTime() - lastUpdateM.getTime()) > 60 * 1000;
+        const isDayExpired = (now.getTime() - lastUpdateD.getTime()) > 24 * 60 * 60 * 1000;
+
+        const isUserRequest = !!userApiKey;
+        let limits;
+        if (modelIndex === 0) limits = isUserRequest ? limitConfigs.basicUser : limitConfigs.basic;
+        else if (modelIndex === 1) limits = isUserRequest ? limitConfigs.advancedUser : limitConfigs.advanced;
+        else if (modelIndex === 2) limits = isUserRequest ? limitConfigs.imageUser : limitConfigs.image;
+        else return { allowed: true };
+
+        // If the window is NOT expired and the hit count is at max, deny.
+        if (!isMinuteExpired && limitRecord.hitM >= limits.maxM) {
+            return { allowed: false, status: 429, message: 'Rate limit exceeded. Try again in a moment.' };
+        }
+        if (!isDayExpired && limitRecord.hitD >= limits.maxD) {
+            return { allowed: false, status: 429, message: 'Daily limit reached. Try again tomorrow.' };
+        }
+
+        return { allowed: true };
+
+    } catch (error) {
+        console.error("ERROR during rate limit check:", error);
+        return { allowed: false, status: 500, message: 'Internal Server Error.' };
+    }
+}
+
+async function incrementHitCount(req) {
+    try {
+        if (!req.body || typeof req.body.modelIndex === 'undefined') return;
+
+        const { modelIndex, apiKey: userApiKey } = req.body;
+        let userId = userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== ''
+            ? crypto.createHash('sha256').update(userApiKey).digest('hex')
+            : getIp(req);
+
+        const limitKey = `${userId}:${modelIndex}`;
+        const now = new Date();
+
+        if (!rateLimitDB[limitKey]) {
+            rateLimitDB[limitKey] = { hitM: 0, hitD: 0, lastUpdateM: now.toISOString(), lastUpdateD: now.toISOString() };
+        }
+        
+        const limitRecord = rateLimitDB[limitKey];
+        const lastUpdateM = new Date(limitRecord.lastUpdateM);
+        const lastUpdateD = new Date(limitRecord.lastUpdateD);
+
+        // Reset counters if windows are expired, then increment
+        if (now.getTime() - lastUpdateM.getTime() > 60 * 1000) {
+            limitRecord.hitM = 1;
+            limitRecord.lastUpdateM = now.toISOString();
+        } else {
+            limitRecord.hitM++;
+        }
+
+        if (now.getTime() - lastUpdateD.getTime() > 24 * 60 * 60 * 1000) {
+            limitRecord.hitD = 1;
+            limitRecord.lastUpdateD = now.toISOString();
+        } else {
+            limitRecord.hitD++;
+        }
+        
+        await saveRateLimitDB();
+
+    } catch (error) {
+        console.error("ERROR incrementing hit count:", error);
+    }
+}
+
+
+
+loadRateLimitDB();
+setInterval(saveRateLimitDB, 30 * 1000);
+
+
+
 
 // --- Troll ---
 app.get('/', (req, res) => {
@@ -231,12 +298,18 @@ app.post('/upload', async (req, res) => {
 });
 
 // --- Main API Endpoint ---
-app.post('/model', applyRateLimiter, async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, apiKey: userApiKey, creativeRP, advanceReasoning, webSearch, images } = req.body;
+app.post('/model', async (req, res) => {
+    let { history, memory, temp, sys, modelIndex, apiKey, creativeRP, advanceReasoning, webSearch, images } = req.body;
     let retry = true;
+
+    const limitResult = await checkRateLimit(req);
+    if (!limitResult.allowed) {
+        return res.status(limitResult.status).json({ error: { message: limitResult.message } });
+    }
+
     start:
     try {
-        const finalApiKey = userApiKey || SERVER_API_KEY;
+        const finalApiKey = apiKey || SERVER_API_KEY;
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'API Key not valid.' } });
         }
@@ -266,7 +339,7 @@ app.post('/model', applyRateLimiter, async (req, res) => {
 
         let contextLimit = modelIndex === 0
             ? GEMMA_HISTORY_LIMIT_CHARS
-            : (userApiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
+            : (apiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
 
         const truncatedHistory = getTruncatedHistory(history, contextLimit);
 
@@ -277,7 +350,6 @@ app.post('/model', applyRateLimiter, async (req, res) => {
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
-        console.log(historyForSDK)
         let result;
 
         if (modelIndex === 0) { // Gemma logic
@@ -405,6 +477,8 @@ app.post('/model', applyRateLimiter, async (req, res) => {
                 text = thought + text;
             }
         }
+
+        await incrementHitCount(req);
 
         res.status(200).json({
             candidates: [{ content: { parts: [{ text }], role: 'model' } }]
