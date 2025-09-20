@@ -168,8 +168,10 @@ This allows for dynamic and context-aware conversations that evolve over time. Y
 
 The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star!
 
+> **Note on Future Development:** This project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed. I am now focusing on different projects.
+
 ---
 
 *Thank you for using ChatBuddy!*
 
-*v1.5 - By KushalRoyChowdhury*
+*v1.5.1 - By KushalRoyChowdhury*

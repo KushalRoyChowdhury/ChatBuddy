@@ -6,11 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Planned]
+## [1.5.1] - 2025-09-20
 
-- Native DarkMode support.
-
+### Fixed
+- Minor UI fixes.
   
+
 ## [1.5] - 2025-09-18
 
 ### Added
@@ -18,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File Sharing Support 'PDF, TXT, DOCX etc' (Advance Model Only).
 
 ### Fixed
-- Huge performance Improvement especially on low end hardware.
+- Performance Improvement especially on low end hardware.
 - Model Awareness.
+
 
 ## [1.4.1] - 2025-09-17
 
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved stability on image sharing (now support upto 20MB).
 - Minor bug fixes.
 - ReTuned Censorship to maintain expressiveness.
+
 
 ## [1.4] - 2025-09-16
 
@@ -36,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - All issues happened with v1.3 are now resolved and tested.
 - Public version updated to latest release.
+
 
 > **NOTICE: [SEP 15 Update]** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 

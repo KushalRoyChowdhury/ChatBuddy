@@ -1333,7 +1333,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setImageGen(!imageGen)}
+                onClick={() => { setImageGen(!imageGen); setShowAddFiles(false) }}
                 className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${imageGen
                   ? 'bg-orange-100 text-orange-600'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
