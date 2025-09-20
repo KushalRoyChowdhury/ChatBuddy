@@ -77,7 +77,7 @@ const path = require('path');
 const fs = require('fs').promises;
 
 const RATE_LIMIT_DB_FILE = path.join(__dirname, 'rate-limiter-db.json');
-let rateLimitDB = {}; 
+let rateLimitDB = {};
 
 const loadRateLimitDB = async () => {
     try {
@@ -103,12 +103,12 @@ function getIp(req) {
 }
 
 const limitConfigs = {
-    basic:        { maxM: 5,   maxD: 500 },
-    advanced:     { maxM: 3,   maxD: 100 },
-    image:        { maxM: 1,   maxD: 10 },
-    basicUser:    { maxM: 30,  maxD: 14350 },
-    advancedUser: { maxM: 15,  maxD: 1000 },
-    imageUser:    { maxM: 10,  maxD: 100 },
+    basic: { maxM: 5, maxD: 500 },
+    advanced: { maxM: 3, maxD: 100 },
+    image: { maxM: 1, maxD: 10 },
+    basicUser: { maxM: 30, maxD: 14350 },
+    advancedUser: { maxM: 15, maxD: 1000 },
+    imageUser: { maxM: 10, maxD: 100 },
 };
 
 async function checkRateLimit(req) {
@@ -121,7 +121,7 @@ async function checkRateLimit(req) {
         let userId = userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== ''
             ? crypto.createHash('sha256').update(userApiKey).digest('hex')
             : getIp(req);
-        
+
         const limitKey = `${userId}:${modelIndex}`;
         const now = new Date();
 
@@ -176,7 +176,7 @@ async function incrementHitCount(req) {
         if (!rateLimitDB[limitKey]) {
             rateLimitDB[limitKey] = { hitM: 0, hitD: 0, lastUpdateM: now.toISOString(), lastUpdateD: now.toISOString() };
         }
-        
+
         const limitRecord = rateLimitDB[limitKey];
         const lastUpdateM = new Date(limitRecord.lastUpdateM);
         const lastUpdateD = new Date(limitRecord.lastUpdateD);
@@ -195,7 +195,7 @@ async function incrementHitCount(req) {
         } else {
             limitRecord.hitD++;
         }
-        
+
         await saveRateLimitDB();
 
     } catch (error) {
@@ -431,12 +431,12 @@ app.post('/model', async (req, res) => {
                 }
             });
         } else {
-            console.log(latestUserMessage)
             result = await genAI.models.generateContent({
                 model: selectedModel,
                 contents: latestUserMessage,
                 config: {
                     responseModalities: [Modality.TEXT, Modality.IMAGE],
+                    safetySettings: safetySettings,
                 },
             });
 
@@ -446,6 +446,7 @@ app.post('/model', async (req, res) => {
         let thought = '';
         let answer = '';
         let generatedImage = null;
+
 
         for (const part of result.candidates[0].content.parts) {
             if (part.inlineData) {

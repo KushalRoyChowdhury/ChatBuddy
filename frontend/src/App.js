@@ -689,7 +689,7 @@ export default function App() {
 
   const isAtBottom = () => {
     const container = chatContainerRef.current;
-    if (!container) return true;
+    if (!container) return false;
     return container.scrollHeight - container.scrollTop <= container.clientHeight + 1;
   };
 
@@ -697,7 +697,6 @@ export default function App() {
     if (isAtBottom()) {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    // else: user scrolled up — don't auto-scroll
   };
 
   useEffect(() => { scrollToBottom(); }, [messages, loading]);
