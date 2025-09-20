@@ -254,6 +254,7 @@ export default function App() {
   const [fileDoc, setFileDoc] = useState(null);
   const fileDocInputRef = useRef(null);
   const [imageGen, setImageGen] = useState(false);
+  const [tapBottom, setTapBottom] = useState();
 
   // Greetings
   const userName = memories
@@ -695,11 +696,12 @@ export default function App() {
 
   const scrollToBottom = () => {
     if (isAtBottom()) {
-      if (loading) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      if (loading || tapBottom) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  useEffect(() => { scrollToBottom(); }, [loading]);
+  useEffect(() => { scrollToBottom(); const timer = setTimeout(() => { setTapBottom(false), 100} return clearTimeout(timer)}, [loading, tapBottom]);
+  useEffect(() => { setTapBottom(true); }, []);
 
   const getSendButtonClass = () => {
     if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
@@ -1145,7 +1147,7 @@ export default function App() {
         >
           <button
             type='button'
-            onClick={() => { scrollToBottom(); }}
+            onClick={() => { setTapBottom(true) }}
             className='absolute right-0 -top-14 md:right-1 md:-top-14 bg-white hover:bg-slate-100 shadow-lg flex justify-center items-center rounded-full p-2 active:scale-95 transition-all'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
               <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
