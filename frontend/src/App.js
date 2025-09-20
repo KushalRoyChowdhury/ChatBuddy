@@ -695,7 +695,7 @@ export default function App() {
 
   const scrollToBottom = () => {
     if (isAtBottom()) {
-      if (!loading) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      if (loading) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
