@@ -689,17 +689,17 @@ export default function App() {
 
   const isAtBottom = () => {
     const container = chatContainerRef.current;
-    if (!container) return false;
+    if (!container) return true;
     return container.scrollHeight - container.scrollTop <= container.clientHeight + 1;
   };
 
   const scrollToBottom = () => {
     if (isAtBottom()) {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      if (!loading) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  useEffect(() => { scrollToBottom(); }, [messages, loading]);
+  useEffect(() => { scrollToBottom(); }, [loading]);
 
   const getSendButtonClass = () => {
     if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
@@ -1062,10 +1062,10 @@ export default function App() {
                     Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
                     <br />
                     <br />
-                    With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD).
+                    With the Default Server Key the RateLimits are: Basic Model (7 RPM / 500 RPD), Advance Model (3 RPM / 100 RPD), Image Generation (1RPM, 10RPD)
                     <br />
                     <br />
-                    With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD) for FREE.
+                    With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD), Image Generation (10RPM, 100RPD) for FREE.
                     <br />
                     <br />
                     Aditionally the app Source Code is available on GitHub 👉
