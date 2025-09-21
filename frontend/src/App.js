@@ -700,8 +700,17 @@ export default function App() {
     }
   };
 
-  useEffect(() => { scrollToBottom(); const timer = setTimeout(() => { setTapBottom(false), 100} return clearTimeout(timer)}, [loading, tapBottom]);
-  useEffect(() => { setTapBottom(true); }, []);
+  useEffect(() => {
+  scrollToBottom();
+  const timer = setTimeout(() => {
+    setTapBottom(false);
+  }, 100);
+  return () => clearTimeout(timer);
+}, [loading, tapBottom]);
+
+useEffect(() => {
+  setTapBottom(true);
+}, []);
 
   const getSendButtonClass = () => {
     if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
