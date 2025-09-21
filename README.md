@@ -16,7 +16,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.) with the Advanced Model. The AI can read and analyze the content of your files, making it perfect for summarizing documents, answering questions about reports, or analyzing data.
 
--   **🎨 Image Generation**: Create stunning 1024x1024 images from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
+-   **🎨 Image Generation**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
 
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
