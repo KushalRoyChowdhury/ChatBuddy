@@ -1,4 +1,4 @@
-// Update 1.5
+// Update 1.5.1
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -419,7 +419,7 @@ app.post('/model', async (req, res) => {
                     topK: advanceReasoning ? 64 : 128,
                     safetySettings: safetySettings,
                     thinkingConfig: {
-                        thinkingBudget: advanceReasoning ? 24576 : 0,
+                        thinkingBudget: advanceReasoning ? -1 : 0,
                         includeThoughts: advanceReasoning ? true : false,
                     },
                     ...(webSearch && {
