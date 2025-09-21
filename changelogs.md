@@ -40,10 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All issues happened with v1.3 are now resolved and tested.
 - Public version updated to latest release.
 
-
+  
+## [1.3] - 2025-09-15
 > **NOTICE: [SEP 15 Update]** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 
-## [1.3] - 2025-09-15
 
 > *This is a huge upgrade from the previous architechture, if you face any bugs or issues kindly mention in GitHub.*
 
