@@ -530,27 +530,28 @@ export default function App() {
     };
 
     if (currentBase64Image) {
-  const img = new Image();
-  img.src = `data:image/jpeg;base64,${currentBase64Image}`;
-  img.onload = () => {
-    const maxWidth = 864;
-    const ratio = Math.min(maxWidth / img.width, 1);
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width * ratio;
-    canvas.height = img.height * ratio;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const resized = canvas.toDataURL('image/jpeg', 0.6).split(',')[1]; // keep only base64 part
-    setMessageImageMap(prev => [
-      ...prev,
-      {
-        id: userMessage.id,
-        base64Data: resized,
-        mimeType: 'image/jpeg'
-      }
-    ]);
-    setCurrentBase64Image(null);
-  };
+      const img = new Image();
+      img.src = `data:image/jpeg;base64,${currentBase64Image}`;
+      img.onload = () => {
+        const maxWidth = 864;
+        const quality = 0.6;
+        const ratio = Math.min(maxWidth / img.width, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const resized = canvas.toDataURL('image/jpeg', quality).split(',')[1];
+        setMessageImageMap(prev => [
+          ...prev,
+          {
+            id: userMessage.id,
+            base64Data: resized,
+            mimeType: 'image/jpeg'
+          }
+        ]);
+        setCurrentBase64Image(null);
+      };
     }
 
 
@@ -714,16 +715,16 @@ export default function App() {
   };
 
   useEffect(() => {
-  scrollToBottom();
-  const timer = setTimeout(() => {
-    setTapBottom(false);
-  }, 100);
-  return () => clearTimeout(timer);
-}, [loading, tapBottom]);
+    scrollToBottom();
+    const timer = setTimeout(() => {
+      setTapBottom(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [loading, tapBottom]);
 
-useEffect(() => {
-  setTapBottom(true);
-}, []);
+  useEffect(() => {
+    setTapBottom(true);
+  }, []);
 
   const getSendButtonClass = () => {
     if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
