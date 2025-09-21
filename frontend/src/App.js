@@ -530,14 +530,27 @@ export default function App() {
     };
 
     if (currentBase64Image) {
-      setMessageImageMap(prev => [
-        ...prev,
-        {
-          id: userMessage.id,
-          base64Data: currentBase64Image
-        }
-      ]);
-      setCurrentBase64Image(null);
+  const img = new Image();
+  img.src = `data:image/jpeg;base64,${currentBase64Image}`;
+  img.onload = () => {
+    const maxWidth = 864;
+    const ratio = Math.min(maxWidth / img.width, 1);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width * ratio;
+    canvas.height = img.height * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const resized = canvas.toDataURL('image/jpeg', 0.6).split(',')[1]; // keep only base64 part
+    setMessageImageMap(prev => [
+      ...prev,
+      {
+        id: userMessage.id,
+        base64Data: resized,
+        mimeType: 'image/jpeg'
+      }
+    ]);
+    setCurrentBase64Image(null);
+  };
     }
 
 
