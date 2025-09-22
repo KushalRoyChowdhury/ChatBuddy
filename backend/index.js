@@ -1,4 +1,4 @@
-// Update 1.5.1
+// Update 1.5.2
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

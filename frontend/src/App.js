@@ -1107,7 +1107,7 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.5.1
+                  v1.5.2
                   <br />
                   By: KushalRoyChowdhury
                 </div>
