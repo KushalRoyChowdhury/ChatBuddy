@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -217,6 +217,7 @@ export default function App() {
   const [memories, setMemories] = useState(() => JSON.parse(localStorage.getItem('chatMemories')) || []);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isViewingBottom, setIsViewingBottom] = useState(false);
 
 
   // --- New/Modified State ---
@@ -310,6 +311,16 @@ export default function App() {
       setChatId(newChatId);
     }
   }, [messages.length, loading]);
+
+  const isBottomAtView = useInView(chatEndRef);
+
+  useEffect(() => {
+    if (isBottomAtView) {
+      setIsViewingBottom(true);
+    } else {
+      setIsViewingBottom(false);
+    }
+  }, [isBottomAtView]);
 
 
   // --- Event Handlers & Logic ---
@@ -1152,7 +1163,7 @@ export default function App() {
             </AnimatePresence>
           )}
           {loading && (<motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start"><div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3"><span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span><div className="flex space-x-1"><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} /><motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} /></div></div></motion.div>)}
-          <div className='w-full h-6 md:h-1 bg-transparent' ref={chatEndRef} />
+          <div className='w-full h-3 md:h-1 bg-transparent' ref={chatEndRef} />
         </div>
 
       </main>
@@ -1168,14 +1179,16 @@ export default function App() {
           onDrop={handleDrop}
           className={`max-w-4xl relative w-full bg-white mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
         >
-          <button
-            type='button'
-            onClick={() => { setTapBottom(true) }}
-            className='absolute right-0 -top-14 md:right-1 md:-top-14 bg-white hover:bg-slate-100 shadow-lg flex justify-center items-center rounded-full p-2 active:scale-95 transition-all'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-          </button>
+          {!isViewingBottom &&
+            <button
+              type='button'
+              onClick={() => { setTapBottom(true) }}
+              className='absolute right-0 -top-14 md:right-1 md:-top-14 bg-white hover:bg-slate-100 shadow-lg flex justify-center items-center rounded-full p-2 active:scale-95 transition-all'>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </button>
+          }
 
           {fileImg && (
             <div className="p-2 border-b-0 border-gray-200">
@@ -1320,9 +1333,9 @@ export default function App() {
                   initial={{ width: 0, height: 0, opacity: 0, x: -30, y: 20 }}
                   animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
                   exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
-                  className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-slate-200/90 backdrop-blur-[2px] rounded-xl border border-black/30`}>
-                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:bg-slate-300 transition-all'>Upload Files</button>}
-                  <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:bg-slate-300 transition-all`}>Upload Image</button>
+                  className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200`}>
+                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}
+                  <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:scale-105 transition-all`}>Upload Image</button>
                 </motion.div>
               }
             </AnimatePresence>
