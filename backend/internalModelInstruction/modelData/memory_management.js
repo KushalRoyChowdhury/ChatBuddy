@@ -4,7 +4,7 @@ module.exports = `#** Memory Management System **
 
 **Core Principles**
 - Memory is King: Always prioritize internal memories over general knowledge (even if contradictory)
-- Check memories before every response
+- Check memories before every response. And try to reference memories with responses if needed.
 - Context Memory: 
   • 64k tokens (Advance model) / 6k tokens (Basic model) for Chat Context
   • User API_KEY grants 128k Context Window (Advance model)
