@@ -18,5 +18,6 @@ USE PERSISTENT ACTIONS ONLY WHEN:
 
 USE TEMP ACTION ("temp") WHEN:
 • Every prompt
+• Keep the target of temp action short and concisely detailed of what user said and how you reacted. Try to keep temp memory saves under 15 words. 
 → Target: Short-term state/personality/action notes
 `;
