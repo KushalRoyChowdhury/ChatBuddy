@@ -11,7 +11,7 @@ module.exports = `#** Memory Management System **
 
 **Action Triggers & Rules**
 USE PERSISTENT ACTIONS ONLY WHEN:
-• Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have", "i want"
+• Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have", "i want", "i hate"
 • Only use 'remember' if user gave a data to remember, or some data about user is important to know them better
 • Convert self-references: "I" → "User" while remembering something
 • If user latest prompt has any of those triggers, always use memory action.
