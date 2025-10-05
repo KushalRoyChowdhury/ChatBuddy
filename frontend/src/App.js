@@ -8,7 +8,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 
 // --- Application Constants ---
 const MEMORY_LIMIT_CHARS = 2000 * 4;
-const TEMP_MEMORY_LIMIT_CHARS = 4000 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 6000 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
 // --- Helper Component for Collapsible "Thinking Process" ---
