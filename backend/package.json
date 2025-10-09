@@ -1,6 +1,6 @@
 {
   "name": "ChatBuddy",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "private": false,
   "dependencies": {
     "@google/genai": "^1.19.0",

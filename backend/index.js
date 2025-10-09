@@ -1,4 +1,4 @@
-// Update 1.5.2
+// Update 1.5.3
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -30,9 +30,13 @@ const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
-const INTERNAL_MEMORY_PROMPT = require('./internalModelInstruction/internalSystemPrompt');
-const BASIC_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_BASIC');
-const ADVANCED_MODEL_CONTEXT = require('./internalModelInstruction/modelData/model_context_ADVANCE');
+const basic = require('./ModelInstructions/BASIC_MODEL_SYS_INS');
+const advance = require('./ModelInstructions/ADVANCE_MODEL_NoWeb_SYS_INS');
+const advance_web = require('./ModelInstructions/ADVANCE_MODEL_Web_SYS_INS');
+const advance_thinking = require('./ModelInstructions/ADVANCE_THINK_NoWeb_SYS_INS');
+const advance_thinking_web = require('./ModelInstructions/ADVANCE_THINK_Web_SYS_INS');
+
+
 
 // --- Helper Function for History Truncation ---
 const getTruncatedHistory = (fullHistory, limit) => {
@@ -229,7 +233,7 @@ app.get('/health', (req, res) => {
     res.status(200).send();
 });
 
-// --- Image Upload ---
+// --- File Upload ---
 app.post('/upload', async (req, res) => {
     const ai = new GoogleGenAI({});
     try {
@@ -323,19 +327,20 @@ app.post('/model', async (req, res) => {
             return res.status(400).json({ error: { message: 'A valid chat history must be provided.' } });
         }
 
-        let INTERNAL_SYSTEM_PROMPT = INTERNAL_MEMORY_PROMPT;
-        if (modelIndex === 0) {
-            INTERNAL_SYSTEM_PROMPT += BASIC_MODEL_CONTEXT;
-        } else if (modelIndex === 1) {
-            INTERNAL_SYSTEM_PROMPT += ADVANCED_MODEL_CONTEXT;
-        }
+        let INTERNAL_SYSTEM_PROMPT = '';
+
+        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic();
+        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance();
+        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web();
+        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking();
+        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web();
 
         const selectedModel = MODELS[modelIndex];
 
         let finalSystemPrompt = INTERNAL_SYSTEM_PROMPT;
-        if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}`;
-        if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- TEMPORARY NOTES ---\n- ${temp.join('\n- ')}`;
-        if (sys && sys.trim()) finalSystemPrompt += `\n\n--- USER'S SYSTEM PROMPT ---\n${sys.trim()}`;
+        if (sys && sys.trim()) finalSystemPrompt += `\n\n--- START USER'S SYSTEM PROMPT ---\n${sys.trim()}\n--- END USER'S SYSTEM PROMPT ---`;
+        if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
+        if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- START RECENT CHATS ---\n- ${temp.join('\n- ')}\n--- END RECENT CHATS ---`;
 
         let contextLimit = modelIndex === 0
             ? GEMMA_HISTORY_LIMIT_CHARS
@@ -354,7 +359,7 @@ app.post('/model', async (req, res) => {
 
         if (modelIndex === 0) { // Gemma logic
             // Build the text part
-            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT Conversation ---\nUSER: ${latestUserMessage}`;
+            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessage}`;
 
             // Start with the full history
             let gemmaContents = [...historyForSDK];
@@ -377,6 +382,7 @@ app.post('/model', async (req, res) => {
                 parts: [createPartFromText(gemmaMessageWithSystemPrompt)]
             });
 
+
             result = await genAI.models.generateContent({
                 model: selectedModel,
                 contents: gemmaContents,
@@ -384,7 +390,7 @@ app.post('/model', async (req, res) => {
                     temperature: creativeRP ? 2 : 1,
                     topP: creativeRP ? 1 : 0.95,
                     topK: creativeRP ? 0 : 128,
-                    safetySettings: safetySettings
+                    safetySettings: safetySettings,
                 }
             });
         } else if (modelIndex === 1) { // Gemini logic
@@ -502,4 +508,4 @@ app.post('/model', async (req, res) => {
 
 });
 
-app.listen(PORT);
+app.listen(PORT, () => console.log(`Server Running on PORT: ${PORT}`));

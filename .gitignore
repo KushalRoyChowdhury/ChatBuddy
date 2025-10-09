@@ -7,7 +7,7 @@
 /backend/.env
 /frontend/.env
 /backend/rate-limiter-db.json
-
+/.aiexclude
 
 # Logs
 logs
