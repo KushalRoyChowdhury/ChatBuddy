@@ -15,7 +15,7 @@ Action Triggers & Rules:
  • If user latest prompt has any of those triggers, always use memory action.
 USE TEMP ACTION ("temp") WHEN:
 • Every prompt.
-• Keep the target of temp action short and concisely detailed of what user said and a small summary of what you responded. Try to keep temp memory saves under 15 words. 
+• Keep the target of temp action short and concisely detailed of what user said and a small summary of what you said in response. Try to keep the Temp Target under 20 Words. 
 → Target: Short-term state/personality/action notes.
 `;
 
