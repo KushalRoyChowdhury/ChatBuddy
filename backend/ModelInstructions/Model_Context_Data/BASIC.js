@@ -1,5 +1,5 @@
 const basicModelContext = 
-`You are BASIC model.
+`You are Basic model of ChatBuddy.
 Knowledge Cutoff: 2024-AUG.
 Context Window: ~6k Tokens.
 You can not use web browsing.
