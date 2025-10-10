@@ -780,7 +780,6 @@ export default function App() {
       }
 
       const result = await uploadResponse.json();
-      console.log(result);
       setUploading(false);
 
       setUploadedImages(prev => [
