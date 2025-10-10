@@ -256,6 +256,7 @@ export default function App() {
   const fileDocInputRef = useRef(null);
   const [imageGen, setImageGen] = useState(false);
   const [tapBottom, setTapBottom] = useState();
+  const [fileName, setFileName] = useState(false);
 
   // Greetings
   const userName = memories
@@ -541,6 +542,17 @@ export default function App() {
     };
 
     if (currentBase64Image) {
+      if (fileName) {
+        setMessageImageMap(prev => [
+          ...prev,
+          {
+            id: userMessage.id,
+            base64Data: null,
+            mimeType: null,
+            fileName: fileName
+          }
+        ]);
+      }
       const img = new Image();
       img.src = `data:image/jpeg;base64,${currentBase64Image}`;
       img.onload = () => {
@@ -573,6 +585,7 @@ export default function App() {
     setFileImg(null);
     setFileDoc(null);
     setLoading(true);
+    setFileName(false);
 
     try {
       const memoriesForModel = tempMemories
@@ -758,6 +771,9 @@ export default function App() {
 
   const uploadImg = async (file) => {
     setUploading(true);
+    if (!file.type.includes('image')) {
+      setFileName(file.name);
+    }
     const base64String = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result.split(',')[1]);
