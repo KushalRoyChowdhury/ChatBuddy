@@ -127,7 +127,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
                 />
               )}
               {!isImageLoaded && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
+                <div className={`p-3 rounded-md flex items-center gap-2 ${msg.model === 'gemma-3-27b-it' ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -135,7 +135,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
                     <line x1="16" y1="17" x2="8" y2="17"></line>
                     <line x1="10" y1="9" x2="8" y2="9"></line>
                   </svg>
-                  <span className="text-sm cursor-default font-medium text-blue-800">
+                  <span className={`text-sm cursor-default font-medium ${msg.model === 'gemma-3-27b-it' ? 'text-green-800' : 'text-blue-800'}`}>
                     {fileName || 'Document'}
                   </span>
                 </div>
@@ -222,8 +222,8 @@ export default function App() {
 
   // --- New/Modified State ---
   const [chatId, setChatId] = useState(() => localStorage.getItem('chatId') || crypto.randomUUID());
-  const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []); // Now an array of objects
-  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || []); // For <think> content
+  const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []);
+  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || []);
   const [uploadedImages, setUploadedImages] = useState(() => {
     const saved = localStorage.getItem('uploadedImages');
     return saved ? JSON.parse(saved) : [];
@@ -534,11 +534,12 @@ export default function App() {
   const sendMessage = async () => {
     if ((!input.trim()) || loading) return;
 
+    let messageID = Date.now();
     const userMessage = {
       role: 'user',
       content: input,
       model: imageGen ? 'image' : model,
-      id: Date.now()
+      id: messageID
     };
 
     if (currentBase64Image) {
@@ -546,7 +547,7 @@ export default function App() {
         setMessageImageMap(prev => [
           ...prev,
           {
-            id: userMessage.id,
+            id: messageID,
             base64Data: null,
             mimeType: null,
             fileName: fileName
@@ -568,7 +569,7 @@ export default function App() {
         setMessageImageMap(prev => [
           ...prev,
           {
-            id: userMessage.id,
+            id: messageID,
             base64Data: resized,
             mimeType: 'image/jpeg'
           }
@@ -577,6 +578,20 @@ export default function App() {
       };
     }
 
+    let finalUploadedImages = uploadedImages; 
+
+    if (uploadedImages.length > 0) {
+      const lastImage = uploadedImages[uploadedImages.length - 1];
+      if (lastImage.id === null) {
+        const updatedImages = [...uploadedImages];
+        updatedImages[uploadedImages.length - 1] = {
+          ...lastImage,
+          id: messageID,
+        };
+        setUploadedImages(updatedImages);
+        finalUploadedImages = updatedImages;
+      }
+    }
 
     const currentMessagesWithUser = [...messages, userMessage];
     setMessages(currentMessagesWithUser);
@@ -592,14 +607,13 @@ export default function App() {
         .filter(mem => mem.id !== chatId)
         .map(mem => mem.memory);
 
-      const currentChatImageUris = uploadedImages
+      const currentChatImageUris = finalUploadedImages // ✅ use updated version
         .filter(img => img.chatId === chatId)
-        .map(img => {
-          return {
-            uri: img.uri,
-            mimeType: img.mimeType
-          }
-        });
+        .map(img => ({
+          uri: img.uri,
+          mimeType: img.mimeType,
+          id: img.id // now includes the new messageID!
+        }));
 
       let modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
       if (imageGen) {
@@ -630,7 +644,6 @@ export default function App() {
               content: '[image omitted]'
             };
           }
-          // Otherwise, return message unchanged
           return msg;
         }),
         memory: memories,
@@ -803,7 +816,8 @@ export default function App() {
         {
           chatId: chatId,
           uri: result.uri,
-          mimeType: result.mimeType
+          mimeType: result.mimeType,
+          id: null
         }
       ]);
 
@@ -822,11 +836,6 @@ export default function App() {
       return;
     }
     e.target.value = null;
-    if (model !== 'gemini-2.5-flash-lite') {
-      alert("Document uploads are only available in Advanced mode.");
-      setShowAddFiles(false);
-      return;
-    }
     const validDocTypes = [
       'application/pdf',
       'text/plain',
@@ -1133,9 +1142,9 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.5.3
+                  v1.6
                   <br />
-                  By: KushalRoyChowdhury
+                  By: Kushal Roy Chowdhury
                 </div>
               </div>
 
@@ -1337,7 +1346,7 @@ export default function App() {
             />
             <input
               type="file"
-              accept=".pdf,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept={model === 'gemini-2.5-flash-lite' ? '.pdf,.mp4,.mp3,.wav,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document' : '.txt'}
               className="hidden"
               ref={fileDocInputRef}
               onChange={handleDocFileChange}
@@ -1349,7 +1358,7 @@ export default function App() {
                   animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
                   exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
                   className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200`}>
-                  {model === 'gemini-2.5-flash-lite' && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}
+                  <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>
                   <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:scale-105 transition-all`}>Upload Image</button>
                 </motion.div>
               }

@@ -14,6 +14,8 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat. The AI can understand and analyze the content of your images, opening up new possibilities for visual-based conversations.
 
+-   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model. The AI can process and understand the content, allowing for discussions and analysis of multimedia files.
+
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.) with the Advanced Model. The AI can read and analyze the content of your files, making it perfect for summarizing documents, answering questions about reports, or analyzing data.
 
 -   **🎨 Image Generation**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
@@ -127,7 +129,7 @@ The application comes with a default API key that has strict rate limits to ensu
 
 > **Note:** The default API key is for the developer-hosted public version. When running the application locally, you will need to provide your own API key.
 
-> **Privacy Notice**: If using the public hosted version, none of your chats, memories are logged/stored on the server. If you use your own key a HASH of the key will be stored on the server for Rate-Limiting (The HASH is secure as it cant be used anywhere else). All other data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
+> **Privacy Notice**: If using the public hosted version, none of your chats, memories are logged/stored on the server. All other data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
 
 
 | Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                        |
@@ -170,8 +172,7 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 > **Note on Future Development:** This project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
 
-> 
 
 *Thank you for using ChatBuddy!*
 
-*v1.5.2 - By KushalRoyChowdhury*
+*v1.6 - By KushalRoyChowdhury*

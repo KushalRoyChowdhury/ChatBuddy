@@ -348,73 +348,52 @@ app.post('/model', async (req, res) => {
 
         const truncatedHistory = getTruncatedHistory(history, contextLimit);
 
-        const latestUserMessageTurn = truncatedHistory.pop();
-        let latestUserMessage = latestUserMessageTurn.content
+        // New logic to build history with interleaved images
+        const historyForSDK_NEW = truncatedHistory.map(msg => {
+            const role = msg.role === 'assistant' ? 'model' : 'user';
+            let parts = [];
 
-        const historyForSDK = truncatedHistory.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-        }));
-        let result;
-
-        if (modelIndex === 0) { // Gemma logic
-            // Build the text part
-            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessage}`;
-
-            // Start with the full history
-            let gemmaContents = [...historyForSDK];
-
-            // If there are images, add each one as a separate user message
-            if (images && images.length > 0) {
-                images.forEach(image => {
-                    if (image.uri) {
-                        const imagePart = createUserContent([
-                            createPartFromUri(image.uri, image.mimeType || "image/png")
-                        ]);
-                        gemmaContents.push(imagePart);
-                    }
+            // If it's a user message, check for associated images
+            if (role === 'user' && images && images.length > 0) {
+                const associatedImages = images.filter(img => img.id === msg.id && img.uri);
+                associatedImages.forEach(img => {
+                    parts.push(createPartFromUri(img.uri, img.mimeType));
                 });
             }
 
-            // Finally, add the text message (with system prompt)
-            gemmaContents.push({
-                role: 'user',
-                parts: [createPartFromText(gemmaMessageWithSystemPrompt)]
-            });
+            // Add the text part
+            parts.push(createPartFromText(msg.content));
 
+            return { role, parts };
+        });
+
+
+        if (modelIndex === 0) { // Gemma logic
+            const latestUserTurn = historyForSDK_NEW.pop();
+            const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
+            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+
+            latestUserTurn.parts = latestUserTurn.parts
+                .filter(p => p.text === undefined) // Keep only non-text parts (images)
+                .concat(createPartFromText(gemmaMessageWithSystemPrompt)); // Add the combined prompt
+
+            const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
 
             result = await genAI.models.generateContent({
                 model: selectedModel,
                 contents: gemmaContents,
                 config: {
                     temperature: creativeRP ? 2 : 1,
-                    topP: creativeRP ? 1 : 0.95,
-                    topK: creativeRP ? 0 : 128,
+                    topP: creativeRP ? 0.98 : 0.95,
+                    topK: creativeRP ? 0 : 64,
                     safetySettings: safetySettings,
                 }
             });
         } else if (modelIndex === 1) { // Gemini logic
-            let geminiContents = [...historyForSDK];
-
-            if (images && images.length > 0) {
-                images.forEach(image => {
-                    if (image.uri) {
-                        const imagePart = createUserContent([
-                            createPartFromUri(image.uri, image.mimeType)
-                        ]);
-                        geminiContents.push(imagePart);
-                    }
-                });
-            }
-
-            geminiContents.push({
-                role: 'user',
-                parts: [createPartFromText(latestUserMessage)]
-            });
 
             result = await genAI.models.generateContent({
                 model: selectedModel,
-                contents: geminiContents,
+                contents: historyForSDK_NEW,
                 config: {
                     systemInstruction: {
                         role: "system",
@@ -439,7 +418,7 @@ app.post('/model', async (req, res) => {
         } else {
             result = await genAI.models.generateContent({
                 model: selectedModel,
-                contents: latestUserMessage,
+                contents: historyForSDK_NEW[historyForSDK_NEW.length - 1].parts,
                 config: {
                     responseModalities: [Modality.TEXT, Modality.IMAGE],
                     safetySettings: safetySettings,

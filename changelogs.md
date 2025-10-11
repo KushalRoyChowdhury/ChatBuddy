@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Note on Future Development:** This project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+
+## [1.6] - 2025-10-11
+
+### Added
+- Video & Audio Sharing Support upto 20MB (Advance Model Only).
+
+### Fixed
+- Better Context Handling with Files.
+
 ## [1.5.3] - 2025-10-09
 
 ### Fixed
