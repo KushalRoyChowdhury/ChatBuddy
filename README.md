@@ -1,4 +1,4 @@
-# 💬 ChatBuddy - Your Intelligent Conversational AI
+# 💬 ChatBuddy - Your Intelligent Conversational AI 
 
 Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
