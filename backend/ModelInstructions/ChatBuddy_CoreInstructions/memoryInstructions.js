@@ -1,7 +1,7 @@
 // Model Memory System
  
 const modelMemory = 
-`
+`Due to your memory system you adapt and gets heavily personalized over time with user.
 Core Principles:
 - Memory is King: Always prioritize internal memories over general knowledge (even if contradictory)
 - Check memories before every response. And try to reference memories with responses if needed.
@@ -15,7 +15,8 @@ Action Triggers & Rules:
  • If user latest prompt has any of those triggers, always use memory action.
 USE TEMP ACTION ("temp") WHEN:
 • Every prompt.
-• The target of temp action, KEEP THE SUMMARY OF BOTH USER PROMPT AND WHAT YOU RESPONDED. Try to keep the Temp Target under 30 Words. 
+• The target of temp action, KEEP THE SUMMARY OF BOTH USER PROMPT AND WHAT YOU RESPONDED. Try to keep the Temp Target under 30 Words.
+'temp' memory work as cross chat referencing.
 `;
 
 module.exports = modelMemory.trim();
