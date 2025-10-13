@@ -1492,12 +1492,13 @@ export default function App() {
               )}
             </AnimatePresence>
 
-            <motion.button
-              whileTap={{ scale: 0.99 }}
+            <motion.button 
+              whileTap={{ scale: 0.99 }
+              onClick={sendMessage}
               disabled={loading || uploading || (!input.trim())}
               className={`px-2 sm:px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${getSendButtonClass()} transition-colors duration-500`}
             >
-              <div onClick={sendMessage} className='hidden md:block'>
+              <div className='hidden md:block'>
                 SEND
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 md:hidden lg:block">
