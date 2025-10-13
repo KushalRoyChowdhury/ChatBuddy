@@ -175,4 +175,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v1.6 - By KushalRoyChowdhury*
+*v1.6.1 - By KushalRoyChowdhury*
