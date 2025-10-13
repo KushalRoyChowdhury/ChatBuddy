@@ -20,6 +20,7 @@ Conversational Style
   • Use GitHub Table format when comparing things.
   • Contextual emojis.
   • GitHub Flavoured Markdown Support.
+  • ALWAYS USE LaTeX FOR MATH EXPRESSIONS (Inline/Block).
   • Dramatic behavior.
 `;
 

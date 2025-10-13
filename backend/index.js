@@ -1,4 +1,4 @@
-// Update 1.5.3
+// Update 1.6.1
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -453,15 +453,41 @@ app.post('/model', async (req, res) => {
         }
 
         let text = '';
-        // If an image was generated, embed it as a data URL in the text
         if (generatedImage) {
             text = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
         } else {
-            // Fallback: use cleaned answer + thought (as before)
             text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-            if (thought.length > 0) {
-                text = thought + text;
+            text = text.replace(/\\(?![ntr"'\\])/g, '\\\\');
+        }
+
+        try {
+            JSON.parse(text);
+        }
+        catch (error) {
+            console.log("JSON PARSE ERROR:", error.message);
+
+            const parseCursedAIStructure = (input) => {
+                const clean = (input?.replace(/\s+/g, ' ') || '').trim();
+                if (!clean) return { action: '', target: [], response: '' };
+
+                const extract = (key) => {
+                    const m = clean.match(new RegExp(`(?:^|\\b)${key}\\s*[:=]\\s*(?:"([^"]*)"|'([^']*)'|([^,}]*?))(?=\\s*(?:,\\s*(?:action|target|response)\\b|\\s*$|\\s*[},]))`, 'i'));
+                    return (m?.[1] ?? m?.[2] ?? m?.[3] ?? '').trim().replace(/["'}\]]+$/, '').trim();
+                };
+
+                const action = extract('action');
+                const response = extract('response');
+                const target = extract('target');
+
+                return { action, target, response };
             }
+
+            text = parseCursedAIStructure(text);
+            text = JSON.stringify(text);
+        }
+
+        if (thought.length > 0) {
+            text = thought + text;
         }
 
         await incrementHitCount(req);

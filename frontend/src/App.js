@@ -5,6 +5,9 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import TextareaAutosize from 'react-textarea-autosize';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 // --- Application Constants ---
 const MEMORY_LIMIT_CHARS = 2000 * 4;
@@ -38,7 +41,7 @@ const CollapsibleThought = ({ thoughtContent }) => {
             className="overflow-hidden"
           >
             <div className="prose prose-sm max-w-none p-2 bg-gray-100 rounded-md">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {formattedContent}
               </ReactMarkdown>
             </div>
@@ -82,12 +85,20 @@ const getTextToRender = (msg) => {
       if (typeof parsedData.response === 'string') {
         textToRender = parsedData.response;
       }
-    } catch (e) {
-      // It's already msg.content, so no action needed
-    }
+    } catch (e) { console.log(e); }
   }
   return textToRender;
 };
+
+const MemoizedMarkdownRenderer = React.memo(({ content }) => {
+  return (
+    <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
+      <ReactMarkdown components={{ code: CodeBlock }} remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+});
 
 const getUserBubbleClass = (msgModel) => {
   return msgModel === 'gemini-2.5-flash-lite'
@@ -182,11 +193,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
           }
           // Otherwise, render as Markdown
           return (
-            <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
-              <ReactMarkdown components={{ code: CodeBlock }} remarkPlugins={[remarkGfm]}>
-                {content}
-              </ReactMarkdown>
-            </div>
+            <MemoizedMarkdownRenderer content={content} />
           );
         })()}
 
@@ -578,7 +585,7 @@ export default function App() {
       };
     }
 
-    let finalUploadedImages = uploadedImages; 
+    let finalUploadedImages = uploadedImages;
 
     if (uploadedImages.length > 0) {
       const lastImage = uploadedImages[uploadedImages.length - 1];
@@ -840,12 +847,16 @@ export default function App() {
       'application/pdf',
       'text/plain',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'video/mp4',
+      'video/mpeg',
+      'audio/mpeg',
+      'audio/wav'
     ];
     setShowAddFiles(false);
 
     if (!validDocTypes.includes(file.type)) {
-      alert("Please select a valid document (PDF, TXT, DOC, DOCX).");
+      alert("Please select a valid document (PDF, TXT, DOC, DOCX, MP4, MP3, WAV).");
       return;
     }
 
@@ -864,12 +875,6 @@ export default function App() {
     }
 
     e.target.value = null;
-
-    if (fileImg) {
-      alert("Only one image file can be uploaded at a time.");
-      setShowAddFiles(false);
-      return;
-    }
 
     if (!file.type.startsWith('image/')) {
       alert("Please select a valid image file (JPG, PNG, etc.).");
@@ -921,7 +926,7 @@ export default function App() {
       const file = files[i];
       if (file.type.startsWith('image/')) {
         await handlePastedOrDroppedImage(file);
-        break; // Only handle first image for now (since you support 1 at a time)
+        break;
       }
     }
   };
@@ -1142,7 +1147,7 @@ export default function App() {
                 <div className="text-center text-gray-600">
                   AI can make mistakes.
                   <br />
-                  v1.6
+                  v1.6.1 (release 251013)
                   <br />
                   By: Kushal Roy Chowdhury
                 </div>
@@ -1196,7 +1201,7 @@ export default function App() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            sendMessage();
+            // sendMessage();
           }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -1268,7 +1273,7 @@ export default function App() {
           )}
 
           {fileDoc && (
-            <div className="p-2 border-b border-gray-200">
+            <div className="p-2 border-b-0 border-gray-200">
               <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
                 {uploading ? (
                   <div className="h-20 w-20 flex items-center justify-center">
@@ -1310,7 +1315,8 @@ export default function App() {
                     type="button"
                     onClick={() => {
                       setFileDoc(null);
-                      setUploadedImages(prev => prev.slice(0, -1)); // Pop last uploaded item
+                      setUploadedImages(prev => prev.slice(0, -1));
+                      setFileName(false) // Pop last uploaded item
                       if (fileDocInputRef.current) {
                         fileDocInputRef.current.value = null;
                       }
@@ -1324,7 +1330,6 @@ export default function App() {
               </div>
             </div>
           )}
-
           <TextareaAutosize
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -1346,7 +1351,7 @@ export default function App() {
             />
             <input
               type="file"
-              accept={model === 'gemini-2.5-flash-lite' ? '.pdf,.mp4,.mp3,.wav,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document' : '.txt'}
+              accept={model === 'gemini-2.5-flash-lite' ? '.pdf,.mp4,.mp3,.wav,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/mp4,video/mpeg,audio/mpeg,audio/wav' : '.txt'}
               className="hidden"
               ref={fileDocInputRef}
               onChange={handleDocFileChange}
@@ -1492,7 +1497,7 @@ export default function App() {
               disabled={loading || uploading || (!input.trim())}
               className={`px-2 sm:px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${getSendButtonClass()} transition-colors duration-500`}
             >
-              <div className='hidden md:block'>
+              <div onClick={sendMessage} className='hidden md:block'>
                 SEND
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 md:hidden lg:block">
