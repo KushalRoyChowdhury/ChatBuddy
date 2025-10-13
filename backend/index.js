@@ -460,30 +460,32 @@ app.post('/model', async (req, res) => {
             text = text.replace(/\\(?![ntr"'\\])/g, '\\\\');
         }
 
-        try {
-            JSON.parse(text);
-        }
-        catch (error) {
-            console.log("JSON PARSE ERROR:", error.message);
-
-            const parseCursedAIStructure = (input) => {
-                const clean = (input?.replace(/\s+/g, ' ') || '').trim();
-                if (!clean) return { action: '', target: [], response: '' };
-
-                const extract = (key) => {
-                    const m = clean.match(new RegExp(`(?:^|\\b)${key}\\s*[:=]\\s*(?:"([^"]*)"|'([^']*)'|([^,}]*?))(?=\\s*(?:,\\s*(?:action|target|response)\\b|\\s*$|\\s*[},]))`, 'i'));
-                    return (m?.[1] ?? m?.[2] ?? m?.[3] ?? '').trim().replace(/["'}\]]+$/, '').trim();
-                };
-
-                const action = extract('action');
-                const response = extract('response');
-                const target = extract('target');
-
-                return { action, target, response };
+        if (!generatedImage) {
+            try {
+                JSON.parse(text);
             }
+            catch (error) {
+                console.log("JSON PARSE ERROR:", error.message);
 
-            text = parseCursedAIStructure(text);
-            text = JSON.stringify(text);
+                const parseCursedAIStructure = (input) => {
+                    const clean = (input?.replace(/\s+/g, ' ') || '').trim();
+                    if (!clean) return { action: '', target: [], response: '' };
+
+                    const extract = (key) => {
+                        const m = clean.match(new RegExp(`(?:^|\\b)${key}\\s*[:=]\\s*(?:"([^"]*)"|'([^']*)'|([^,}]*?))(?=\\s*(?:,\\s*(?:action|target|response)\\b|\\s*$|\\s*[},]))`, 'i'));
+                        return (m?.[1] ?? m?.[2] ?? m?.[3] ?? '').trim().replace(/["'}\]]+$/, '').trim();
+                    };
+
+                    const action = extract('action');
+                    const response = extract('response');
+                    const target = extract('target');
+
+                    return { action, target, response };
+                }
+
+                text = parseCursedAIStructure(text);
+                text = JSON.stringify(text);
+            }
         }
 
         if (thought.length > 0) {
