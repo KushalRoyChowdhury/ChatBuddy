@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Note on Future Development:** This project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+> **Note on Future Development:** With th release of v1.6, this project is considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+
+## [1.6.1] - 2025-10-13
+
+### Fixed
+- Better rendring of complex Mathematical Equations.
+- Huge performance improvements for weak Single-Core CPUs.
+- Improved Memory Load.
 
 ## [1.6] - 2025-10-11
 
@@ -59,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **NOTICE: [SEP 15 Update]** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 
 
-> *This is a huge upgrade from the previous architechture, if you face any bugs or issues kindly mention in GitHub.*
+> *This is a huge upgrade architechtural upgrade than previous one, if you face any bugs or issues kindly mention in GitHub.*
 
 ### Fixed
 - Major changes in server side to make responses consistent.
