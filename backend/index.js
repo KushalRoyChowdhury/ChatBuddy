@@ -151,10 +151,10 @@ async function checkRateLimit(req) {
 
         // If the window is NOT expired and the hit count is at max, deny.
         if (!isMinuteExpired && limitRecord.hitM >= limits.maxM) {
-            return { allowed: false, status: 429, message: 'Rate limit exceeded. Try again in a moment.' };
+            return { allowed: false, status: 429, message: 'Too many requests. Try again in a moment.' };
         }
         if (!isDayExpired && limitRecord.hitD >= limits.maxD) {
-            return { allowed: false, status: 429, message: 'Daily limit reached. Try again tomorrow.' };
+            return { allowed: false, status: 429, message: 'Daily limit reached for this model. Try again tomorrow or switch to different model.' };
         }
 
         return { allowed: true };
