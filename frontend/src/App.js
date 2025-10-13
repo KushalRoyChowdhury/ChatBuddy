@@ -1493,7 +1493,7 @@ export default function App() {
             </AnimatePresence>
 
             <motion.button 
-              whileTap={{ scale: 0.99 }
+              whileTap={{ scale: 0.99 }}
               onClick={sendMessage}
               disabled={loading || uploading || (!input.trim())}
               className={`px-2 sm:px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${getSendButtonClass()} transition-colors duration-500`}
