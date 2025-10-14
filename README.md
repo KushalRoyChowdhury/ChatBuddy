@@ -1,6 +1,6 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI 
 
-Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
+Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and Noe.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
@@ -18,7 +18,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.) with the Advanced Model. The AI can read and analyze the content of your files, making it perfect for summarizing documents, answering questions about reports, or analyzing data.
 
--   **🎨 Image Generation**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
+-   **🎨 Image Generation (`gemini-2.0-image-preview`)**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
 
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
@@ -34,8 +34,8 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   System Prompt & API Key
 
 -   **🧠 Advanced Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations.
-    -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall.
-    -   **Temporary Memory**: A short-term buffer that holds recent context, automatically managed to stay within token limits.
+    -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
+    -   **Temporary Memory**: A short-term buffer that holds recent context, managed automatically by the application.
 
 -   **🔧 Full Configurability**: Tailor the AI's behavior to your exact needs through the **Options** menu.
     -   **Custom System Prompt**: Define the AI's personality, rules, and objectives to tune its responses.
@@ -43,7 +43,8 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **💻 Rich Markdown & Code Rendering**:
     -   Full Markdown support for formatting responses.
-    -   Beautiful, syntax-highlighted code blocks with a one-click "Copy" button.
+    -   LaTeX Rendering for Mathematical Equations.
+    -   Beautiful, syntax-highlighted code blocks.
 
 -   **🛠️ Utility Features**:
     -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
@@ -62,13 +63,13 @@ This project is built with a modern and powerful tech stack:
     -   **React**: For building the user interface.
     -   **Tailwind CSS**: For utility-first styling.
     -   **Framer Motion**: For smooth and beautiful animations.
-    -   **React Markdown**: For rendering AI responses with rich formatting.
-    -   **React Syntax Highlighter**: For elegant code block rendering.
--   **Backend**: Node.js with Express.
+-   **Backend**:
+    -   Node.js with Express.
+    -   @google/genai SDK
 
 ## 🚀 Getting Started
 
-To run ChatBuddy locally, you'll need to set up both the frontend and the backend.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend.
 
 ### Prerequisites
 
@@ -123,24 +124,22 @@ The backend server is required for the AI to function.
 
 ChatBuddy is designed to be flexible and powerful, giving you control over your AI experience.
 
-### Default vs. Personal API Key
+### Public Version and Privacy (This information is not applicable if self-hosting)
 
-The application comes with a default API key that has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
-
-> **Note:** The default API key is for the developer-hosted public version. When running the application locally, you will need to provide your own API key.
-
-> **Privacy Notice**: If using the public hosted version, none of your chats, memories are logged/stored on the server. All other data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms).
+On the hosted version the app work without providing any KEYs but has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
 
 
-| Feature               | Default Server Key (Free Tier) [Per User]  | Your Own Key (Free Tier)                        |
+| Feature               | Without PersonalbKey (Free Tier)           | Your Own Key (Free Tier)                        |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k /  *Advanced: 128k*                   |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 1      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 10 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
 
-> **NOTE:** *Context Window sizes are for chat history. Memories and System Prompts are not counted towards the mentioned limits.*
+> **NOTE:** *Context Window sizes are for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
 
 > Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
+
+> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use File Upload feature the files will be stored for next 48hrs from uploading (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). It is still recommended not to share any private sensitive information.
 
 
 **How to get your key:**
@@ -170,7 +169,7 @@ This allows for dynamic and context-aware conversations that evolve over time. Y
 
 The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star!
 
-> **Note on Future Development:** This project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+> **Note on Future Development:** With the release of v1.6, this project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
 
 
 *Thank you for using ChatBuddy!*
