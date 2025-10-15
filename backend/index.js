@@ -214,28 +214,29 @@ setInterval(saveRateLimitDB, 30 * 1000);
 
 
 /**
-* Parses a potentially malformed, JSON-like string from an AI, extracts key values,
-* applies defaults, and returns a clean, valid JSON string.
-*
-* @param {string} rawText The raw string input from the AI.
-* @returns {string} A valid JSON string representing the parsed object.
-*/
+ * A highly tolerant parser that tries to salvage key-value data from a malformed,
+ * JSON-like string from AI. If the string is so malformed that no
+ * relevant keys can be found, it signals a complete failure by returning null.
+ *
+ * @param {string} rawText The raw, potentially malformed string input.
+ * @returns {string|null} A valid, stringified JSON object on success, or null on total failure.
+ */
 function sanitizeAndParseAIResponse(rawText) {
-    // If the input is empty or not a string, return a default JSON structure.
+    // 1. Handle null, empty, or non-string inputs immediately.
     if (!rawText || typeof rawText !== 'string') {
-        const defaultObj = {
-            action: 'chat',
-            target: [''],
-            response: '',
-        };
-        return JSON.stringify(defaultObj, null, 2);
+        return null;
     }
 
-    // --- Helper function to extract a value for a given key ---
+    /**
+     * An inner helper function to extract a value for a specific key using a robust regex.
+     * @param {string} key The key to search for ('action', 'target', or 'response').
+     * @param {string} text The text to search within.
+     * @returns {string|null} The cleaned value string, or null if not found.
+     */
     const extractValue = (key, text) => {
-
         const regex = new RegExp(
             `\\b${key}\\b\\s*[:=]\\s*` +
+
             `(` +
             `"(?:[^"\\\\]|\\\\.)*"` +
             `|` +
@@ -243,11 +244,11 @@ function sanitizeAndParseAIResponse(rawText) {
             `|` +
             `\\[(?:[^\\]\\\\]|\\\\.)*\\]` +
             `|` +
-
             `.+?` +
             `)` +
 
             `(?=\\s*,?\\s*\\b(?:action|target|response)\\b|\\s*[}\\]]|$)`,
+
             'is'
         );
 
@@ -257,6 +258,7 @@ function sanitizeAndParseAIResponse(rawText) {
         }
 
         let value = match[1].trim();
+
         if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
             value = value.slice(1, -1);
         }
@@ -267,22 +269,23 @@ function sanitizeAndParseAIResponse(rawText) {
     const extractedTarget = extractValue('target', rawText);
     const extractedResponse = extractValue('response', rawText);
 
+    if (extractedAction === null && extractedTarget === null && extractedResponse === null) {
+        return null; 
+    }
     const action = extractedAction || 'chat';
-
     const response = extractedResponse !== null ? extractedResponse : rawText;
 
     let target;
     if (extractedTarget) {
         try {
             target = JSON.parse(extractedTarget);
-
-            if (!Array.isArray(target)) target = [target];
+            if (!Array.isArray(target)) {
+                target = [target];
+            }
         } catch (e) {
-
             target = [extractedTarget];
         }
     } else {
-
         target = [''];
     }
 
@@ -292,10 +295,8 @@ function sanitizeAndParseAIResponse(rawText) {
         response: response,
     };
 
-    return JSON.stringify(finalObject, null, 2);
+    return JSON.stringify(finalObject);
 }
-
-
 
 
 // --- Troll ---
@@ -550,6 +551,24 @@ app.post('/model', async (req, res) => {
             catch (error) {
                 console.log("JSON PARSE ERROR:", error.message);
                 text = sanitizeAndParseAIResponse(text);
+
+                if (text === null) {
+
+                    console.log("SANITIZER FAILED: Input was too cursed. Using fallback response.");
+                    const fallbackObject = {
+                        action: 'chat',
+                        target: [],
+                        response: "I'm currently having problem generating a response, try again in a moment."
+                    };
+
+                    text = JSON.stringify(fallbackObject);
+
+                    await incrementHitCount(req);
+
+                    res.status(200).json({
+                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                    });
+                }
             }
         }
 
