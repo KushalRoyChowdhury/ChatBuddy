@@ -213,6 +213,89 @@ loadRateLimitDB();
 setInterval(saveRateLimitDB, 30 * 1000);
 
 
+/**
+* Parses a potentially malformed, JSON-like string from an AI, extracts key values,
+* applies defaults, and returns a clean, valid JSON string.
+*
+* @param {string} rawText The raw string input from the AI.
+* @returns {string} A valid JSON string representing the parsed object.
+*/
+function sanitizeAndParseAIResponse(rawText) {
+    // If the input is empty or not a string, return a default JSON structure.
+    if (!rawText || typeof rawText !== 'string') {
+        const defaultObj = {
+            action: 'chat',
+            target: [''],
+            response: '',
+        };
+        return JSON.stringify(defaultObj, null, 2);
+    }
+
+    // --- Helper function to extract a value for a given key ---
+    const extractValue = (key, text) => {
+
+        const regex = new RegExp(
+            `\\b${key}\\b\\s*[:=]\\s*` +
+            `(` +
+            `"(?:[^"\\\\]|\\\\.)*"` +
+            `|` +
+            `'(?:[^'\\\\]|\\\\.)*'` +
+            `|` +
+            `\\[(?:[^\\]\\\\]|\\\\.)*\\]` +
+            `|` +
+
+            `.+?` +
+            `)` +
+
+            `(?=\\s*,?\\s*\\b(?:action|target|response)\\b|\\s*[}\\]]|$)`,
+            'is'
+        );
+
+        const match = text.match(regex);
+        if (!match || !match[1]) {
+            return null;
+        }
+
+        let value = match[1].trim();
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+        return value;
+    };
+
+    const extractedAction = extractValue('action', rawText);
+    const extractedTarget = extractValue('target', rawText);
+    const extractedResponse = extractValue('response', rawText);
+
+    const action = extractedAction || 'chat';
+
+    const response = extractedResponse !== null ? extractedResponse : rawText;
+
+    let target;
+    if (extractedTarget) {
+        try {
+            target = JSON.parse(extractedTarget);
+
+            if (!Array.isArray(target)) target = [target];
+        } catch (e) {
+
+            target = [extractedTarget];
+        }
+    } else {
+
+        target = [''];
+    }
+
+    const finalObject = {
+        action: action,
+        target: target,
+        response: response,
+    };
+
+    return JSON.stringify(finalObject, null, 2);
+}
+
+
 
 
 // --- Troll ---
@@ -466,25 +549,7 @@ app.post('/model', async (req, res) => {
             }
             catch (error) {
                 console.log("JSON PARSE ERROR:", error.message);
-
-                const parseCursedAIStructure = (input) => {
-                    const clean = (input?.replace(/\s+/g, ' ') || '').trim();
-                    if (!clean) return { action: '', target: [], response: '' };
-
-                    const extract = (key) => {
-                        const m = clean.match(new RegExp(`(?:^|\\b)${key}\\s*[:=]\\s*(?:"([^"]*)"|'([^']*)'|([^,}]*?))(?=\\s*(?:,\\s*(?:action|target|response)\\b|\\s*$|\\s*[},]))`, 'i'));
-                        return (m?.[1] ?? m?.[2] ?? m?.[3] ?? '').trim().replace(/["'}\]]+$/, '').trim();
-                    };
-
-                    const action = extract('action');
-                    const response = extract('response');
-                    const target = extract('target');
-
-                    return { action, target, response };
-                }
-
-                text = parseCursedAIStructure(text);
-                text = JSON.stringify(text);
+                text = sanitizeAndParseAIResponse(text);
             }
         }
 
