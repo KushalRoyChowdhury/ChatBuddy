@@ -139,7 +139,7 @@ On the hosted version the app work without providing any KEYs but has strict rat
 
 > Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
 
-> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use File Upload feature the files will be stored for next 48hrs from uploading (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). It is still recommended not to share any private sensitive information.
+> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use File Upload feature the files will be stored for next 48hrs from uploading in google cloud project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)).
 
 
 **How to get your key:**
