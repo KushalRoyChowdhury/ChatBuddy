@@ -561,7 +561,7 @@ app.post('/model', async (req, res) => {
                     res.status(200).json({
                         candidates: [{ content: { parts: [{ text }], role: 'model' } }]
                     });
-                })
+                }
 return;
                 }
 
