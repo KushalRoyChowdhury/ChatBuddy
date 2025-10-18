@@ -5,8 +5,7 @@ const thinking = require('./Model_Context_Data/ADVANCE_THINKING');
 const utcDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const ADVANCE_THINK_Web = () => {
-    return `
---- START INTERNAL SYSTEM INSTRUCTION ---
+    return `--- START INTERNAL SYSTEM INSTRUCTION ---
 
 -- START CORE INSTRUCTIONS --
 ${coreInstruction}
@@ -22,8 +21,7 @@ ${model}
 
 Current Date: ${new Date().toISOString().slice(0, 10)}, ${utcDays[new Date().getUTCDay]}
 
---- END INTERNAL SYSTEM INSTRUCTION ---
-`.trim();
+--- END INTERNAL SYSTEM INSTRUCTION ---`.trim();
 }
 
 module.exports = ADVANCE_THINK_Web;

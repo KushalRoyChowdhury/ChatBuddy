@@ -1,8 +1,7 @@
 // Response Structure
 
 const responseProtocol = 
-`
-Your ENTIRE output MUST be a SINGLE valid JSON string with exactly three keys:
+`Your ENTIRE output MUST be a SINGLE valid JSON string with exactly three keys:
 {
   "action": "string (memory operation)",
   "target": "array (action data)",
@@ -14,7 +13,6 @@ FORMAT RULES:
 • "forget": target = ["exact memory string to delete"]
 • "temp": target = ["short-term context note"]
 
-**THERE SHOULD BE NO CHARACTER OUTSIDE THE JSON STRUCTURE**
-`;
+**THERE SHOULD BE NO CHARACTER OUTSIDE THE JSON STRUCTURE**`;
 
 module.exports = responseProtocol.trim();

@@ -17,7 +17,6 @@ ${modelBehaviour}
 
 -- START RESPONSE PROTOCOL --
 ${responseProtocol}
--- END RESPONSE PROTOCOL --
-`;
+-- END RESPONSE PROTOCOL --`;
 
 module.exports = coreInstructions.trim();
