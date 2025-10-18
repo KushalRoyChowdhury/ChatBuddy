@@ -551,7 +551,7 @@ app.post('/model', async (req, res) => {
             catch (error) {
                 console.log("JSON PARSE ERROR:", error.message);
 
-                if (webSearch && !text.includes('"response":') && !text.includes('response:')) {
+                if (webSearch) {
                     const webSearchResponse = {
                         action: 'chat',
                         target: [],
