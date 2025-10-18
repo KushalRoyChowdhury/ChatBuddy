@@ -98,7 +98,7 @@ const MemoizedMarkdownRenderer = React.memo(({ content }) => {
       </ReactMarkdown>
     </div>
   );
-});
+}, () => true);
 
 const getUserBubbleClass = (msgModel) => {
   return msgModel === 'gemini-2.5-flash-lite'
