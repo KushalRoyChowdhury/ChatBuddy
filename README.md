@@ -1,6 +1,6 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI 
 
-Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and Node.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
+Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models directly to your browser (AI models can't be run locally). Built with React and Node.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
@@ -23,7 +23,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
     -   **Advanced Model (`gemini-2.5-flash`)**: A state-of-the-art model for complex reasoning, deep analysis, and creative generation.
-    -   **� Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
+    -   **💭 Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
     -   **🤔 Model Thinking Transparency**: See the AI's step-by-step reasoning process for complex queries when using the Advanced Reasoning mode.
     -   **🔎 Google Search**: The Advanced model can access Google Search to provide responses with the most up-to-date information.
 
@@ -33,9 +33,9 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   Model Selection
     -   System Prompt & API Key
 
--   **🧠 Advanced Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations.
+-   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations.
     -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
-    -   **Temporary Memory**: A short-term buffer that holds recent context, managed automatically by the application.
+    -   **Temporary Memory**: A short-term buffer that holds recent chats, managed automatically by the application.
 
 -   **🔧 Full Configurability**: Tailor the AI's behavior to your exact needs through the **Options** menu.
     -   **Custom System Prompt**: Define the AI's personality, rules, and objectives to tune its responses.
@@ -49,11 +49,12 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🛠️ Utility Features**:
     -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
     -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
-    -   **Import Export Memories**: Take backup or add new memories from other devices.
+    -   **Import / Export Memories**: Back up or add new memories from other devices.
     -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
     -   **Full App Reset**: A one-click option to reset the entire application to its default state.
 
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
+-   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
 
 ## ⚙️ Technologies Used
 
@@ -126,20 +127,20 @@ ChatBuddy is designed to be flexible and powerful, giving you control over your 
 
 ### Public Version and Privacy (This information is not applicable if self-hosting)
 
-On the hosted version the app work without providing any KEYs but has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
+On the hosted version, the app works without providing any keys but has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
 
 
 | Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
-| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k /  *Advanced: 128k*                   |
+| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 1      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 10 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
 
-> **NOTE:** *Context Window sizes are for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
+> **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
 
-> Your Own API Key Limits are shown as per Google Free Quota *(Updated: 2025 SEP)*.
+> Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
 
-> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use File Upload feature the files will be stored for next 48hrs from uploading in google cloud project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)).
+> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)).
 
 
 **How to get your key:**
