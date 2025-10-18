@@ -551,7 +551,7 @@ app.post('/model', async (req, res) => {
             catch (error) {
                 console.log("JSON PARSE ERROR:", error.message);
 
-                if (webSearch && !text.include('action') && !text.include('target') && !text.include('response')) {
+                if (webSearch && !text.includes('"response":') && !text.includes('response:')) {
                     const webSearchResponse = {
                         action: 'chat',
                         target: [],
@@ -586,7 +586,6 @@ if (text === null) {
     return;
 }
             }
-        }
 
 if (thought.length > 0) {
     text = thought + text;
