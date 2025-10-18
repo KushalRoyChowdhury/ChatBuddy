@@ -547,6 +547,9 @@ app.post('/model', async (req, res) => {
         if (!generatedImage) {
             try {
                 if (webSearch) {
+                    if (thought.length > 0) {
+                        text = thought + text;
+                    }
                     res.status(200).json({
                         candidates: [{ content: { parts: [{ text }], role: 'model' } }]
                     });
