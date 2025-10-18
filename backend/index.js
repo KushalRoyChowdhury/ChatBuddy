@@ -546,71 +546,65 @@ app.post('/model', async (req, res) => {
 
         if (!generatedImage) {
             try {
-                JSON.parse(text);
-            }
-            catch (error) {
-                console.log("JSON PARSE ERROR:", error.message);
-
                 if (webSearch) {
-                    const webSearchResponse = {
-                        action: 'chat',
-                        target: [],
-                        response: text
-                    }
-                    text = JSON.stringify(webSearchResponse);
                     res.status(200).json({
                         candidates: [{ content: { parts: [{ text }], role: 'model' } }]
                     });
                     return;
                 }
-         }
-
-text = sanitizeAndParseAIResponse(text);
-
-if (text === null) {
-
-    console.log("SANITIZER FAILED: Input was too cursed. Using fallback response.");
-    const fallbackObject = {
-        action: 'chat',
-        target: [],
-        response: "I'm currently having problem generating a response, try again in a moment."
-    };
-
-    text = JSON.stringify(fallbackObject);
-
-    await incrementHitCount(req);
-
-    res.status(200).json({
-        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-    });
-    return;
-}
+                JSON.parse(text);
             }
+            catch (error) {
+                console.log("JSON PARSE ERROR:", error.message);
 
-if (thought.length > 0) {
-    text = thought + text;
-}
 
-await incrementHitCount(req);
+                text = sanitizeAndParseAIResponse(text);
 
-res.status(200).json({
-    candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-});
+                if (text === null) {
+
+                    console.log("SANITIZER FAILED: Input was too cursed. Using fallback response.");
+                    const fallbackObject = {
+                        action: 'chat',
+                        target: [],
+                        response: "I'm currently having problem generating a response, try again in a moment."
+                    };
+
+                    text = JSON.stringify(fallbackObject);
+
+                    await incrementHitCount(req);
+
+                    res.status(200).json({
+                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                    });
+                    return;
+                }
+            }
+        }
+
+        if (thought.length > 0) {
+            text = thought + text;
+        }
+
+        await incrementHitCount(req);
+
+        res.status(200).json({
+            candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+        });
 
     } catch (error) {
-    console.error("GEMINI API ERROR:: ", error);
-    if (error.toString().includes('429') && retry) {
-        console.log('API-side rate limit reached. Attempting fallback...');
-        modelIndex = modelIndex === 1 ? 0 : 1;
-        retry = false;
-        break start;
-    }
+        console.error("GEMINI API ERROR:: ", error);
+        if (error.toString().includes('429') && retry) {
+            console.log('API-side rate limit reached. Attempting fallback...');
+            modelIndex = modelIndex === 1 ? 0 : 1;
+            retry = false;
+            break start;
+        }
 
-    let errorMessage = error;
-    res.status(error.status || 500).json({
-        candidates: [{ content: { parts: [{ errorMessage }], role: 'model' } }]
-    });
-}
+        let errorMessage = error;
+        res.status(error.status || 500).json({
+            candidates: [{ content: { parts: [{ errorMessage }], role: 'model' } }]
+        });
+    }
 
 });
 
