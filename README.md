@@ -1,6 +1,6 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI 
 
-Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and Noe.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
+Welcome to ChatBuddy, a feature-rich web-application that brings the power of advanced AI model access directly to your browser (AI models can't be run locally). Built with React and Node.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
 ### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
@@ -129,7 +129,7 @@ ChatBuddy is designed to be flexible and powerful, giving you control over your 
 On the hosted version the app work without providing any KEYs but has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
 
 
-| Feature               | Without PersonalbKey (Free Tier)           | Your Own Key (Free Tier)                        |
+| Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k /  *Advanced: 128k*                   |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 1      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
@@ -164,6 +164,8 @@ The AI can manage its own memory based on your conversation. The App listens for
 -   `"response"`: The user-facing text that gets displayed in the chat.
 
 This allows for dynamic and context-aware conversations that evolve over time. You can view and manage all permanent memories from the "Saved Memories" modal.
+
+**NOTE:** Memory Actions are not available in Web Search mode.
 
 ## 📜 Source Code
 
