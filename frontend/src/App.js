@@ -90,7 +90,7 @@ const getTextToRender = (msg) => {
   return textToRender;
 };
 
-const MemoizedMarkdownRenderer = React.memo(({ content }) => {
+const ChatBubbleMessage = React.memo(({ content }) => {
   return (
     <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
       <ReactMarkdown components={{ code: CodeBlock }} remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
@@ -193,7 +193,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
           }
           // Otherwise, render as Markdown
           return (
-            <MemoizedMarkdownRenderer content={content} />
+            <ChatBubbleMessage content={content} />
           );
         })()}
 
