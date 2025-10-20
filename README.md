@@ -12,6 +12,8 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 
 ChatBuddy is more than just a simple chatbot. It's packed with advanced features designed for power users and developers.
 
+-   **💬 Multi-Chat Support**: Manage multiple conversations at once. Each chat is saved independently, allowing you to switch between different topics and contexts without losing your history.
+
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat. The AI can understand and analyze the content of your images, opening up new possibilities for visual-based conversations.
 
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model. The AI can process and understand the content, allowing for discussions and analysis of multimedia files.
@@ -25,7 +27,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **Advanced Model (`gemini-2.5-flash`)**: A state-of-the-art model for complex reasoning, deep analysis, and creative generation.
     -   **💭 Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
     -   **🤔 Model Thinking Transparency**: See the AI's step-by-step reasoning process for complex queries when using the Advanced Reasoning mode.
-    -   **🔎 Google Search**: The Advanced model can access Google Search to provide responses with the most up-to-date information.
+    -   **🔎 Google Search**: The advanced model can access Google Search to provide responses with the most up-to-date information.
 
 -   **📝 Persistent State**: Your entire session is saved locally in your browser's `localStorage`. This includes:
     -   Chat History
@@ -55,6 +57,10 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
 -   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
+
+## ⚠️ Disclaimer
+
+**Version 2.0 is not backward compatible with previous chat data.** Due to significant data structure changes in this release, older `.json` chat files cannot be imported.
 
 ## ⚙️ Technologies Used
 
@@ -170,11 +176,11 @@ This allows for dynamic and context-aware conversations that evolve over time. Y
 
 ## 📜 Source Code
 
-The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star!
+The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star! The codebase has been improved for readability, making it easier for open-source contributors to get involved.
 
-> **Note on Future Development:** With the release of v1.6, this project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+> **Note on Future Development:** With the release of v2.0.0, this project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
 
 
 *Thank you for using ChatBuddy!*
 
-*v1.6.1 - By KushalRoyChowdhury*
+*v2.0.0 - By KushalRoyChowdhury*
