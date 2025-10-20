@@ -1,4 +1,4 @@
-// Update 1.6.1
+// Update 2.0
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -346,7 +346,7 @@ app.post('/upload', async (req, res) => {
         };
 
         // Determine applicable limit
-        let maxFileSize = 20 * 1024 * 1024; // Fallback to global limit
+        let maxFileSize = 50 * 1024 * 1024; // Fallback to global limit
 
         if (fileType.startsWith('image/')) {
             maxFileSize = SIZE_LIMITS['image/'];
