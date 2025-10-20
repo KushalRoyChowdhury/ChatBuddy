@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Note on Future Development:** With th release of v1.6, this project is considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+> **Note on Future Development:** With th release of v2.0.0, this project is considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
+
+## [2.0.0] - 2025-10-20
+
+### Added
+- Multi-Chat Support.
+
+### Changed
+- UI Enhancements for more features and modern design.
+- Reduced Visual Clutter.
+- Video Sharing now support upto 50MB.
 
 ## [1.6.1] - 2025-10-13
 
@@ -116,3 +126,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of the project as Open-Source.
+
+*Thank you for using ChatBuddy!*
