@@ -50,8 +50,8 @@ app.get('/auth/google/callback', async (req, res) => {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
 
-        res.cookie('access_token', tokens.access_token, { httpOnly: true, secure: false, SameSite=None });
-        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, secure: false, SameSite=None });
+        res.cookie('access_token', tokens.access_token, {httpOnly: true, secure: true, sameSite: 'None'});
+        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, secure: true,sameSite: 'None' });
 
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
