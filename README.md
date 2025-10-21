@@ -178,8 +178,6 @@ This allows for dynamic and context-aware conversations that evolve over time. Y
 
 The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star! The codebase has been improved for readability, making it easier for open-source contributors to get involved.
 
-> **Note on Future Development:** With the release of v2.0.0, this project is now considered feature-complete, and no major new features are planned. However, I will continue to provide patch fixes and performance improvements over time as needed.
-
 
 *Thank you for using ChatBuddy!*
 
