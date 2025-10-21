@@ -24,6 +24,17 @@ app.use(fileUpload({
     tempFileDir: '/tmp/',
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
+app.use('/debug', (req, res) => {
+  res.json({
+    protocol: req.protocol,
+    secure: req.secure,
+    headers: {
+      'x-forwarded-proto': req.get('x-forwarded-proto'),
+      'x-forwarded-host': req.get('x-forwarded-host'),
+      origin: req.get('origin')
+    }
+  });
+});
 
 // Google Drive API setup
 const oauth2Client = new google.auth.OAuth2(
