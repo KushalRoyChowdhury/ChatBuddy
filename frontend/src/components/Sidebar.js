@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions, isSidebarOpen, setIsSidebarOpen, isDesktop, handleSettingsClick, handleImportClick, setShowExportOptions, setTempMemories, setUploadedImages, setMessageImageMap, loading, setShowNotAvailablePopup }) => {
+const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions, isSidebarOpen, setIsSidebarOpen, isDesktop, handleSettingsClick, handleImportClick, setShowExportOptions, setTempMemories, setUploadedImages, setMessageImageMap, loading, setShowNotAvailablePopup, setThinkingProcesses }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
@@ -11,18 +11,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       setShowNotAvailablePopup(true);
       return;
     }
-
-    const activeChat = chatSessions.find(session => session.chatID === activeChatId);
-
-    if (activeChat && activeChat.chat.length === 0) {
-      if (!isDesktop) {
-        setIsSidebarOpen(false);
-      }
-      return;
-    }
-
     const newChatId = crypto.randomUUID();
-    setChatSessions(prevSessions => [{ chatID: newChatId, title: 'New Chat', chat: [] }, ...prevSessions]);
     setActiveChatId(newChatId);
     if (!isDesktop) {
       setIsSidebarOpen(false);
@@ -37,6 +26,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     setTempMemories(prevMemories => prevMemories.filter(memory => memory.id !== chatIdToDelete));
     setUploadedImages(prevImages => prevImages.filter(image => !messageIdsToDelete.has(image.id)));
     setMessageImageMap(prevMap => prevMap.filter(map => !messageIdsToDelete.has(map.id)));
+    setThinkingProcesses(prev => {
+      const newThinkingProcesses = { ...prev };
+      delete newThinkingProcesses[chatIdToDelete];
+      return newThinkingProcesses;
+    });
 
     if (activeChatId === chatIdToDelete) {
       const newActiveId = chatSessions.length > 1 ? chatSessions.find(session => session.chatID !== chatIdToDelete).chatID : null;
@@ -83,7 +77,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   const desktopSidebar = (
     <motion.div
       layout
-      className="bg-gray-100 flex flex-col sticky top-0 overflow-hidden h-dvh"
+      className="bg-gray-100 flex flex-col fixed top-0 left-0 overflow-hidden h-dvh"
       initial={false}
       animate={{ width: isSidebarOpen ? '18rem' : '0' }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -106,7 +100,13 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           <div
             key={session.chatID}
             className={`p-2 h-10 mb-2 rounded-md cursor-pointer group flex items-center ${activeChatId === session.chatID ? 'bg-blue-200' : 'hover:bg-gray-200'}`}
-            onClick={() => setActiveChatId(session.chatID)}
+            onClick={() => {
+              if (loading) {
+                setShowNotAvailablePopup(true);
+              } else {
+                setActiveChatId(session.chatID);
+              }
+            }}
           >
             {renamingId === session.chatID ? (
               <input
@@ -156,7 +156,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30"
+            className="fixed inset-0 top-0 left-0 bg-black bg-opacity-50 z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -190,8 +190,12 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
                   key={session.chatID}
                   className={`p-2 h-10 mb-2 rounded-md cursor-pointer flex items-center ${activeChatId === session.chatID ? 'bg-blue-200' : 'hover:bg-gray-200'}`}
                   onClick={() => {
-                    setActiveChatId(session.chatID);
-                    setIsSidebarOpen(false);
+                    if (loading) {
+                      setShowNotAvailablePopup(true);
+                    } else {
+                      setActiveChatId(session.chatID);
+                      setIsSidebarOpen(false);
+                    }
                   }}
                 >
                   {renamingId === session.chatID ? (

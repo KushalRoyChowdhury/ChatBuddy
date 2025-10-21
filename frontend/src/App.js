@@ -34,11 +34,11 @@ const getUserBubbleClass = (msgModel) => {
 export default function App() {
   useEffect(() => { fetch(`${BACKEND_URL}/health`, { method: 'GET' }) }, []);
 
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   // --- State Management ---
   const [chatSessions, setChatSessions] = useState(() => JSON.parse(localStorage.getItem('chatSessions')) || []);
-  const [activeChatId, setActiveChatId] = useState(() => sessionStorage.getItem('activeChatId') || null);
+  const [activeChatId, setActiveChatId] = useState(() => sessionStorage.getItem('activeChatId') || crypto.randomUUID());
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [model, setModel] = useState(() => localStorage.getItem('selectedModel') || 'gemma-3-27b-it');
@@ -53,7 +53,7 @@ export default function App() {
 
   // --- New/Modified State ---
   const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []);
-  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || []);
+  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || {});
   const [uploadedImages, setUploadedImages] = useState(() => {
     const saved = localStorage.getItem('uploadedImages');
     return saved ? JSON.parse(saved) : [];
@@ -89,20 +89,14 @@ export default function App() {
   const [tapBottom, setTapBottom] = useState();
   const [fileName, setFileName] = useState(false);
   const [showNotAvailablePopup, setShowNotAvailablePopup] = useState(false);
+  const [showPersonalization, setShowPersonalization] = useState(false);
+  const [userNickname, setUserNickname] = useState(() => localStorage.getItem('userNickname') || '');
+  const [showImportAppDataConfirm, setShowImportAppDataConfirm] = useState(false);
+  const [appDataToImport, setAppDataToImport] = useState(null);
 
   // Greetings
-  const userName = memories
-    .map(memory => {
-      if (memory.includes("User's name is")) {
-        return memory.split("User's name is")[1].trim();
-      }
-      if (memory.includes("User prefers to call them")) {
-        return memory.split("user prefers to call them")[1].trim();
-      }
-      return null;
-    })
-    .filter(Boolean)[0] || "legend";
-
+  let userName = userNickname || 'legend';
+  userName = userName.charAt(0).toUpperCase() + userName.slice(1);
   const greetings = [
     `Yo! Welcome back, ${userName}.`,
     "Oh look, you decided to come today 🎉",
@@ -117,6 +111,7 @@ export default function App() {
   const fileInputRef = useRef(null);
   const memoryFileInputRef = useRef(null);
   const fileImgInputRef = useRef(null);
+  const appDataFileInputRef = useRef(null);
 
   // --- State Persistence Effects ---
   useEffect(() => { localStorage.setItem('chatSessions', JSON.stringify(chatSessions)); }, [chatSessions]);
@@ -125,6 +120,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
   useEffect(() => { localStorage.setItem('geminiApiKey', apiKey); }, [apiKey]);
   useEffect(() => { localStorage.setItem('chatMemories', JSON.stringify(memories)); }, [memories]);
+  useEffect(() => { localStorage.setItem('userNickname', userNickname); }, [userNickname]);
 
   useEffect(() => {
     if (activeChatId) {
@@ -142,13 +138,10 @@ export default function App() {
   useEffect(() => {
     if (chatSessions.length === 0) {
       const newChatId = crypto.randomUUID();
-      setChatSessions([{ chatID: newChatId, title: 'New Chat', chat: [] }]);
       setActiveChatId(newChatId);
+      setChatSessions([{ chatID: newChatId, title: 'New Chat', chat: [] }]);
     }
-    if (!activeChatId && chatSessions.length > 0) {
-      setActiveChatId(chatSessions[0].chatID);
-    }
-  }, []);
+  }, [chatSessions.length]);
 
   useEffect(() => {
     setIsSidebarOpen(isDesktop);
@@ -181,7 +174,7 @@ export default function App() {
     setMessages([]);
     setMemories([]);
     setTempMemories([]);
-    setThinkingProcesses([]); // Clear thinking processes
+    setThinkingProcesses({}); // Clear thinking processes
     setSystemPrompt('');
     setApiKey('');
     setModel('gemma-3-27b-it');
@@ -190,11 +183,6 @@ export default function App() {
     setShowResetConfirm(false);
     setShowOptions(false);
     window.location.reload();
-  };
-
-  const handleClearTempMemory = () => {
-    setTempMemories([]);
-    localStorage.removeItem('chatTempMemories');
   };
 
   const deleteMemory = (memToDelete) => {
@@ -236,6 +224,46 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const handleImportAppDataClick = () => {
+    appDataFileInputRef.current.click();
+  };
+
+  const handleAppDataFileSelected = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        setAppDataToImport(content);
+        setShowImportAppDataConfirm(true);
+      };
+      reader.readAsText(file);
+    } else {
+      alert("Import failed: Please select a valid .json file.");
+    }
+    event.target.value = null;
+  };
+
+  const confirmImportAppData = () => {
+    if (!appDataToImport) return;
+    try {
+      const importedData = JSON.parse(appDataToImport);
+      for (const key in importedData) {
+        if (Object.hasOwnProperty.call(importedData, key)) {
+          localStorage.setItem(key, importedData[key]);
+        }
+      }
+      setShowImportAppDataConfirm(false);
+      setAppDataToImport(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("App Data Import Error:", error);
+      alert(`App data import failed: ${error.message}`);
+      setShowImportAppDataConfirm(false);
+      setAppDataToImport(null);
+    }
   };
 
   // --- Chat Import/Export Functions ---
@@ -329,7 +357,7 @@ export default function App() {
       setChatSessions(prevSessions => [...prevSessions, newChatSession]);
       setActiveChatId(newChatId);
       setSystemPrompt(importedData.systemPrompt || '');
-      setThinkingProcesses([]); // Clear old thinking processes on import
+      setThinkingProcesses(prev => ({ ...prev, [newChatId]: [] }));// Clear old thinking processes on import
       setShowImportConfirm(false);
       setFileToImport(null);
     } catch (error) {
@@ -399,7 +427,7 @@ export default function App() {
   };
 
 
-    const abortControllerRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   const handleStop = () => {
     if (abortControllerRef.current) {
@@ -472,10 +500,7 @@ export default function App() {
       }
     }
 
-    const currentChatId = activeChatId || crypto.randomUUID();
-    if (!activeChatId) {
-      setActiveChatId(currentChatId);
-    }
+    const currentChatId = activeChatId;
 
     setChatSessions(prevSessions => {
       const sessionExists = prevSessions.some(session => session.chatID === currentChatId);
@@ -530,6 +555,14 @@ export default function App() {
         setModelUsed("advance");
       }
 
+      const getSystemPrompt = () => {
+        if (userNickname && systemPrompt) {
+          return `-- USER NICKNAME "${userNickname}" -- Instruction: ${systemPrompt}`;
+        } else if (userNickname) {
+          return `-- USER NICKNAME "${userNickname}" --`;
+        }
+        return systemPrompt;
+      };
 
       const payload = {
         history: messages.concat(userMessage).map(msg => {
@@ -548,7 +581,7 @@ export default function App() {
         }),
         memory: memories,
         temp: memoriesForModel,
-        sys: systemPrompt,
+        sys: getSystemPrompt(),
         apiKey: apiKey || "",
         modelIndex: modelIndex,
         creativeRP: creativeRP,
@@ -579,7 +612,10 @@ export default function App() {
       const assistantMessageId = Date.now();
 
       if (thoughtContent) {
-        setThinkingProcesses(prev => [...prev, { id: assistantMessageId, content: thoughtContent }]);
+        setThinkingProcesses(prev => ({
+          ...prev,
+          [currentChatId]: [...(prev[currentChatId] || []), { id: assistantMessageId, content: thoughtContent }]
+        }));
       }
 
       let permanentMemoryChanged = false;
@@ -684,7 +720,7 @@ export default function App() {
       setTapBottom(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, [loading, tapBottom]);
+  }, [loading, tapBottom, messages]);
 
   useEffect(() => {
     setTapBottom(true);
@@ -812,7 +848,7 @@ export default function App() {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf("image") !== -1) {
-        e.preventDefault(); 
+        e.preventDefault();
         const file = items[i].getAsFile();
         if (file) {
           await handlePastedOrDroppedImage(file);
@@ -873,7 +909,11 @@ export default function App() {
 
   // --- JSX Rendering ---
   return (
-    <div className="min-h-dvh bg-gray-50 flex font-sans">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+      className="min-h-dvh max-w-[100vw] bg-gray-50 flex font-sans">
       <Sidebar
         chatSessions={chatSessions}
         activeChatId={activeChatId}
@@ -890,8 +930,9 @@ export default function App() {
         setMessageImageMap={setMessageImageMap}
         loading={loading}
         setShowNotAvailablePopup={setShowNotAvailablePopup}
+        setThinkingProcesses={setThinkingProcesses}
       />
-      <main className={`flex-1 flex flex-col transition-all duration-300`}>
+      <main className={`flex-1 w-full flex flex-col transition-all duration-300 ${isSidebarOpen && 'lg:ml-[18rem]'}`}>
         <Header
           model={model}
           handleModelToggle={handleModelToggle}
@@ -901,6 +942,7 @@ export default function App() {
         />
         <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept="application/json" className="hidden" />
         <input type="file" ref={memoryFileInputRef} onChange={handleMemoryFileSelected} accept="application/json" className="hidden" />
+        <input type="file" ref={appDataFileInputRef} onChange={handleAppDataFileSelected} accept="application/json" className="hidden" />
 
         <Modals
           showImportExportOptions={showImportExportOptions}
@@ -926,11 +968,8 @@ export default function App() {
           deleteMemory={deleteMemory}
           showOptions={showOptions}
           setShowOptions={setShowOptions}
-          systemPrompt={systemPrompt}
-          setSystemPrompt={setSystemPrompt}
           apiKey={apiKey}
           setApiKey={setApiKey}
-          handleClearTempMemory={handleClearTempMemory}
           setShowResetConfirm={setShowResetConfirm}
           showResetConfirm={showResetConfirm}
           handleResetApp={handleResetApp}
@@ -943,11 +982,21 @@ export default function App() {
           exportAppData={exportAppData}
           showNotAvailablePopup={showNotAvailablePopup}
           setShowNotAvailablePopup={setShowNotAvailablePopup}
+          showPersonalization={showPersonalization}
+          setShowPersonalization={setShowPersonalization}
+          userNickname={userNickname}
+          setUserNickname={setUserNickname}
+          systemPrompt={systemPrompt}
+          setSystemPrompt={setSystemPrompt}
+          handleImportAppDataClick={handleImportAppDataClick}
+          showImportAppDataConfirm={showImportAppDataConfirm}
+          setShowImportAppDataConfirm={setShowImportAppDataConfirm}
+          confirmImportAppData={confirmImportAppData}
         />
 
         <ChatLog
           messages={messages}
-          thinkingProcesses={thinkingProcesses}
+          thinkingProcesses={thinkingProcesses[activeChatId] || []}
           messageImageMap={messageImageMap}
           getTextToRender={getTextToRender}
           getUserBubbleClass={getUserBubbleClass}
@@ -999,6 +1048,6 @@ export default function App() {
           setWebSearch={setWebSearch}
         />
       </main>
-    </div >
+    </motion.div >
   );
 }

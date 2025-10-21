@@ -29,7 +29,6 @@ const Modals = React.memo(({
   setSystemPrompt,
   apiKey,
   setApiKey,
-  handleClearTempMemory,
   setShowResetConfirm,
   showResetConfirm,
   handleResetApp,
@@ -41,7 +40,15 @@ const Modals = React.memo(({
   handleMemoriesClick,
   exportAppData,
   showNotAvailablePopup,
-  setShowNotAvailablePopup
+  setShowNotAvailablePopup,
+  showPersonalization,
+  setShowPersonalization,
+  userNickname,
+  setUserNickname,
+  handleImportAppDataClick,
+  showImportAppDataConfirm,
+  setShowImportAppDataConfirm,
+  confirmImportAppData
 }) => {
   return (
     <AnimatePresence>
@@ -410,33 +417,6 @@ const Modals = React.memo(({
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto flex-grow space-y-6">
-              <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <p className="text-sm text-blue-800">
-                  The system prompt sets the behavior and rules for the AI.
-                </p>
-              </div>
-
-              <div className="relative">
-                <textarea
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  maxLength="400"
-                  className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
-                  placeholder="Enter system instructions..."
-                />
-                <div className="absolute bottom-2 right-2 text-xs text-gray-400">
-                  {systemPrompt.length} / 400
-                </div>
-                {systemPrompt && (
-                  <button
-                    onClick={() => setSystemPrompt('')}
-                    className="absolute top-3 right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Gemini API Key
@@ -466,10 +446,10 @@ const Modals = React.memo(({
                   Export App Data
                 </button>
                 <button
-                  onClick={handleClearTempMemory}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm"
+                  onClick={handleImportAppDataClick}
+                  className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
                 >
-                  Clear Temporary Memory
+                  Import App Data
                 </button>
                 <button
                   onClick={() => {
@@ -572,6 +552,15 @@ const Modals = React.memo(({
               <div className="space-y-2">
                 <button
                   onClick={() => {
+                    setShowPersonalization(true);
+                    setShowSettings(false);
+                  }}
+                  className="w-full p-2 rounded-md bg-green-100 text-green-800 hover:bg-green-200"
+                >
+                  Personalization
+                </button>
+                <button
+                  onClick={() => {
                     handleMemoriesClick();
                     setShowSettings(false);
                   }}
@@ -598,6 +587,109 @@ const Modals = React.memo(({
                   About
                 </button>
               </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      {showPersonalization && (
+        <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowPersonalization(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+          >
+            {/* Modal Header */}
+            <div className="p-5 border-b flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">Personalization</h2>
+              <button
+                onClick={() => setShowPersonalization(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto flex-grow space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  User Nickname
+                </label>
+                <div className='relative'>
+                  <input
+                    type="text"
+                    maxLength="20"
+                    value={userNickname}
+                    onChange={(e) => setUserNickname(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    placeholder="Enter your nickname"
+                  />
+                  <div className="absolute bottom-1 right-2 text-xs text-gray-400">
+                    {userNickname.length} / 20
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Custom Instructions
+                </label>
+                <div className="mb-1 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-sm text-blue-800">
+                    The Custom Instruction sets the behavior and rules for the AI.
+                  </p>
+                </div>
+                <textarea
+                  value={systemPrompt}
+                  onChange={(e) => setSystemPrompt(e.target.value)}
+                  maxLength="400"
+                  className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
+                  placeholder="Enter custom instructions..."
+                />
+                <div className="absolute bottom-3 right-2 text-xs text-gray-400">
+                  {systemPrompt.length} / 400
+                </div>
+                {systemPrompt && (
+                  <button
+                    onClick={() => setSystemPrompt('')}
+                    className="absolute top-3 right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t flex justify-end">
+              <button
+                onClick={() => setShowPersonalization(false)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Close
+              </button>
             </div>
           </motion.div>
         </motion.div>
@@ -643,9 +735,6 @@ const Modals = React.memo(({
             </div>
             <div className="p-5 overflow-y-auto flex-grow space-y-6">
               <div className="p-4 bg-gray-50 rounded-lg mt-4">
-                <h3 className="font-medium text-gray-800 mb-2">
-                  About ChatBuddy
-                </h3>
                 <p className="text-sm text-gray-600">
                   ChatBuddy is a Free for All AI Chatapp. Available with 2 AI
                   models (Basic and Advanced).
@@ -717,6 +806,61 @@ const Modals = React.memo(({
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Close
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {showImportAppDataConfirm && (
+        <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowImportAppDataConfirm(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+          >
+            <div className="p-6 text-center">
+              <svg
+                className="mx-auto mb-4 text-red-400 w-12 h-12"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+              <h3 className="mb-2 text-lg font-bold text-gray-800">
+                Import App Data?
+              </h3>
+              <p className="text-sm text-gray-500">
+                This will replace all current application data, including chats, memories, and settings. This action is not revertable.
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+              <button
+                onClick={() => setShowImportAppDataConfirm(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmImportAppData}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+              >
+                Yes, Import
               </button>
             </div>
           </motion.div>
