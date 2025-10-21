@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useInView, motion } from 'framer-motion';
 import Header from './components/Header';
 import ChatLog from './components/ChatLog';
@@ -49,6 +49,8 @@ export default function App() {
   const [uploading, setUploading] = useState(false);
   const [isViewingBottom, setIsViewingBottom] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showMergeConflict, setShowMergeConflict] = useState(false);
 
 
   // --- New/Modified State ---
@@ -112,6 +114,43 @@ export default function App() {
   const memoryFileInputRef = useRef(null);
   const fileImgInputRef = useRef(null);
   const appDataFileInputRef = useRef(null);
+  const previousActiveChatIdRef = useRef();
+
+  // --- Data Sync ---
+  const saveDataToDrive = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    const appData = {
+      chatSessions,
+      activeChatId,
+      model,
+      systemPrompt,
+      apiKey,
+      memories,
+      tempMemories,
+      thinkingProcesses,
+      uploadedImages,
+      messageImageMap,
+      userNickname,
+      lastModified: new Date().toISOString()
+    };
+
+    try {
+      await fetch(`${BACKEND_URL}/api/drive/write`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(appData),
+          credentials: 'include'
+        }
+      );
+    } catch (error) {
+      console.error('Error saving data to Google Drive:', error);
+    }
+  }, [isAuthenticated, chatSessions, activeChatId, model, systemPrompt, apiKey, memories, tempMemories, thinkingProcesses, uploadedImages, messageImageMap, userNickname]);
+
 
   // --- State Persistence Effects ---
   useEffect(() => { localStorage.setItem('chatSessions', JSON.stringify(chatSessions)); }, [chatSessions]);
@@ -167,9 +206,70 @@ export default function App() {
     }
   }, [isBottomAtView]);
 
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/auth/status`, { credentials: 'include' });
+        const data = await response.json();
+        setIsAuthenticated(data.isAuthenticated);
+        if (data.isAuthenticated) {
+          const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
+          if (driveResponse.ok) {
+            const driveData = await driveResponse.json();
+            const localLastModified = localStorage.getItem('lastModified');
+            if (localLastModified && new Date(localLastModified) > new Date(driveData.modifiedTime)) {
+              setShowMergeConflict(true);
+            } else {
+              setChatSessions(driveData.data.chatSessions || []);
+              setActiveChatId(driveData.data.activeChatId || crypto.randomUUID());
+              setModel(driveData.data.model || 'gemma-3-27b-it');
+              setSystemPrompt(driveData.data.systemPrompt || '');
+              setApiKey(driveData.data.apiKey || '');
+              setMemories(driveData.data.memories || []);
+              setTempMemories(driveData.data.tempMemories || []);
+              setThinkingProcesses(driveData.data.thinkingProcesses || {});
+              setUploadedImages(driveData.data.uploadedImages || []);
+              setMessageImageMap(driveData.data.messageImageMap || []);
+              setUserNickname(driveData.data.userNickname || '');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error during initial data load:', error);
+      }
+    };
+    checkAuthStatus();
+  }, []);
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      saveDataToDrive();
+    }, 3000);
+    return () => clearTimeout(debounce);
+  }, [systemPrompt, userNickname, saveDataToDrive]);
+
+  useEffect(() => {
+    if (previousActiveChatIdRef.current) {
+      const previousChat = chatSessions.find(session => session.chatID === previousActiveChatIdRef.current);
+      if (previousChat && previousChat.chat.length > 0) {
+        const lastMessage = previousChat.chat[previousChat.chat.length - 1];
+        if (lastMessage.role === 'assistant') {
+          saveDataToDrive();
+        }
+      }
+    }
+    previousActiveChatIdRef.current = activeChatId;
+  }, [activeChatId, chatSessions, saveDataToDrive]);
+
 
   // --- Event Handlers & Logic ---
-  const handleResetApp = () => {
+  const handleResetApp = async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
     setChatSessions([]);
     setMessages([]);
     setMemories([]);
@@ -185,12 +285,50 @@ export default function App() {
     window.location.reload();
   };
 
+  const handleOverwriteLocal = async () => {
+    const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
+    if (driveResponse.ok) {
+      const driveData = await driveResponse.json();
+      setChatSessions(driveData.data.chatSessions || []);
+      setActiveChatId(driveData.data.activeChatId || crypto.randomUUID());
+      setModel(driveData.data.model || 'gemma-3-27b-it');
+      setSystemPrompt(driveData.data.systemPrompt || '');
+      setApiKey(driveData.data.apiKey || '');
+      setMemories(driveData.data.memories || []);
+      setTempMemories(driveData.data.tempMemories || []);
+      setThinkingProcesses(driveData.data.thinkingProcesses || {});
+      setUploadedImages(driveData.data.uploadedImages || []);
+      setMessageImageMap(driveData.data.messageImageMap || []);
+      setUserNickname(driveData.data.userNickname || '');
+      localStorage.setItem('lastModified', new Date().toISOString());
+    }
+    setShowMergeConflict(false);
+  };
+
+  const handleOverwriteRemote = () => {
+    saveDataToDrive();
+    setShowMergeConflict(false);
+  };
+
   const deleteMemory = (memToDelete) => {
     setMemories(prevMemories => prevMemories.filter(mem => mem !== memToDelete));
   };
 
   const handleModelToggle = () => {
     setModel(prev => prev === 'gemini-2.5-flash-lite' ? 'gemma-3-27b-it' : 'gemini-2.5-flash-lite');
+  };
+
+  const handleLogin = () => {
+    window.location.href = `${BACKEND_URL}/auth/google`;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   const handleOptionsClick = () => {
@@ -992,6 +1130,13 @@ export default function App() {
           showImportAppDataConfirm={showImportAppDataConfirm}
           setShowImportAppDataConfirm={setShowImportAppDataConfirm}
           confirmImportAppData={confirmImportAppData}
+          isAuthenticated={isAuthenticated}
+          handleLogin={handleLogin}
+          handleLogout={handleLogout}
+          showMergeConflict={showMergeConflict}
+          setShowMergeConflict={setShowMergeConflict}
+          handleOverwriteLocal={handleOverwriteLocal}
+          handleOverwriteRemote={handleOverwriteRemote}
         />
 
         <ChatLog

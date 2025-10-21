@@ -3,21 +3,161 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-const { GoogleGenAI, createUserContent, createPartFromUri, createPartFromText, Modality } = require('@google/genai');
-
+const { GoogleGenAI, createPartFromUri, createPartFromText, Modality } = require('@google/genai');
+const { google } = require('googleapis');
+const cookieParser = require('cookie-parser');
+const stream = require('stream');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: [process.env.FRONTEND_URL, '::1', 'localhost', '127.0.0.1', '0.0.0.0'],
+    credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
 app.set('trust proxy', 1);
 app.use(fileUpload({
     useTempFiles: false,
     tempFileDir: '/tmp/',
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
+
+// Google Drive API setup
+const oauth2Client = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    process.env.CALLBACK_URL
+);
+
+const scopes = [
+    'https://www.googleapis.com/auth/drive.file'
+];
+
+app.get('/auth/google', (req, res) => {
+    const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: scopes
+    });
+    res.redirect(url);
+});
+
+app.get('/auth/google/callback', async (req, res) => {
+    const { code } = req.query;
+    try {
+        const { tokens } = await oauth2Client.getToken(code);
+        oauth2Client.setCredentials(tokens);
+
+        res.cookie('access_token', tokens.access_token, { httpOnly: true, secure: false, sameSite: 'strict' });
+        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, secure: false, sameSite: 'strict' });
+
+        res.redirect(process.env.FRONTEND_URL);
+    } catch (error) {
+        console.error('Error getting tokens:', error);
+        res.status(500).send('Authentication failed');
+    }
+});
+
+app.get('/auth/status', (req, res) => {
+    if (req.cookies.access_token) {
+        res.json({ isAuthenticated: true });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
+});
+
+app.get('/auth/logout', (req, res) => {
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    res.json({ success: true });
+});
+
+const drive = google.drive('v3');
+
+const setOAuthCredentials = (req, res, next) => {
+    const accessToken = req.cookies.access_token;
+    const refreshToken = req.cookies.refresh_token;
+    if (!accessToken) {
+        return res.status(401).send('Unauthorized');
+    }
+    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
+    next();
+};
+
+app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
+    try {
+        const response = await drive.files.list({
+            auth: oauth2Client,
+            q: "name='chatbuddy_data.json'",
+            spaces: 'drive',
+            fields: 'files(id, name, modifiedTime)',
+        });
+
+        if (response.data.files.length === 0) {
+            return res.status(404).send('File not found');
+        }
+
+        const fileId = response.data.files[0].id;
+        const modifiedTime = response.data.files[0].modifiedTime;
+
+        const fileResponse = await drive.files.get(
+            { auth: oauth2Client, fileId: fileId, alt: 'media' },
+            { responseType: 'json' }
+        );
+
+        res.json({ modifiedTime, data: fileResponse.data });
+
+    } catch (error) {
+        console.error('Error reading from Google Drive:', error);
+        res.status(500).send('Failed to read from Google Drive');
+    }
+});
+
+app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
+    const appData = req.body;
+
+    try {
+        const listResponse = await drive.files.list({
+            auth: oauth2Client,
+            q: "name='chatbuddy_data.json'",
+            spaces: 'drive',
+            fields: 'files(id)',
+        });
+
+        const fileMetadata = {
+            name: 'chatbuddy_data.json',
+        };
+
+        const media = {
+            mimeType: 'application/json',
+            body: stream.Readable.from(JSON.stringify(appData))
+        };
+
+        if (listResponse.data.files.length > 0) {
+            const fileId = listResponse.data.files[0].id;
+            await drive.files.update({
+                auth: oauth2Client,
+                fileId: fileId,
+                media: media,
+            });
+            res.send('File updated successfully');
+        } else {
+            await drive.files.create({
+                auth: oauth2Client,
+                resource: fileMetadata,
+                media: media,
+                fields: 'id'
+            });
+            res.send('File created successfully');
+        }
+    } catch (error) {
+        console.error('Error writing to Google Drive:', error);
+        res.status(500).send('Failed to write to Google Drive');
+    }
+});
+
 
 // --- Constants ---
 const SERVER_API_KEY = process.env.GEMINI_API_KEY;
@@ -235,20 +375,18 @@ function sanitizeAndParseAIResponse(rawText) {
      */
     const extractValue = (key, text) => {
         const regex = new RegExp(
-            `\\b${key}\\b\\s*[:=]\\s*` +
-
-            `(` +
-            `"(?:[^"\\\\]|\\\\.)*"` +
-            `|` +
-            `'(?:[^'\\\\]|\\\\.)*'` +
-            `|` +
-            `\\[(?:[^\\]\\\\]|\\\\.)*\\]` +
-            `|` +
-            `.+?` +
-            `)` +
-
-            `(?=\\s*,?\\s*\\b(?:action|target|response)\\b|\\s*[}\\]]|$)`,
-
+            `\b${key}\b\s*[:=]\s*` + 
+            `(` + 
+            `"(?:[^"\\]|\\.)*"` + 
+            `|` + 
+            `'(?:[^'\\]|\\.)*'` + 
+            `|` + 
+            `\[(?:[^\]\]|\\.)*\]` + 
+            `|` + 
+            `.+?` + 
+            `)
+` + 
+            `(?=\s*,?\s*\b(?:action|target|response)\b|\s*[}\]]|$)`,
             'is'
         );
 
@@ -259,7 +397,7 @@ function sanitizeAndParseAIResponse(rawText) {
 
         let value = match[1].trim();
 
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'" ) && value.endsWith("'" ))) {
             value = value.slice(1, -1);
         }
         return value;
@@ -541,7 +679,7 @@ app.post('/model', async (req, res) => {
             text = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
         } else {
             text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-            text = text.replace(/\\(?![ntr"'\\])/g, '\\\\');
+            text = text.replace(/\\(?![ntr"'\\])/g, '\\');
         }
 
         if (!generatedImage) {

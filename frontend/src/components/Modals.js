@@ -48,10 +48,56 @@ const Modals = React.memo(({
   handleImportAppDataClick,
   showImportAppDataConfirm,
   setShowImportAppDataConfirm,
-  confirmImportAppData
+  confirmImportAppData,
+  isAuthenticated,
+  handleLogin,
+  handleLogout,
+  showMergeConflict,
+  setShowMergeConflict,
+  handleOverwriteLocal,
+  handleOverwriteRemote
 }) => {
   return (
     <AnimatePresence>
+      {showMergeConflict && (
+        <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowMergeConflict(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+          >
+            <div className="p-6 text-center">
+              <h3 className="text-lg font-bold">Merge Conflict</h3>
+              <p className="text-sm text-gray-500 mt-2">
+                You have local changes that are not on Google Drive. How would you like to resolve this?
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+              <button
+                onClick={handleOverwriteLocal}
+                className="px-6 py-2 border rounded-lg"
+              >
+                Use Google Drive Data
+              </button>
+              <button
+                onClick={handleOverwriteRemote}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Use Local Data
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {showImportExportOptions && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
@@ -577,6 +623,11 @@ const Modals = React.memo(({
                 >
                   Options
                 </button>
+                {isAuthenticated ? (
+                  <button onClick={handleLogout} className="w-full p-2 rounded-md bg-red-100 text-red-800 hover:bg-red-200">Sign Out</button>
+                ) : (
+                  <button onClick={handleLogin} className="w-full p-2 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200">Google Cloud Sync</button>
+                )}
                 <button
                   onClick={() => {
                     setShowAbout(true);
@@ -735,6 +786,9 @@ const Modals = React.memo(({
             </div>
             <div className="p-5 overflow-y-auto flex-grow space-y-6">
               <div className="p-4 bg-gray-50 rounded-lg mt-4">
+                <h3 className="font-medium text-gray-800 mb-2">
+                  About ChatBuddy
+                </h3>
                 <p className="text-sm text-gray-600">
                   ChatBuddy is a Free for All AI Chatapp. Available with 2 AI
                   models (Basic and Advanced).
@@ -782,7 +836,13 @@ const Modals = React.memo(({
                     >
                       HERE
                     </a>
-                    ]
+                    ] <a
+                      href="https://github.com/KushalRoyChowdhury/ChatBuddy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      HERE
+                    </a>
                   </span>
                   👈 . Fork It, Modify it.. I don't care. Just Star it before
                   touching.
