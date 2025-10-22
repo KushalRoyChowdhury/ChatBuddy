@@ -7,14 +7,19 @@ const { GoogleGenAI, createPartFromUri, createPartFromText, Modality } = require
 const { google } = require('googleapis');
 const cookieParser = require('cookie-parser');
 const stream = require('stream');
+const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs').promises;
+const compression = require('compression');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const isLocal = process.env.NODE_ENV === 'development';
 const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 
 // Middleware
+app.use(express.static(path.join(__dirname, 'build')));
+app.use(compression());
 app.use(cors({
     origin: [process.env.FRONTEND_URL, '::1', 'localhost', '127.0.0.1', '0.0.0.0'],
     credentials: true,
@@ -276,9 +281,7 @@ const safetySettings = [
 ];
 
 // Rate Limiter
-const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs').promises;
+
 
 const RATE_LIMIT_DB_FILE = path.join(__dirname, 'rate-limiter-db.json');
 let rateLimitDB = {};
@@ -513,15 +516,12 @@ function sanitizeAndParseAIResponse(rawText) {
 
 // --- Troll ---
 app.get('/', (req, res) => {
-    const roasts = [
-        "Don't Sniff this /dev/null. Its all underlying Truma.. 😵‍💫😵‍💫😵‍💫",
-        "You really typed this URL? Touch some grass, bro 🌱",
-        "Congrats. You just found nothing. Literally. 🚮",
-        "404? Nah, you get 100% psychological damage instead 💀",
-        "This is not an API, this is your life choices flashing before your eyes. 😭"
-    ];
-    console.warn(`'${req.ip} Sniffed.'`)
-    res.status(418).send(roasts[Math.floor(Math.random() * roasts.length)]);
+    res.sendFile(path.join(__dirname, 'build', 'index.html'), (err) => {
+        if (err) {
+            console.error('Error sending index.html:', err);
+            res.status(500).send("Error loading application.");
+        }
+    });
 });
 
 // --- Health Check ---
