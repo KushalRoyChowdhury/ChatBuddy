@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions, isSidebarOpen, setIsSidebarOpen, isDesktop, handleSettingsClick, handleImportClick, setShowExportOptions, setTempMemories, setUploadedImages, setMessageImageMap, loading, setShowNotAvailablePopup, setThinkingProcesses }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [userData, setUserData] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/auth/logout');
+      setUserData(null);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   const createNewChat = () => {
     if (loading) {
@@ -148,6 +159,22 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
         )}
         <button onClick={handleSettingsClick} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300">Settings</button>
       </div>
+      {userData && (
+        <div className="p-4 min-w-72 border-t border-gray-300">
+          <div className="flex items-center">
+            <img src={userData.picture} alt="User Avatar" className="w-10 h-10 rounded-full mr-3" />
+            <div className="flex-1">
+              <p className="font-semibold truncate">{userData.name}</p>
+              <p className="text-sm text-gray-500 truncate">{userData.email}</p>
+            </div>
+            <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 h-6 w-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3h12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 
@@ -238,6 +265,22 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
               )}
               <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300">Settings</button>
             </div>
+            {userData && (
+              <div className="p-4 border-t border-gray-300">
+                <div className="flex items-center">
+                  <img src={userData.picture} alt="User Avatar" className="w-10 h-10 rounded-full mr-3" />
+                  <div className="flex-1">
+                    <p className="font-semibold truncate">{userData.name}</p>
+                    <p className="text-sm text-gray-500 truncate">{userData.email}</p>
+                  </div>
+                  <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 h-6 w-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3h12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </>
       )}

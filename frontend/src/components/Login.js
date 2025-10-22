@@ -17,7 +17,7 @@ export default function Login({ handleLogin }) {
           <p className="mb-6">Please log in to continue.</p>
           <button
             onClick={handleLogin}
-            className="bg-white border active:scale-95 transition-all border-gray-300 flex gap-2 justify-center items-center w-full hover:bg-gray-50 text-gray-800 font-medium py-2 px-4 rounded-full shadow-sm duration-200"
+            className="bg-white border active:scale-[0.98] transition-all border-gray-300 flex gap-2 justify-center items-center w-full hover:bg-gray-50 text-gray-800 font-medium py-2 px-4 rounded-full shadow-sm duration-200"
           >
             <svg width="25" height="25" viewBox="-0.5 0 48 48" xmlns="http://www.w3.org/2000/svg">
               <path d="M9.83 24c0-1.52.25-2.99.7-4.36L2.62 13.6C1.08 16.73.21 20.26.21 24s.87 7.26 2.41 10.39l7.9-6.05c-.45-1.36-.7-2.82-.7-4.34" fill="#FBBC05" />

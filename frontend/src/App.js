@@ -214,7 +214,13 @@ export default function App() {
         const data = await response.json();
         setIsAuthenticated(data.isAuthenticated);
         if (data.isAuthenticated) {
-          setUserProfile(data.profile);
+
+          const userResponse = await fetch(`${BACKEND_URL}/auth/user`, { credentials: 'include' });
+          if (userResponse.ok) {
+            const profileData = await userResponse.json();
+            setUserProfile(profileData); 
+          }
+
           const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
           if (driveResponse.ok) {
             const driveData = await driveResponse.json();
@@ -697,11 +703,14 @@ export default function App() {
 
       const getSystemPrompt = () => {
         if (userNickname && systemPrompt) {
-          return `-- USER NICKNAME "${userNickname}" -- Instruction: ${systemPrompt}`;
+          return `-- NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" -- Instruction: ${systemPrompt}`;
         } else if (userNickname) {
-          return `-- USER NICKNAME "${userNickname}" --`;
+          return `-- NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" --`;
         }
-        return systemPrompt;
+        else if (!userNickname && systemPrompt) {
+          return `-- NAME "${userProfile.name.split(' ')[0]}" -- ${systemPrompt}`;
+        }
+        return `-- NAME "${userProfile.name.split(' ')[0]}" --`;
       };
 
       const payload = {
@@ -1091,6 +1100,7 @@ export default function App() {
         <input type="file" ref={appDataFileInputRef} onChange={handleAppDataFileSelected} accept="application/json" className="hidden" />
 
         <Modals
+          userProfile={userProfile}
           showImportExportOptions={showImportExportOptions}
           setShowImportExportOptions={setShowImportExportOptions}
           handleImportClick={handleImportClick}

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Modals = React.memo(({
+  userProfile,
   showImportExportOptions,
   setShowImportExportOptions,
   handleImportClick,
@@ -55,7 +56,7 @@ const Modals = React.memo(({
   showMergeConflict,
   setShowMergeConflict,
   handleOverwriteLocal,
-  handleOverwriteRemote
+  handleOverwriteRemote,
 }) => {
   return (
     <AnimatePresence>
@@ -576,6 +577,8 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
+
       {showSettings && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
@@ -595,6 +598,42 @@ const Modals = React.memo(({
               <h3 className="text-lg font-bold text-gray-800 mb-4">
                 Settings
               </h3>
+              {isAuthenticated && userProfile && (
+                <div className="flex items-center p-2 mb-3 border rounded-lg">
+                  <img src={userProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
+                  <div className="ml-3 flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{userProfile.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{userProfile.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    title="Sign Out"
+                    className="ml-2 flex-shrink-0 text-gray-500 hover:text-red-600 p-1 rounded-full"
+                  >
+                    <svg
+                      width="25"
+                      height="25"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13 2C10.2386 2 8 4.23858 8 7C8 7.55228 8.44772 8 9 8C9.55228 8 10 7.55228 10 7C10 5.34315 11.3431 4 13 4H17C18.6569 4 20 5.34315 20 7V17C20 18.6569 18.6569 20 17 20H13C11.3431 20 10 18.6569 10 17C10 16.4477 9.55228 16 9 16C8.44772 16 8 16.4477 8 17C8 19.7614 10.2386 22 13 22H17C19.7614 22 22 19.7614 22 17V7C22 4.23858 19.7614 2 17 2H13Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M14 11C14.5523 11 15 11.4477 15 12C15 12.5523 14.5523 13 14 13V11Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M5.71783 11C5.80685 10.8902 5.89214 10.7837 5.97282 10.682C6.21831 10.3723 6.42615 10.1004 6.57291 9.90549C6.64636 9.80795 6.70468 9.72946 6.74495 9.67492L6.79152 9.61162L6.804 9.59454L6.80842 9.58848C6.80846 9.58842 6.80892 9.58778 6 9L6.80842 9.58848C7.13304 9.14167 7.0345 8.51561 6.58769 8.19098C6.14091 7.86637 5.51558 7.9654 5.19094 8.41215L5.18812 8.41602L5.17788 8.43002L5.13612 8.48679C5.09918 8.53682 5.04456 8.61033 4.97516 8.7025C4.83623 8.88702 4.63874 9.14542 4.40567 9.43937C3.93443 10.0337 3.33759 10.7481 2.7928 11.2929L2.08569 12L2.7928 12.7071C3.33759 13.2519 3.93443 13.9663 4.40567 14.5606C4.63874 14.8546 4.83623 15.113 4.97516 15.2975C5.04456 15.3897 5.09918 15.4632 5.13612 15.5132L5.17788 15.57L5.18812 15.584L5.19045 15.5872C5.51509 16.0339 6.14091 16.1336 6.58769 15.809C7.0345 15.4844 7.13355 14.859 6.80892 14.4122L6 15C6.80892 14.4122 6.80897 14.4123 6.80892 14.4122L6.804 14.4055L6.79152 14.3884L6.74495 14.3251C6.70468 14.2705 6.64636 14.1921 6.57291 14.0945C6.42615 13.8996 6.21831 13.6277 5.97282 13.318C5.89214 13.2163 5.80685 13.1098 5.71783 13H14V11H5.71783Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+
+                  </button>
+                </div>
+              )}
               <div className="space-y-2">
                 <button
                   onClick={() => {
@@ -623,11 +662,6 @@ const Modals = React.memo(({
                 >
                   Options
                 </button>
-                {isAuthenticated ? (
-                  <button onClick={handleLogout} className="w-full p-2 rounded-md bg-red-100 text-red-800 hover:bg-red-200">Sign Out</button>
-                ) : (
-                  <button onClick={handleLogin} className="w-full p-2 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200">Google Cloud Sync</button>
-                )}
                 <button
                   onClick={() => {
                     setShowAbout(true);
@@ -642,6 +676,8 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
+
       {showPersonalization && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
@@ -816,7 +852,7 @@ const Modals = React.memo(({
                   Supports 64k Context Window (Default Key).
                   <br />
                   <br />
-                  With the Default Server Key the RateLimits are: Basic Model (7
+                  With the Without Personal Key the RateLimits are: Basic Model (7
                   RPM / 500 RPD), Advance Model (3 RPM / 100 RPD), Image
                   Generation (1RPM, 10RPD)
                   <br />
@@ -855,7 +891,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600">
                 AI can make mistakes.
                 <br />
-                v2.0.0 (release 251020)
+                v2.1.1 (release 251022)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

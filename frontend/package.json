@@ -1,6 +1,6 @@
 {
   "name": "ChatBuddy",
-  "version": "2.0",
+  "version": "2.1.1",
   "private": false,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",

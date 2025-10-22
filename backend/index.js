@@ -1,4 +1,4 @@
-// Update 2.0
+// Update 2.1.1
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -10,6 +10,9 @@ const stream = require('stream');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+const isLocal = process.env.NODE_ENV === 'development';
+const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 
 // Middleware
 app.use(cors({
@@ -24,17 +27,6 @@ app.use(fileUpload({
     tempFileDir: '/tmp/',
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
-app.use('/debug', (req, res) => {
-  res.json({
-    protocol: req.protocol,
-    secure: req.secure,
-    headers: {
-      'x-forwarded-proto': req.get('x-forwarded-proto'),
-      'x-forwarded-host': req.get('x-forwarded-host'),
-      origin: req.get('origin')
-    }
-  });
-});
 
 // Google Drive API setup
 const oauth2Client = new google.auth.OAuth2(
@@ -44,13 +36,47 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 const scopes = [
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.email'
 ];
+
+const setOAuthCredentials = async (req, res, next) => {
+    const accessToken = req.cookies.access_token;
+    const refreshToken = req.cookies.refresh_token;
+
+    if (!accessToken) {
+        return res.status(401).send('Unauthorized. No access token.');
+    }
+
+    if (!refreshToken) {
+        return res.status(401).send('Unauthorized. No refresh token. Please log out and log in again.');
+    }
+
+    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
+
+    try {
+        const { token } = await oauth2Client.getAccessToken();
+
+        if (token !== accessToken) {
+            res.cookie('access_token', token, { maxAge: 86400000, httpOnly: true, secure: !isLocal, sameSite: isLocal ? 'lax' : 'none' });
+        }
+        next();
+
+    } catch (error) {
+        console.error('Error refreshing access token:', error.message);
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        return res.status(401).json({ error: 'Authentication expired. Please log in again.' });
+    }
+};
+
 
 app.get('/auth/google', (req, res) => {
     const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: scopes
+        scope: scopes,
+        prompt: 'consent'
     });
     res.redirect(url);
 });
@@ -61,8 +87,16 @@ app.get('/auth/google/callback', async (req, res) => {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
 
-        res.cookie('access_token', tokens.access_token, {maxAge: 86400000, httpOnly: false, secure: true, sameSite: 'none'});
-        res.cookie('refresh_token', tokens.refresh_token, {maxAge: 86400000, httpOnly: false, secure: true, sameSite: 'none'});
+        const oauth2 = google.oauth2({
+            auth: oauth2Client,
+            version: 'v2'
+        });
+        const { data } = await oauth2.userinfo.get();
+        const email = data.email;
+
+        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
+        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
+        res.cookie('user_email', email, { httpOnly: false, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
 
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
@@ -85,17 +119,21 @@ app.get('/auth/logout', (req, res) => {
     res.json({ success: true });
 });
 
-const drive = google.drive('v3');
-
-const setOAuthCredentials = (req, res, next) => {
-    const accessToken = req.cookies.access_token;
-    const refreshToken = req.cookies.refresh_token;
-    if (!accessToken) {
-        return res.status(401).send('Unauthorized');
+app.get('/auth/user', setOAuthCredentials, async (req, res) => {
+    try {
+        const oauth2 = google.oauth2({
+            auth: oauth2Client,
+            version: 'v2'
+        });
+        const { data } = await oauth2.userinfo.get();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).send('Failed to fetch user data');
     }
-    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
-    next();
-};
+});
+
+const drive = google.drive('v3');
 
 app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
     try {
@@ -171,7 +209,6 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
 
 
 // --- Constants ---
-const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 const MODELS = [
     'gemma-3-27b-it',
     'gemini-2.5-flash-lite',
@@ -273,9 +310,16 @@ async function checkRateLimit(req) {
         }
 
         const { modelIndex, apiKey: userApiKey } = req.body;
-        let userId = userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== ''
-            ? crypto.createHash('sha256').update(userApiKey).digest('hex')
-            : getIp(req);
+        const userEmail = req.cookies.user_email;
+        let userId;
+
+        if (userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== '') {
+            userId = crypto.createHash('sha256').update(userApiKey).digest('hex');
+        } else if (userEmail) {
+            userId = crypto.createHash('sha256').update(userEmail).digest('hex');
+        } else {
+            userId = getIp(req);
+        }
 
         const limitKey = `${userId}:${modelIndex}`;
         const now = new Date();
@@ -321,9 +365,16 @@ async function incrementHitCount(req) {
         if (!req.body || typeof req.body.modelIndex === 'undefined') return;
 
         const { modelIndex, apiKey: userApiKey } = req.body;
-        let userId = userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== ''
-            ? crypto.createHash('sha256').update(userApiKey).digest('hex')
-            : getIp(req);
+        const userEmail = req.cookies.user_email; 
+        let userId;
+
+        if (userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== '') {
+            userId = crypto.createHash('sha256').update(userApiKey).digest('hex');
+        } else if (userEmail) {
+            userId = crypto.createHash('sha256').update(userEmail).digest('hex');
+        } else {
+            userId = getIp(req);
+        }
 
         const limitKey = `${userId}:${modelIndex}`;
         const now = new Date();
@@ -386,17 +437,17 @@ function sanitizeAndParseAIResponse(rawText) {
      */
     const extractValue = (key, text) => {
         const regex = new RegExp(
-            `\b${key}\b\s*[:=]\s*` + 
-            `(` + 
-            `"(?:[^"\\]|\\.)*"` + 
-            `|` + 
-            `'(?:[^'\\]|\\.)*'` + 
-            `|` + 
-            `\[(?:[^\]\]|\\.)*\]` + 
-            `|` + 
-            `.+?` + 
+            `\b${key}\b\s*[:=]\s*` +
+            `(` +
+            `"(?:[^"\\]|\\.)*"` +
+            `|` +
+            `'(?:[^'\\]|\\.)*'` +
+            `|` +
+            `\[(?:[^\]\]|\\.)*\]` +
+            `|` +
+            `.+?` +
             `)
-` + 
+` +
             `(?=\s*,?\s*\b(?:action|target|response)\b|\s*[}\]]|$)`,
             'is'
         );
@@ -408,7 +459,7 @@ function sanitizeAndParseAIResponse(rawText) {
 
         let value = match[1].trim();
 
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'" ) && value.endsWith("'" ))) {
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
             value = value.slice(1, -1);
         }
         return value;
@@ -469,6 +520,7 @@ app.get('/health', (req, res) => {
 // --- File Upload ---
 app.post('/upload', async (req, res) => {
     const ai = new GoogleGenAI({});
+
     try {
         // Check if a file was uploaded
         if (!req.files || !req.files.image) {
@@ -536,7 +588,7 @@ app.post('/upload', async (req, res) => {
 
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, apiKey, creativeRP, advanceReasoning, webSearch, images } = req.body;
+    let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey } = req.body;
     let retry = true;
 
     const limitResult = await checkRateLimit(req);
