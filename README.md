@@ -62,7 +62,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 ## ⚠️ Disclaimer
 
-**Version 2.0 is not backward compatible with previous chat data.** Due to significant data structure changes in this release, older `.json` chat files cannot be imported.
+**Version 2.0 and above is not backward compatible with data from v1.X** Due to significant data structure changes in this release, older `.json` chat files cannot be imported. Permanent Memories will be migrated automatically.
 
 ## ⚙️ Technologies Used
 
@@ -78,7 +78,7 @@ This project is built with a modern and powerful tech stack:
 
 ## 🚀 Getting Started
 
-To use ChatBuddy locally, you'll need to set up both the frontend and the backend.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting with cloud sync capabilities, which is powered by the Google Drive API, a Google Cloud project with OAuth credentials is required.
 
 ### Prerequisites
 
@@ -126,6 +126,8 @@ The backend server is required for the AI to function.
     ```
 
     The backend server will start, typically on port `8000`. The frontend is pre-configured to communicate with the backend on this port.
+
+
 
 ## 🤖 AI Models & API Keys
 
@@ -183,4 +185,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v2.1.0 - By KushalRoyChowdhury*
+*v2.1.1 - By KushalRoyChowdhury*
