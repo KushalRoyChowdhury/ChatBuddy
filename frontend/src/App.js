@@ -6,6 +6,7 @@ import MessageInput from './components/MessageInput';
 import Modals from './components/Modals';
 import Sidebar from './components/Sidebar';
 import useMediaQuery from './hooks/useMediaQuery';
+import Login from './components/Login';
 
 // --- Application Constants ---
 const MEMORY_LIMIT_CHARS = 2000 * 4;
@@ -50,6 +51,7 @@ export default function App() {
   const [isViewingBottom, setIsViewingBottom] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   const [showMergeConflict, setShowMergeConflict] = useState(false);
 
 
@@ -122,7 +124,6 @@ export default function App() {
 
     const appData = {
       chatSessions,
-      activeChatId,
       model,
       systemPrompt,
       apiKey,
@@ -149,7 +150,7 @@ export default function App() {
     } catch (error) {
       console.error('Error saving data to Google Drive:', error);
     }
-  }, [isAuthenticated, chatSessions, activeChatId, model, systemPrompt, apiKey, memories, tempMemories, thinkingProcesses, uploadedImages, messageImageMap, userNickname]);
+  }, [isAuthenticated, chatSessions, model, systemPrompt, apiKey, memories, tempMemories, thinkingProcesses, uploadedImages, messageImageMap, userNickname]);
 
 
   // --- State Persistence Effects ---
@@ -213,6 +214,7 @@ export default function App() {
         const data = await response.json();
         setIsAuthenticated(data.isAuthenticated);
         if (data.isAuthenticated) {
+          setUserProfile(data.profile);
           const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
           if (driveResponse.ok) {
             const driveData = await driveResponse.json();
@@ -721,6 +723,7 @@ export default function App() {
         temp: memoriesForModel,
         sys: getSystemPrompt(),
         apiKey: apiKey || "",
+        email: localStorage.getItem('userEmail') || "",
         modelIndex: modelIndex,
         creativeRP: creativeRP,
         advanceReasoning: advanceReasoning,
@@ -731,6 +734,7 @@ export default function App() {
       const response = await fetch(`${BACKEND_URL}/model`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(payload),
         signal
       });
@@ -1046,6 +1050,10 @@ export default function App() {
 
 
   // --- JSX Rendering ---
+  if (!isAuthenticated) {
+    return <Login handleLogin={handleLogin} />;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

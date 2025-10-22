@@ -502,7 +502,7 @@ const Modals = React.memo(({
                     setShowResetConfirm(true);
                     setShowOptions(false);
                   }}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                  className="w-full justify-center items-center gap-2 hidden px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
                 >
                   Reset App
                 </button>

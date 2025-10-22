@@ -1,16 +1,18 @@
 import React from 'react';
 import logo from '../assets/icon-512x512.png'
+import { useState } from 'react';
 
 export default function Login({ handleLogin }) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="p-5 bg-white flex items-center justify-center gap-5 rounded-2xl shadow-md">
 
-        <div className='w-52 overflow-hidden rounded-lg'>
-          <img src={logo} alt="ChatBuddy Logo" className='w-full h-full object-contain scale-[1.2]' />
+        <div className={`w-52 h-52 overflow-hidden rounded-lg bg-gray-200`}>
+          <img onLoad={() => setIsImageLoaded(true)} src={logo} alt="ChatBuddy Logo" className={`w-full h-full object-contain transition-all duration-500 ease-in-out ${isImageLoaded ? 'opacity-100 blur-none scale-[1.2]' : 'opacity-0 blur-md scale-150'}`} />
         </div>
 
-        <div>
+        <div className='h-52 flex flex-col justify-center items-center'>
           <h1 className="text-2xl font-bold mb-4">Welcome to ChatBuddy</h1>
           <p className="mb-6">Please log in to continue.</p>
           <button
