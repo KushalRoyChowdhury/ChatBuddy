@@ -28,6 +28,18 @@ app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
 
+app.use('/debug', (req, res) => {
+  res.json({
+    protocol: req.protocol,
+    secure: req.secure,
+    headers: {
+      'x-forwarded-proto': req.get('x-forwarded-proto'),
+      'x-forwarded-host': req.get('x-forwarded-host'),
+      origin: req.get('origin')
+    }
+  });
+});
+
 // Google Drive API setup
 const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
@@ -59,7 +71,7 @@ const setOAuthCredentials = async (req, res, next) => {
         const { token } = await oauth2Client.getAccessToken();
 
         if (token !== accessToken) {
-            res.cookie('access_token', token, { maxAge: 86400000, httpOnly: true, secure: !isLocal, sameSite: isLocal ? 'lax' : 'none' });
+            res.cookie('access_token', token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
         }
         next();
 
@@ -94,9 +106,9 @@ app.get('/auth/google/callback', async (req, res) => {
         const { data } = await oauth2.userinfo.get();
         const email = data.email;
 
-        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
-        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
-        res.cookie('user_email', email, { httpOnly: false, sameSite: isLocal ? 'lax' : 'none', secure: !isLocal });
+        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
+        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, maxAge: 2592000000, sameSite: 'none', secure: true });
+        res.cookie('user_email', email, { httpOnly: false, sameSite: 'none', maxAge: 2592000000, secure: true });
 
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
