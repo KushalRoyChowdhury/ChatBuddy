@@ -3,7 +3,7 @@
 Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models directly to your browser (AI models can't be run locally). Built with React and Node.js, powered by the latest `@google/genai` SDK, it offers a persistent, configurable, and highly interactive chat experience.
 
 
-### Try Live Now: *👉 [Click Here](https://chatbuddy2025.onrender.com) 👈*
+### Try Live Now: *👉 [Click Here](https://chatbuddy2026.onrender.com) 👈*
 
 ![ChatBuddy Homepage](frontend/public/screenshot/home.png) 
 
@@ -150,7 +150,7 @@ On the hosted version, the app works without providing any keys but has strict r
 
 > Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
 
-> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)).
+> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). All your  Google login Credentials are stored locally in your device. 
 
 
 **How to get your key:**
