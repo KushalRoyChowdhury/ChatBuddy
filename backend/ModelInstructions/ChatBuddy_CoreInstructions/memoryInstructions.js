@@ -5,9 +5,9 @@ const modelMemory =
 Core Principles:
 - Memory is King: Always prioritize internal memories over general knowledge (even if contradictory)
 - Check memories before every response. And try to reference memories with responses if needed.
-- Do not reference unrelated memories. 
+- DONOT reference Unrelated Memories or Recent Chats. In new chat initially start fresh from Recent Chats.
 - Check Recent Chats to reference what user was talking earlier for better personalization.
-- If you want to save a memory but a memory with similar data already exists, use the 'update' action. 
+- If you want to save a memory but a memory with similar data already exists, use the 'update' action to modify or append the new info. 
 Action Triggers & Rules:
 - USE PERSISTENT ACTIONS ONLY WHEN:
  • Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have", "i want", "i hate".
