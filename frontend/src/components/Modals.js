@@ -738,7 +738,7 @@ const Modals = React.memo(({
                 </div>
               </div>
 
-              <div className="relative">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Custom Instructions
                 </label>
@@ -747,24 +747,26 @@ const Modals = React.memo(({
                     The Custom Instruction sets the behavior and rules for the AI.
                   </p>
                 </div>
-                <textarea
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  maxLength="400"
-                  className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
-                  placeholder="Enter custom instructions..."
-                />
-                <div className="absolute bottom-3 right-2 text-xs text-gray-400">
-                  {systemPrompt.length} / 400
+                <div className='relative'>
+                  <textarea
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    maxLength="400"
+                    className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
+                    placeholder="Enter custom instructions..."
+                  />
+                  <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+                    {systemPrompt.length} / 400
+                  </div>
+                  {systemPrompt && (
+                    <button
+                      onClick={() => setSystemPrompt('')}
+                      className="absolute top-2 right-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
-                {systemPrompt && (
-                  <button
-                    onClick={() => setSystemPrompt('')}
-                    className="absolute top-3 right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
-                  >
-                    Clear
-                  </button>
-                )}
               </div>
 
             </div>
@@ -877,7 +879,6 @@ const Modals = React.memo(({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      HERE
                     </a>
                   </span>
                   👈 . Fork It, Modify it.. I don't care. Just Star it before
