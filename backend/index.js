@@ -601,7 +601,7 @@ app.post('/upload', async (req, res) => {
 
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey } = req.body;
+    let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst } = req.body;
     let retry = true;
 
     const limitResult = await checkRateLimit(req);
@@ -627,11 +627,11 @@ app.post('/model', async (req, res) => {
 
         let INTERNAL_SYSTEM_PROMPT = '';
 
-        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic();
-        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance();
-        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web();
-        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking();
-        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web();
+        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(isFirst);
+        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(isFirst);
+        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(isFirst);
+        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(isFirst);
+        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(isFirst);
 
         const selectedModel = MODELS[modelIndex];
 

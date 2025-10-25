@@ -3,9 +3,11 @@ const modelMemory = require('../ChatBuddy_CoreInstructions/memoryInstructions');
 const modelBehaviour = require('../ChatBuddy_CoreInstructions/modelBehaviour');
 const responseProtocol = require('../ChatBuddy_CoreInstructions/responseProtocol');
 
+const responseProtocolFirst = require('../ChatBuddy_CoreInstructions/responseProtocolFirst');
 
-const coreInstructions = 
-`${mainContext}
+
+const coreInstructions = (isFirst) => {
+return `${mainContext}
 
 -- START MEMORY INSTRUCTION --
 ${modelMemory}
@@ -16,7 +18,8 @@ ${modelBehaviour}
 -- END BEHAVIOUR INSTRUCTION --
 
 -- START RESPONSE PROTOCOL --
-${responseProtocol}
--- END RESPONSE PROTOCOL --`;
+${isFirst ? responseProtocolFirst : responseProtocol}
+-- END RESPONSE PROTOCOL --`.trim();
+}
 
-module.exports = coreInstructions.trim();
+module.exports = coreInstructions;

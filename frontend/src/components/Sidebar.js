@@ -191,7 +191,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           />
           <motion.div
             layout
-            className="fixed top-0 left-0 h-full w-64 bg-gray-100 rounded-r-xl flex flex-col z-40"
+            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-100 rounded-r-xl flex flex-col z-40"
             variants={sidebarVariants}
             initial="closed"
             animate="open"

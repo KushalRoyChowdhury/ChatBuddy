@@ -218,7 +218,7 @@ export default function App() {
           const userResponse = await fetch(`${BACKEND_URL}/auth/user`, { credentials: 'include' });
           if (userResponse.ok) {
             const profileData = await userResponse.json();
-            setUserProfile(profileData); 
+            setUserProfile(profileData);
           }
 
           const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
@@ -647,23 +647,18 @@ export default function App() {
     }
 
     const currentChatId = activeChatId;
+    const isFirstMessage = messages.length === 0;
 
     setChatSessions(prevSessions => {
       const sessionExists = prevSessions.some(session => session.chatID === currentChatId);
       if (sessionExists) {
-        return prevSessions.map(session => {
-          if (session.chatID === currentChatId) {
-            const newChat = [...session.chat, userMessage];
-            const newTitle = session.title === 'New Chat' && newChat.length === 1
-              ? userMessage.content.split(' ').slice(0, 5).join(' ')
-              : session.title;
-            return { ...session, title: newTitle, chat: newChat };
-          }
-          return session;
-        });
+        return prevSessions.map(session =>
+          session.chatID === currentChatId
+            ? { ...session, chat: [...session.chat, userMessage] }
+            : session
+        );
       } else {
-        const newTitle = userMessage.content.split(' ').slice(0, 5).join(' ');
-        return [{ chatID: currentChatId, title: newTitle, chat: [userMessage] }, ...prevSessions];
+        return [{ chatID: currentChatId, title: 'New Chat', chat: [userMessage] }, ...prevSessions];
       }
     });
 
@@ -737,7 +732,8 @@ export default function App() {
         creativeRP: creativeRP,
         advanceReasoning: advanceReasoning,
         webSearch: webSearch,
-        images: currentChatImageUris
+        images: currentChatImageUris,
+        isFirst: isFirstMessage
       };
 
       const response = await fetch(`${BACKEND_URL}/model`, {
@@ -773,7 +769,16 @@ export default function App() {
       let tempMemoryChanged = false;
       try {
         const parsedResponse = JSON.parse(cleanJsonString);
-        const { action, target } = parsedResponse;
+        const { action, target, title } = parsedResponse;
+
+        if (isFirstMessage) {
+          const newTitle = title || userMessage.content.split(' ').slice(0, 5).join(' ');
+          setChatSessions(prevSessions => prevSessions.map(session =>
+            session.chatID === currentChatId
+              ? { ...session, title: newTitle }
+              : session
+          ));
+        }
 
         if (action === 'remember' && target[0] && !memories.includes(target[0])) {
           permanentMemoryChanged = true;
@@ -804,6 +809,13 @@ export default function App() {
           }
         }
       } catch (e) {
+        if (isFirstMessage) {
+          setChatSessions(prevSessions => prevSessions.map(session =>
+            session.chatID === currentChatId
+              ? { ...session, title: userMessage.content.split(' ').slice(0, 5).join(' ') }
+              : session
+          ));
+        }
         console.log("JSON Parse Error: ", e);
       }
 

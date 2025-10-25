@@ -234,7 +234,7 @@ const MessageInput = React.memo(({
                 className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200`}
                 ref={addFilesMenuRef}
               >
-                <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>
+                {!imageGen && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}
                 <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:scale-105 transition-all`}>Upload Image</button>
               </motion.div>
             }
@@ -249,8 +249,7 @@ const MessageInput = React.memo(({
             exit={{ opacity: 0 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => { setShowAddFiles(!showAddFiles) }}
-            className={`aspect-square flex items-center justify-center ${imageGen && 'cursor-not-allowed text-gray-300'}`}
-            disabled={imageGen}
+            className={`aspect-square flex items-center justify-center`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-7 ${showAddFiles ? 'hidden' : 'block'}`}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
