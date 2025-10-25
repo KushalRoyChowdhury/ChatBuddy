@@ -133,6 +133,7 @@ app.get('/auth/status', (req, res) => {
 app.get('/auth/logout', (req, res) => {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
+    res.clearCookie('user_email');
     res.json({ success: true });
 });
 
