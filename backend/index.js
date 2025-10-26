@@ -814,6 +814,7 @@ app.post('/model', async (req, res) => {
                     if (thought.length > 0) {
                         text = thought + text;
                     }
+                    await incrementHitCount(req);
                     res.status(200).json({
                         candidates: [{ content: { parts: [{ text }], role: 'model' } }]
                     });
@@ -864,7 +865,6 @@ app.post('/model', async (req, res) => {
             console.log('API-side rate limit reached. Attempting fallback...');
             modelIndex = modelIndex === 1 ? 0 : 1;
             retry = false;
-            break start;
         }
 
         let errorMessage = error;
