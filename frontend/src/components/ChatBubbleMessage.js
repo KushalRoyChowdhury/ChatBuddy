@@ -9,7 +9,7 @@ import CodeBlock from './CodeBlock';
 
 const ChatBubbleMessage = React.memo(({ content }) => {
   return (
-    <div className="prose prose-sm max-w-none prose-p:text-inherit markdown-content">
+    <div className="prose prose-sm max-w-none select-text prose-p:text-inherit markdown-content">
       <ReactMarkdown components={{ code: CodeBlock }} remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
         {content}
       </ReactMarkdown>

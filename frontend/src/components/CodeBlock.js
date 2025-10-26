@@ -12,8 +12,8 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }) =
   };
 
   return !inline && match ? (
-    <div className="relative my-2 rounded-lg overflow-hidden font-mono text-sm max-w-full">
-      <div className="px-4 py-2 bg-gray-200 flex justify-between items-center">
+    <div className="relative my-2 rounded-lg select-text overflow-hidden font-mono text-sm max-w-full">
+      <div className="px-4 py-2 bg-gray-200 flex select-none justify-between items-center">
         <span className="text-xs text-gray-700">{match[1]}</span>
         <button onClick={() => copyToClipboard(codeText)} className="text-xs text-gray-700 hover:text-black hover:font-bold transition-all">Copy</button>
       </div>

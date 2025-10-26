@@ -1113,7 +1113,7 @@ export default function App() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="min-h-dvh max-w-[100vw] bg-gray-50 flex font-sans">
+      className="min-h-dvh max-w-[100vw] select-none bg-gray-50 flex font-sans">
       <Sidebar
         chatSessions={chatSessions}
         activeChatId={activeChatId}

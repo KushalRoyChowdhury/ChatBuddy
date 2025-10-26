@@ -5,7 +5,7 @@ import { useState } from 'react';
 export default function Login({ handleLogin }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col select-none items-center justify-center min-h-screen bg-gray-100">
       <div className="p-5 bg-white flex items-center justify-center gap-5 rounded-2xl shadow-md">
 
         <div className={`w-52 h-52 overflow-hidden rounded-lg bg-gray-200 hidden md:block`}>

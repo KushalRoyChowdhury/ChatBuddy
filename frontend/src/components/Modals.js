@@ -364,7 +364,7 @@ const Modals = React.memo(({
 
               {/* Memories List or Empty State */}
               {memories.length > 0 ? (
-                <ul className="space-y-3 text-sm text-gray-700">
+                <ul className="space-y-3 select-text text-sm text-gray-700">
                   {[...memories].reverse().map((mem) => (
                     <li
                       key={mem}
@@ -473,7 +473,7 @@ const Modals = React.memo(({
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 select-text py-2 border border-gray-300 rounded-lg"
                   placeholder="Optional: Use your own key"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -791,7 +791,7 @@ const Modals = React.memo(({
                     value={systemPrompt}
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     maxLength="400"
-                    className="w-full h-40 p-4 pr-16 border rounded-lg font-mono text-sm"
+                    className="w-full h-40 select-text p-4 pr-16 border rounded-lg font-mono text-sm"
                     placeholder="Enter custom instructions..."
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-gray-400">

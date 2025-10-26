@@ -203,9 +203,9 @@ const MessageInput = React.memo(({
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           onPaste={handlePaste}
-          placeholder={`${imageGen ? 'Enter Image Generation prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
+          placeholder={`${imageGen ? 'Enter Image Generation/Edit prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
 
-          className={`w-full flex bg-white items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
+          className={`w-full flex bg-white select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
           minRows={1}
           maxRows={5}
         />
