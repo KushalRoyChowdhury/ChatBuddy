@@ -34,15 +34,15 @@ app.use(fileUpload({
 }));
 
 app.use('/debug', (req, res) => {
-  res.json({
-    protocol: req.protocol,
-    secure: req.secure,
-    headers: {
-      'x-forwarded-proto': req.get('x-forwarded-proto'),
-      'x-forwarded-host': req.get('x-forwarded-host'),
-      origin: req.get('origin')
-    }
-  });
+    res.json({
+        protocol: req.protocol,
+        secure: req.secure,
+        headers: {
+            'x-forwarded-proto': req.get('x-forwarded-proto'),
+            'x-forwarded-host': req.get('x-forwarded-host'),
+            origin: req.get('origin')
+        }
+    });
 });
 
 // Google Drive API setup
@@ -76,7 +76,7 @@ const setOAuthCredentials = async (req, res, next) => {
         const { token } = await oauth2Client.getAccessToken();
 
         if (token !== accessToken) {
-            res.cookie('access_token', token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
+            res.cookie('access_token', token, { httpOnly: true, maxAge: 3600 * 1000, sameSite: 'none', secure: true });
         }
         next();
 
@@ -111,7 +111,7 @@ app.get('/auth/google/callback', async (req, res) => {
         const { data } = await oauth2.userinfo.get();
         const email = data.email;
 
-        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
+        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 3600 * 1000, sameSite: 'none', secure: true });
         res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, maxAge: 2592000000, sameSite: 'none', secure: true });
         res.cookie('user_email', email, { httpOnly: false, sameSite: 'none', maxAge: 2592000000, secure: true });
 
@@ -347,6 +347,12 @@ async function checkRateLimit(req) {
 
         const limitRecord = rateLimitDB[limitKey];
         const lastUpdateM = new Date(limitRecord.lastUpdateM);
+
+        if (new Date(limitRecord.lastUpdateD).toISOString().slice(0, 10) < new Date().toISOString().slice(0, 10)) {
+            limitRecord.hitD = 0;
+            limitRecord.hitM = 0;
+        }
+
         const lastUpdateD = new Date(limitRecord.lastUpdateD);
 
         // Check if the windows have expired (but don't reset here, just check against the count)
@@ -381,7 +387,7 @@ async function incrementHitCount(req) {
         if (!req.body || typeof req.body.modelIndex === 'undefined') return;
 
         const { modelIndex, apiKey: userApiKey } = req.body;
-        const userEmail = req.cookies.user_email; 
+        const userEmail = req.cookies.user_email;
         let userId;
 
         if (userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== '') {
@@ -396,27 +402,30 @@ async function incrementHitCount(req) {
         const now = new Date();
 
         if (!rateLimitDB[limitKey]) {
-            rateLimitDB[limitKey] = { hitM: 0, hitD: 0, lastUpdateM: now.toISOString(), lastUpdateD: now.toISOString() };
+            rateLimitDB[limitKey] = { hitM: 1, hitD: 1, lastUpdateM: now.toISOString(), lastUpdateD: now.toISOString() };
+            await saveRateLimitDB();
+            return;
         }
 
         const limitRecord = rateLimitDB[limitKey];
         const lastUpdateM = new Date(limitRecord.lastUpdateM);
-        const lastUpdateD = new Date(limitRecord.lastUpdateD);
-
-        // Reset counters if windows are expired, then increment
+        
+        // Reset minute counter if window is expired
         if (now.getTime() - lastUpdateM.getTime() > 60 * 1000) {
             limitRecord.hitM = 1;
-            limitRecord.lastUpdateM = now.toISOString();
         } else {
             limitRecord.hitM++;
         }
+        limitRecord.lastUpdateM = now.toISOString(); // Always update last minute-update time
 
-        if (now.getTime() - lastUpdateD.getTime() > 24 * 60 * 60 * 1000) {
+        // Reset daily counter if date has changed
+        if (new Date(limitRecord.lastUpdateD).toISOString().slice(0, 10) < now.toISOString().slice(0, 10)) {
             limitRecord.hitD = 1;
-            limitRecord.lastUpdateD = now.toISOString();
         } else {
             limitRecord.hitD++;
         }
+        limitRecord.lastUpdateD = now.toISOString(); // Always update last day-update time
+
 
         await saveRateLimitDB();
 
@@ -427,8 +436,49 @@ async function incrementHitCount(req) {
 
 
 
-loadRateLimitDB();
-setInterval(saveRateLimitDB, 30 * 1000);
+app.post('/checkLimit', async (req, res) => {
+    try {
+        const { apiKey: userApiKey } = req.body;
+        const userEmail = req.cookies.user_email;
+        let userId;
+
+        if (userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== '') {
+            userId = crypto.createHash('sha256').update(userApiKey).digest('hex');
+        } else if (userEmail) {
+            userId = crypto.createHash('sha256').update(userEmail).digest('hex');
+        } else {
+            // No identifier, so no limits to check
+            return res.json({ basic: 0, advance: 0, image: 0 });
+        }
+
+        const today = new Date().toISOString().slice(0, 10);
+        const usage = { basic: 0, advance: 0, image: 0 };
+
+        for (let i = 0; i < 3; i++) {
+            const limitKey = `${userId}:${i}`;
+            const modelType = i === 0 ? 'basic' : i === 1 ? 'advance' : 'image';
+            
+            if (rateLimitDB[limitKey]) {
+                const limitRecord = rateLimitDB[limitKey];
+                const lastUpdateDate = new Date(limitRecord.lastUpdateD).toISOString().slice(0, 10);
+
+                if (lastUpdateDate === today) {
+                    usage[modelType] = limitRecord.hitD || 0;
+                }
+            }
+        }
+
+        res.json(usage);
+
+    } catch (error) {
+        console.error("ERROR during /checkLimit:", error);
+        res.status(500).json({ error: 'Internal Server Error.' });
+    }
+});
+
+
+
+
 
 
 /**
@@ -672,7 +722,7 @@ app.post('/model', async (req, res) => {
             const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
 
             latestUserTurn.parts = latestUserTurn.parts
-                .filter(p => p.text === undefined) // Keep only non-text parts (images)
+                .filter(p => p.text === undefined)
                 .concat(createPartFromText(gemmaMessageWithSystemPrompt)); // Add the combined prompt
 
             const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
@@ -825,4 +875,10 @@ app.post('/model', async (req, res) => {
 
 });
 
-app.listen(PORT, () => console.log(`Server Running on PORT: ${PORT}`));
+const startServer = async () => {
+    await loadRateLimitDB();
+    setInterval(saveRateLimitDB, 30 * 1000);
+    app.listen(PORT, () => console.log(`Server Running on PORT: ${PORT}`));
+};
+
+startServer();

@@ -51,13 +51,14 @@ const Modals = React.memo(({
   setShowImportAppDataConfirm,
   confirmImportAppData,
   isAuthenticated,
-  handleLogin,
   handleLogout,
   showMergeConflict,
   setShowMergeConflict,
   handleOverwriteLocal,
   handleOverwriteRemote,
+  usage
 }) => {
+  // const usage = { "basic": 500, "advance": 100, "image": 8 }
   return (
     <AnimatePresence>
       {showMergeConflict && (
@@ -483,6 +484,44 @@ const Modals = React.memo(({
                   greater Context Window. Default Access has stricter Rate Limits and
                   Context Window. Changing API KEY does not change model behavior.
                 </p>
+              </div>
+
+              <div className='border p-2 rounded-lg font-medium text-gray-700 select-none'>
+                Usage Today
+                <div className='text-sm font-normal text-gray-500 ml-2'>
+                  <div className='flex items-center w-full'>
+                    <div className='w-[120px] text-nowrap'>Basic Model: </div>
+                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
+                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    </div>
+                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
+                      ( {usage.basic}{apiKey.trim().length > 32 ? ' / 14350' : ' / 500'} )
+                    </div>
+                  </div>
+
+                  <div className='flex w-full items-center'>
+                    <div className='w-[120px] text-nowrap'>Advance Model: </div>
+                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
+                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
+                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    </div>
+                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
+                      ( {usage.advance}{apiKey.trim().length > 32 ? ' / 1000' : ' / 100'} )
+                    </div>
+                  </div>
+
+                  <div className='flex w-full items-center'>
+                    <div className='w-[120px] text-nowrap'>Image Generation: </div>
+                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
+                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 10)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    </div>
+                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
+                      ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 10'} )
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2 pt-4 border-t">

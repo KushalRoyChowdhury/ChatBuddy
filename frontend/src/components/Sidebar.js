@@ -74,9 +74,16 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     }
   };
 
-  const filteredChatSessions = chatSessions.filter(session =>
-    session.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredChatSessions = chatSessions.filter(session => {
+    const searchTermLower = searchTerm.toLowerCase();
+    
+    return (
+      session.title.toLowerCase().includes(searchTermLower) ||
+      (session.chat && session.chat.some(message =>
+        message.content && message.content.toLowerCase().includes(searchTermLower)
+      ))
+    );
+  });
 
   const activeChat = chatSessions.find(session => session.chatID === activeChatId);
 
@@ -102,6 +109,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           type="text"
           placeholder="Search Chats..."
           value={searchTerm}
+          onClick={(e) => {e.stopPropagation(); e.preventDefault();}}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 border rounded-md"
         />
@@ -207,6 +215,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
                 type="text"
                 placeholder="Search Chats..."
                 value={searchTerm}
+                onClick={(e) => {e.stopPropagation(); e.preventDefault();}}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border rounded-md"
               />

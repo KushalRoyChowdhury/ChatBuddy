@@ -54,6 +54,8 @@ export default function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [showMergeConflict, setShowMergeConflict] = useState(false);
 
+  const [usage, setUsage] = useState({ "basic": 0, "advance": 0, "image": 0 });
+
 
   // --- New/Modified State ---
   const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []);
@@ -860,6 +862,20 @@ export default function App() {
     } finally {
       setLoading(false);
       abortControllerRef.current = null;
+      try {
+        const usageResponse = await fetch(`${BACKEND_URL}/checkLimit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: 'include',
+          body: JSON.stringify({ apiKey: apiKey || "" }),
+        });
+        if (usageResponse.ok) {
+          const usageData = await usageResponse.json();
+          setUsage(usageData);
+        }
+      } catch (error) {
+        console.error("Error fetching usage data:", error);
+      }
     }
   };
 
@@ -887,6 +903,23 @@ export default function App() {
 
   useEffect(() => {
     setTapBottom(true);
+    const checkLimit = async () => {
+      try {
+        const usageResponse = await fetch(`${BACKEND_URL}/checkLimit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: 'include',
+          body: JSON.stringify({ apiKey: apiKey || "" }),
+        });
+        if (usageResponse.ok) {
+          const usageData = await usageResponse.json();
+          setUsage(usageData);
+        }
+      } catch (error) {
+        console.error("Error fetching usage data:", error);
+      }
+    }
+    checkLimit();
   }, []);
 
   const getSendButtonClass = () => {
@@ -1167,6 +1200,7 @@ export default function App() {
           setShowMergeConflict={setShowMergeConflict}
           handleOverwriteLocal={handleOverwriteLocal}
           handleOverwriteRemote={handleOverwriteRemote}
+          usage={usage}
         />
 
         <ChatLog
