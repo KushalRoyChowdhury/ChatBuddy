@@ -839,8 +839,6 @@ app.post('/model', async (req, res) => {
 
                     text = JSON.stringify(fallbackObject);
 
-                    await incrementHitCount(req);
-
                     res.status(200).json({
                         candidates: [{ content: { parts: [{ text }], role: 'model' } }]
                     });
@@ -861,11 +859,6 @@ app.post('/model', async (req, res) => {
 
     } catch (error) {
         console.error("GEMINI API ERROR:: ", error);
-        if (error.toString().includes('429') && retry) {
-            console.log('API-side rate limit reached. Attempting fallback...');
-            modelIndex = modelIndex === 1 ? 0 : 1;
-            retry = false;
-        }
 
         let errorMessage = error;
         res.status(error.status || 500).json({
@@ -877,7 +870,7 @@ app.post('/model', async (req, res) => {
 
 const startServer = async () => {
     await loadRateLimitDB();
-    setInterval(saveRateLimitDB, 30 * 1000);
+    setInterval(saveRateLimitDB, 5 * 1000);
     app.listen(PORT, () => console.log(`Server Running on PORT: ${PORT}`));
 };
 
