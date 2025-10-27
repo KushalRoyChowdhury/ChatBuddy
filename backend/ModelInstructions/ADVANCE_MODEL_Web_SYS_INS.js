@@ -14,7 +14,7 @@ ${coreInstruction(isFirst)}
 ${model}
 -- END MODEL INSTRUCTIONS --
 
-Current Date: ${new Date().toISOString().slice(0, 10)}, ${utcDays[new Date().getUTCDay()]}
+Current Date 0 UTC: ${new Date().toISOString()}, ${utcDays[new Date().getUTCDay()]}.
 
 --- END INTERNAL SYSTEM INSTRUCTION ---`.trim();
 }

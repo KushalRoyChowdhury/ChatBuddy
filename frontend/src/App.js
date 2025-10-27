@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import * as pako from 'pako';
 import { useInView, motion } from 'framer-motion';
 import Header from './components/Header';
 import ChatLog from './components/ChatLog';
@@ -139,13 +140,18 @@ export default function App() {
     };
 
     try {
+      let data = JSON.stringify(appData);
+      data = pako.gzip(data, { level: 9 });
+
+
       await fetch(`${BACKEND_URL}/api/drive/write`,
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/octet-stream'
           },
-          body: JSON.stringify(appData),
+          body: data,
           credentials: 'include'
         }
       );
@@ -612,7 +618,7 @@ export default function App() {
       const img = new Image();
       img.src = `data:image/jpeg;base64,${currentBase64Image}`;
       img.onload = () => {
-        const maxWidth = 864;
+        const maxWidth = 256;
         const quality = 0.6;
         const ratio = Math.min(maxWidth / img.width, 1);
         const canvas = document.createElement('canvas');
@@ -712,7 +718,6 @@ export default function App() {
 
       const payload = {
         history: messages.concat(userMessage).map(msg => {
-          // Only check for image in assistant messages
           if (
             msg.role === 'assistant' &&
             typeof msg.content === 'string' &&
@@ -1113,7 +1118,7 @@ export default function App() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="min-h-dvh max-w-[100vw] select-none bg-gray-50 flex font-sans">
+      className="min-h-dvh font-medium max-w-[100vw] select-none bg-gray-50 flex font-sans">
       <Sidebar
         chatSessions={chatSessions}
         activeChatId={activeChatId}
@@ -1132,7 +1137,7 @@ export default function App() {
         setShowNotAvailablePopup={setShowNotAvailablePopup}
         setThinkingProcesses={setThinkingProcesses}
       />
-      <main className={`flex-1 w-full flex flex-col transition-all duration-300 ${isSidebarOpen && 'lg:ml-[18rem]'}`}>
+      <main className={`flex-1 w-full flex flex-col transition-all duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
         <Header
           model={model}
           handleModelToggle={handleModelToggle}

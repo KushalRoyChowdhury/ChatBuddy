@@ -5,7 +5,6 @@ const responseProtocol =
 {
   "action": "string (memory operation)",
   "target": "array (action data)",
-  "response": "string (user-facing content)"
 }
 FORMAT RULES:
 • "remember": target = ["exact string to save"]

@@ -486,14 +486,14 @@ const Modals = React.memo(({
                 </p>
               </div>
 
-              <div className='border p-2 rounded-lg font-medium text-gray-700 select-none'>
-                Usage Today
+              <div className='border p-2 rounded-lg text-sm font-medium text-gray-700 select-none'>
+                Used Today
                 <div className='text-sm font-normal text-gray-500 ml-2'>
                   <div className='flex items-center w-full'>
-                    <div className='w-[120px] text-nowrap'>Basic Model: </div>
-                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
-                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    <div className='w-[118px] text-nowrap'>Basic Model: </div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.basic}{apiKey.trim().length > 32 ? ' / 14350' : ' / 500'} )
@@ -501,10 +501,10 @@ const Modals = React.memo(({
                   </div>
 
                   <div className='flex w-full items-center'>
-                    <div className='w-[120px] text-nowrap'>Advance Model: </div>
-                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
-                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
-                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    <div className='w-[118px] text-nowrap'>Advance Model: </div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.advance}{apiKey.trim().length > 32 ? ' / 1000' : ' / 100'} )
@@ -512,10 +512,10 @@ const Modals = React.memo(({
                   </div>
 
                   <div className='flex w-full items-center'>
-                    <div className='w-[120px] text-nowrap'>Image Generation: </div>
-                    <div className='ml-1 h-2 flex-grow gap-1 flex items-center'>
-                      <div className={`bg-yellow-400 h-full overflow-hidden rounded-md`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 10)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative`} ></div>
+                    <div className='w-[118px] text-nowrap'>Image Generation: </div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 10)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 10'} )
@@ -524,16 +524,16 @@ const Modals = React.memo(({
                 </div>
               </div>
 
-              <div className="space-y-2 pt-4 border-t">
+              <div className="pt-4 flex gap-2 items-center justify-center flex-col-reverse md:flex-row-reverse border-t">
                 <button
                   onClick={exportAppData}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all duration-300 ease-in-out hover:border-blue-100 text-sm font-medium"
                 >
                   Export App Data
                 </button>
                 <button
                   onClick={handleImportAppDataClick}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all duration-300 ease-in-out hover:border-blue-100 text-sm font-medium"
                 >
                   Import App Data
                 </button>
@@ -768,7 +768,7 @@ const Modals = React.memo(({
                     maxLength="20"
                     value={userNickname}
                     onChange={(e) => setUserNickname(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full select-text px-3 py-2 border border-gray-300 rounded-lg"
                     placeholder="Enter your nickname"
                   />
                   <div className="absolute bottom-1 right-2 text-xs text-gray-400">
@@ -781,11 +781,7 @@ const Modals = React.memo(({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Custom Instructions
                 </label>
-                <div className="mb-1 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <p className="text-sm text-blue-800">
-                    The Custom Instruction sets the behavior and rules for the AI.
-                  </p>
-                </div>
+
                 <div className='relative'>
                   <textarea
                     value={systemPrompt}
@@ -903,25 +899,17 @@ const Modals = React.memo(({
                   (10RPM, 100RPD) for FREE.
                   <br />
                   <br />
-                  Aditionally the app Source Code is available on GitHub 👉
-                  <span className="font-medium">
-                    [
+                  Aditionally the app Source Code is available on 👉
+                  <span className="font-bold">
                     <a
                       href="https://github.com/KushalRoyChowdhury/ChatBuddy"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      HERE
-                    </a>
-                    ] <a
-                      href="https://github.com/KushalRoyChowdhury/ChatBuddy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                      GitHub
                     </a>
                   </span>
-                  👈 . Fork It, Modify it.. I don't care. Just Star it before
-                  touching.
+                  👈. 
                   <br />
                   <br />
                   Thank You for using ChatBuddy.
@@ -931,7 +919,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600">
                 AI can make mistakes.
                 <br />
-                v2.1.1 (release 251022)
+                v2.2 (release 251027)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

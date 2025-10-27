@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
 const compression = require('compression');
+const pako = require('pako');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -19,7 +20,7 @@ const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'build')));
-app.use(compression());
+app.use(compression({ level: 9 }));
 app.use(cors({
     origin: [process.env.FRONTEND_URL, '::1', 'localhost', '127.0.0.1', '0.0.0.0'],
     credentials: true,
@@ -32,6 +33,20 @@ app.use(fileUpload({
     tempFileDir: '/tmp/',
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
+app.use((req, res, next) => {
+    if (req.headers['content-encoding'] === 'gzip' && req.headers['content-type'] === 'application/octet-stream') {
+        const chunks = [];
+        req.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+        req.on('end', () => {
+            req.body = Buffer.concat(chunks);
+            next();
+        });
+    } else {
+        next();
+    }
+});
 
 app.use('/debug', (req, res) => {
     res.json({
@@ -157,7 +172,7 @@ app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
     try {
         const response = await drive.files.list({
             auth: oauth2Client,
-            q: "name='chatbuddy_data.json'",
+            q: "name='chatbuddy_data.bin'",
             spaces: 'drive',
             fields: 'files(id, name, modifiedTime)',
         });
@@ -171,10 +186,14 @@ app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
 
         const fileResponse = await drive.files.get(
             { auth: oauth2Client, fileId: fileId, alt: 'media' },
-            { responseType: 'json' }
+            { responseType: 'arraybuffer' }
         );
 
-        res.json({ modifiedTime, data: fileResponse.data });
+        const compressedData = Buffer.from(fileResponse.data);
+        const decompressedData = pako.ungzip(compressedData, { to: 'string' });
+        const jsonData = JSON.parse(decompressedData);
+
+        res.json({ modifiedTime, data: jsonData });
 
     } catch (error) {
         console.error('Error reading from Google Drive:', error);
@@ -183,23 +202,23 @@ app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
 });
 
 app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
-    const appData = req.body;
+    const compressedData = req.body;
 
     try {
         const listResponse = await drive.files.list({
             auth: oauth2Client,
-            q: "name='chatbuddy_data.json'",
+            q: "name='chatbuddy_data.bin'",
             spaces: 'drive',
             fields: 'files(id)',
         });
 
         const fileMetadata = {
-            name: 'chatbuddy_data.json',
+            name: 'chatbuddy_data.bin',
         };
 
         const media = {
-            mimeType: 'application/json',
-            body: stream.Readable.from(JSON.stringify(appData))
+            mimeType: 'application/octet-stream',
+            body: stream.Readable.from(compressedData)
         };
 
         if (listResponse.data.files.length > 0) {
@@ -228,9 +247,10 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
 
 // --- Constants ---
 const MODELS = [
-    'gemma-3-27b-it',
-    'gemini-2.5-flash-lite',
-    'gemini-2.0-flash-preview-image-generation'
+    'gemma-3-27b-it',   // Basic Model
+    'gemini-2.5-flash-lite',    // Advanced Model
+    'gemini-2.0-flash-preview-image-generation',    // Image Model
+    'gemma-3-12b-it'     // Memory, Image Safety & Format Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
@@ -241,6 +261,11 @@ const advance = require('./ModelInstructions/ADVANCE_MODEL_NoWeb_SYS_INS');
 const advance_web = require('./ModelInstructions/ADVANCE_MODEL_Web_SYS_INS');
 const advance_thinking = require('./ModelInstructions/ADVANCE_THINK_NoWeb_SYS_INS');
 const advance_thinking_web = require('./ModelInstructions/ADVANCE_THINK_Web_SYS_INS');
+
+const INTERNAL_MEMORY_PROMPT = require('./ModelInstructions/InstructionAbstraction/CoreInstructionMemory');
+const ImageSafetyHandler = require('./ModelInstructions/InstructionAbstraction/ImageSafetyHandler');
+
+
 
 
 
@@ -409,7 +434,7 @@ async function incrementHitCount(req) {
 
         const limitRecord = rateLimitDB[limitKey];
         const lastUpdateM = new Date(limitRecord.lastUpdateM);
-        
+
         // Reset minute counter if window is expired
         if (now.getTime() - lastUpdateM.getTime() > 60 * 1000) {
             limitRecord.hitM = 1;
@@ -457,7 +482,7 @@ app.post('/checkLimit', async (req, res) => {
         for (let i = 0; i < 3; i++) {
             const limitKey = `${userId}:${i}`;
             const modelType = i === 0 ? 'basic' : i === 1 ? 'advance' : 'image';
-            
+
             if (rateLimitDB[limitKey]) {
                 const limitRecord = rateLimitDB[limitKey];
                 const lastUpdateDate = new Date(limitRecord.lastUpdateD).toISOString().slice(0, 10);
@@ -475,95 +500,6 @@ app.post('/checkLimit', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error.' });
     }
 });
-
-
-
-
-
-
-/**
- * A highly tolerant parser that tries to salvage key-value data from a malformed,
- * JSON-like string from AI. If the string is so malformed that no
- * relevant keys can be found, it signals a complete failure by returning null.
- *
- * @param {string} rawText The raw, potentially malformed string input.
- * @returns {string|null} A valid, stringified JSON object on success, or null on total failure.
- */
-function sanitizeAndParseAIResponse(rawText) {
-    // 1. Handle null, empty, or non-string inputs immediately.
-    if (!rawText || typeof rawText !== 'string') {
-        return null;
-    }
-
-    /**
-     * An inner helper function to extract a value for a specific key using a robust regex.
-     * @param {string} key The key to search for ('action', 'target', or 'response').
-     * @param {string} text The text to search within.
-     * @returns {string|null} The cleaned value string, or null if not found.
-     */
-    const extractValue = (key, text) => {
-        const regex = new RegExp(
-            `\b${key}\b\s*[:=]\s*` +
-            `(` +
-            `"(?:[^"\\]|\\.)*"` +
-            `|` +
-            `'(?:[^'\\]|\\.)*'` +
-            `|` +
-            `\[(?:[^\]\]|\\.)*\]` +
-            `|` +
-            `.+?` +
-            `)
-` +
-            `(?=\s*,?\s*\b(?:action|target|response)\b|\s*[}\]]|$)`,
-            'is'
-        );
-
-        const match = text.match(regex);
-        if (!match || !match[1]) {
-            return null;
-        }
-
-        let value = match[1].trim();
-
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-            value = value.slice(1, -1);
-        }
-        return value;
-    };
-
-    const extractedAction = extractValue('action', rawText);
-    const extractedTarget = extractValue('target', rawText);
-    const extractedResponse = extractValue('response', rawText);
-
-    if (extractedAction === null && extractedTarget === null && extractedResponse === null) {
-        return null;
-    }
-    const action = extractedAction || 'chat';
-    const response = extractedResponse !== null ? extractedResponse : rawText;
-
-    let target;
-    if (extractedTarget) {
-        try {
-            target = JSON.parse(extractedTarget);
-            if (!Array.isArray(target)) {
-                target = [target];
-            }
-        } catch (e) {
-            target = [extractedTarget];
-        }
-    } else {
-        target = [''];
-    }
-
-    const finalObject = {
-        action: action,
-        target: target,
-        response: response,
-    };
-
-    return JSON.stringify(finalObject);
-}
-
 
 // --- Troll ---
 app.get('/', (req, res) => {
@@ -652,14 +588,12 @@ app.post('/upload', async (req, res) => {
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst } = req.body;
-    let retry = true;
 
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
     }
 
-    start:
     try {
         const finalApiKey = apiKey || SERVER_API_KEY;
         if (!finalApiKey) {
@@ -677,11 +611,11 @@ app.post('/model', async (req, res) => {
 
         let INTERNAL_SYSTEM_PROMPT = '';
 
-        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(isFirst);
-        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(isFirst);
-        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(isFirst);
-        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(isFirst);
-        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(isFirst);
+        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic();
+        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance();
+        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web();
+        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking();
+        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web();
 
         const selectedModel = MODELS[modelIndex];
 
@@ -709,8 +643,11 @@ app.post('/model', async (req, res) => {
                 });
             }
 
-            // Add the text part
-            parts.push(createPartFromText(msg.content));
+            let content;
+            try {
+                content = JSON.parse(msg.content).response;
+            } catch (err) { content = msg.content }
+            parts.push(createPartFromText(content));
 
             return { role, parts };
         });
@@ -764,9 +701,31 @@ app.post('/model', async (req, res) => {
                 }
             });
         } else {
+            let instruction = ImageSafetyHandler;
+            let prompt = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts;
+
+            let safetycheck = instruction + prompt;
+
+            result = await genAI.models.generateContent({
+                model: MODELS[3],
+                contents: safetycheck,
+                config: { safetySettings: safetySettings }
+            });
+
+            let safety = result.candidates[0].content.parts[0].text;
+            console.log(safety);
+
+            if (!safety) {
+                let text = "Provided Content Violates Safety.";
+                res.status(200).json({
+                    candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                });
+                return;
+            }
+
             result = await genAI.models.generateContent({
                 model: selectedModel,
-                contents: historyForSDK_NEW[historyForSDK_NEW.length - 1].parts,
+                contents: prompt,
                 config: {
                     responseModalities: [Modality.TEXT, Modality.IMAGE],
                     safetySettings: safetySettings,
@@ -800,53 +759,65 @@ app.post('/model', async (req, res) => {
             }
         }
 
-        let text = '';
+        let mainText = '';
         if (generatedImage) {
-            text = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
+            mainText = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
         } else {
-            text = answer.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-            text = text.replace(/\\(?![ntr"'\\])/g, '\\');
+
+            mainText = answer.replace(/\\(?![ntr"'\\])/g, '\\');
         }
 
-        if (!generatedImage) {
+        // --------------------------------------------------------------------------------------------------------------------
+
+        let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst);
+        if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
+
+        contextLimit = 1000 * 4;
+
+        let shortHistory = getTruncatedHistory(history, contextLimit);
+
+        const historyForMemory = shortHistory.map(msg => {
+            const role = msg.role === 'assistant' ? 'model' : 'user';
+            let parts = [];
+
+            let content;
             try {
-                if (webSearch) {
-                    if (thought.length > 0) {
-                        text = thought + text;
-                    }
-                    res.status(200).json({
-                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                    });
-                    return;
-                }
-                JSON.parse(text);
-            }
-            catch (error) {
-                console.log("JSON PARSE ERROR:", error.message);
+                content = JSON.parse(msg.content).response;
+            } catch (err) { content = msg.content }
+            parts.push(createPartFromText(content));
 
+            return { role, parts };
+        });
 
-                text = sanitizeAndParseAIResponse(text);
+        const latestUserTurn = historyForMemory.pop();
+        const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
+        const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText} \nMODEL: ${mainText}`;
 
-                if (text === null) {
+        latestUserTurn.parts = latestUserTurn.parts
+            .filter(p => p.text === undefined)
+            .concat(createPartFromText(memoryMessageWithSystemPrompt));
 
-                    console.log("SANITIZER FAILED: Input was too cursed. Using fallback response.");
-                    const fallbackObject = {
-                        action: 'chat',
-                        target: [],
-                        response: "I'm currently having problem generating a response, try again in a moment."
-                    };
+        const memoryContents = [...historyForSDK_NEW, latestUserTurn];
 
-                    text = JSON.stringify(fallbackObject);
+        result = await genAI.models.generateContent({
+            model: MODELS[3],
+            contents: memoryContents,
+            config: { safetySettings: safetySettings }
+        });
 
-                    await incrementHitCount(req);
+        let text = result.candidates[0].content.parts[0].text;
+        text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
 
-                    res.status(200).json({
-                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                    });
-                    return;
-                }
-            }
+        try {
+            text = JSON.parse(text);
+            text = { ...text, response: `${mainText}` };
+            text = JSON.stringify(text);
+        } catch (err) {
+            text = mainText;
         }
+
+        // --------------------------------------------------------------------------------------------------------------------
+
 
         if (thought.length > 0) {
             text = thought + text;
@@ -860,11 +831,34 @@ app.post('/model', async (req, res) => {
 
     } catch (error) {
         console.error("GEMINI API ERROR:: ", error);
-        if (error.toString().includes('429') && retry) {
-            console.log('API-side rate limit reached. Attempting fallback...');
-            modelIndex = modelIndex === 1 ? 0 : 1;
-            retry = false;
-            break start;
+        if (error.toString().includes('503')) {
+            const fallbackObject = {
+                action: 'chat',
+                target: [],
+                response: "Server Overloaded. Try again later."
+            };
+
+            text = JSON.stringify(fallbackObject);
+
+            res.status(200).json({
+                candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+            });
+            return;
+        }
+
+        if (error.toString().includes('429')) {
+            const fallbackObject = {
+                action: 'chat',
+                target: [],
+                response: "Server Busy. Try again later."
+            };
+
+            text = JSON.stringify(fallbackObject);
+
+            res.status(200).json({
+                candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+            });
+            return;
         }
 
         let errorMessage = error;

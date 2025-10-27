@@ -97,10 +97,10 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       layout
       className="bg-gray-100 flex flex-col fixed top-0 left-0 overflow-hidden h-dvh"
       initial={false}
-      animate={{ width: isSidebarOpen ? '18rem' : '0' }}
+      animate={{ width: isSidebarOpen ? '20rem' : '0' }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      <div className="flex min-w-72 justify-between items-center mb-4 flex-shrink-0 p-4">
+      <div className="flex min-w-80 justify-between items-center mb-4 flex-shrink-0 p-4">
         <h1 className="text-xl font-bold">Chats</h1>
         <button onClick={createNewChat} className="p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
       </div>
@@ -114,7 +114,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           className="w-full p-2 border rounded-md"
         />
       </div>
-      <div className="flex-1 min-w-72 overflow-y-auto px-4">
+      <div className="flex-1 min-w-80 overflow-y-auto px-4">
         {filteredChatSessions.map(session => (
           <div
             key={session.chatID}
@@ -159,7 +159,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           </div>
         ))}
       </div>
-      <div className="p-4 min-w-72">
+      <div className="p-4 min-w-80">
         {activeChat && activeChat.chat.length > 0 ? (
           <button onClick={() => setShowExportOptions(true)} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300 mb-2">Export Chat</button>
         ) : (
@@ -168,7 +168,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
         <button onClick={handleSettingsClick} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300">Settings</button>
       </div>
       {userData && (
-        <div className="p-4 min-w-72 border-t border-gray-300">
+        <div className="p-4 min-w-80 border-t border-gray-300">
           <div className="flex items-center">
             <img src={userData.picture} alt="User Avatar" className="w-10 h-10 rounded-full mr-3" />
             <div className="flex-1">

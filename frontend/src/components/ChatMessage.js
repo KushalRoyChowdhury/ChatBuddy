@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import CollapsibleThought from './CollapsibleThought';
 import ChatBubbleMessage from './ChatBubbleMessage';
+import AiImage from './AiImage';
 
 const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, getUserBubbleClass }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(true);
@@ -10,7 +11,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
     <motion.div
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
         {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
@@ -57,37 +58,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
           const content = getTextToRender(msg);
           // Check if content is a data URL (image)
           if (content.startsWith('image/')) {
-            // Function to download the image
-            const handleDownload = () => {
-              const link = document.createElement('a');
-              link.href = `data:${content}`;
-              link.download = 'ai-generated-image.png';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            };
-
-            return (
-              <div className="mb-2 relative inline-block">
-                <button
-                  onClick={handleDownload}
-                  className="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center"
-                  aria-label="Download image"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-
-                </button>
-
-                {/* Image */}
-                <img
-                  src={`data:${content}`}
-                  alt="AI Generated"
-                  className="max-w-xs max-h-64 rounded-lg object-cover border border-gray-200 shadow-sm"
-                />
-              </div>
-            );
+            return <AiImage content={content} />;
           }
           // Otherwise, render as Markdown
           return (
