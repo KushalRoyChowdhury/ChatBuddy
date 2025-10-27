@@ -29,11 +29,12 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **🤔 Model Thinking Transparency**: See the AI's step-by-step reasoning process for complex queries when using the Advanced Reasoning mode.
     -   **🔎 Google Search**: The advanced model can access Google Search to provide responses with the most up-to-date information.
 
--   **📝 Persistent State**: Your entire session is saved locally in your browser's `localStorage` & `Google Drive` for Sync. This includes:
+-   **📝 Persistent State**: Your entire session is saved in your browser's `localStorage`, `sessionStorage`, `cookies`. `Google Drive` for Sync. This includes:
     -   Chat History
     -   Saved Memories
     -   Model Selection
     -   System Prompt & API Key
+    -   Nickname
 
 -   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices by linking your Google account. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device.
 

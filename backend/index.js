@@ -782,9 +782,26 @@ app.post('/model', async (req, res) => {
 
             let content;
             try {
+<<<<<<< HEAD
                 content = JSON.parse(msg.content).response;
             } catch (err) { content = msg.content }
             parts.push(createPartFromText(content));
+=======
+                if (webSearch) {
+                    if (thought.length > 0) {
+                        text = thought + text;
+                    }
+                    await incrementHitCount(req);
+                    res.status(200).json({
+                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                    });
+                    return;
+                }
+                JSON.parse(text);
+            }
+            catch (error) {
+                console.log("JSON PARSE ERROR:", error.message);
+>>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
 
             return { role, parts };
         });
@@ -805,6 +822,7 @@ app.post('/model', async (req, res) => {
             config: { safetySettings: safetySettings }
         });
 
+<<<<<<< HEAD
         let text = result.candidates[0].content.parts[0].text;
         text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
 
@@ -814,6 +832,14 @@ app.post('/model', async (req, res) => {
             text = JSON.stringify(text);
         } catch (err) {
             text = mainText;
+=======
+                    res.status(200).json({
+                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                    });
+                    return;
+                }
+            }
+>>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
         }
 
         // --------------------------------------------------------------------------------------------------------------------
@@ -831,6 +857,7 @@ app.post('/model', async (req, res) => {
 
     } catch (error) {
         console.error("GEMINI API ERROR:: ", error);
+<<<<<<< HEAD
         if (error.toString().includes('503')) {
             const fallbackObject = {
                 action: 'chat',
@@ -860,6 +887,8 @@ app.post('/model', async (req, res) => {
             });
             return;
         }
+=======
+>>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
 
         let errorMessage = error;
         res.status(error.status || 500).json({
@@ -871,7 +900,7 @@ app.post('/model', async (req, res) => {
 
 const startServer = async () => {
     await loadRateLimitDB();
-    setInterval(saveRateLimitDB, 30 * 1000);
+    setInterval(saveRateLimitDB, 5 * 1000);
     app.listen(PORT, () => console.log(`Server Running on PORT: ${PORT}`));
 };
 
