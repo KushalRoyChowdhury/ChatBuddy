@@ -20,7 +20,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.) with the Advanced Model. The AI can read and analyze the content of your files, making it perfect for summarizing documents, answering questions about reports, or analyzing data.
 
--   **🎨 Image Generation (`gemini-2.0-image-preview`)**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun.
+-   **🎨 Image Generation (`gemini-2.0-image-preview`)**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun **AVAILABLE TILL 2025-NOV-12**.
 
 -   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
@@ -144,8 +144,8 @@ On the hosted version, the app works without providing any keys but has strict r
 | Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 1      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 10 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 3      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
+| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 25 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
 
 > **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
 
@@ -167,17 +167,15 @@ The AI can manage its own memory based on your conversation. The App listens for
 {
   "action": "remember",
   "target": "The user's name is Alex and they are a software developer.",
-  "response": "Got it, Alex! I'll remember that you're a software developer."
 }
 ```
 
 -   `"action"`: Can be `remember`, `forget`, `update`, or `temp`.
 -   `"target"`: The piece of information to act upon.
--   `"response"`: The user-facing text that gets displayed in the chat.
 
 This allows for dynamic and context-aware conversations that evolve over time. You can view and manage all permanent memories from the "Saved Memories" modal.
 
-**NOTE:** Memory Actions are not available in Web Search mode.
+**Memory is handled by `Gemma3-12b-it`**.
 
 ## 📜 Source Code
 
