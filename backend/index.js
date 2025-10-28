@@ -654,6 +654,10 @@ app.post('/model', async (req, res) => {
             if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
             if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- START RECENT CHATS ---\n- ${temp.join('\n- ')}\n--- END RECENT CHATS ---`;
 
+            let thought = '';
+            let answer = '';
+            let generatedImage = null;
+
             if (modelIndex === 0) { // Gemma logic
                 const latestUserTurn = historyForSDK_NEW.pop();
                 const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
@@ -713,11 +717,6 @@ app.post('/model', async (req, res) => {
                         safetySettings: safetySettings,
                     },
                 });
-
-                let thought = '';
-                let answer = '';
-                let generatedImage = null;
-
 
                 try {
                     for (const part of result.candidates[0].content.parts) {
