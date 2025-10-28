@@ -263,8 +263,6 @@ const advance_thinking = require('./ModelInstructions/ADVANCE_THINK_NoWeb_SYS_IN
 const advance_thinking_web = require('./ModelInstructions/ADVANCE_THINK_Web_SYS_INS');
 
 const INTERNAL_MEMORY_PROMPT = require('./ModelInstructions/InstructionAbstraction/CoreInstructionMemory');
-const IMAGE_SAFETY_PROMPT = require('./ModelInstructions/InstructionAbstraction/ImageSafety');
-
 
 
 // --- Helper Function for History Truncation ---
