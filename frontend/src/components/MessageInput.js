@@ -41,6 +41,7 @@ const MessageInput = React.memo(({
   webSearch,
   setWebSearch,
   handleStop,
+  imageGenAvailable
 }) => {
   const addFilesMenuRef = useRef(null);
   const addFilesButtonRef = useRef(null);
@@ -209,7 +210,7 @@ const MessageInput = React.memo(({
           minRows={1}
           maxRows={5}
         />
-        <div className='p-2 flex relative justify-start gap-2 h-[56px] transition-all'>
+        <div className='p-2 flex relative justify-start gap-2 h-max transition-all'>
           <input
             type="file"
             accept="image/*"
@@ -235,7 +236,7 @@ const MessageInput = React.memo(({
                 ref={addFilesMenuRef}
               >
                 {!imageGen && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}
-                <button onClick={handleImgUpload} className={`p-4 ${model === 'gemini-2.5-flash-lite' && 'pt-2'} text-nowrap hover:scale-105 transition-all`}>Upload Image</button>
+                <button onClick={handleImgUpload} className={`p-4 ${!imageGen && 'pt-2'}  text-nowrap hover:scale-105 transition-all`}>Upload Image</button>
               </motion.div>
             }
           </AnimatePresence>
@@ -262,112 +263,109 @@ const MessageInput = React.memo(({
 
           </motion.button>
 
-          <AnimatePresence>
-            <motion.button
-              type="button"
-              title="Generate Images"
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => { setImageGen(!imageGen); setShowAddFiles(false) }}
-              className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${imageGen
-                ? 'bg-orange-100 text-orange-600'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-            >
-              <div className='flex gap-2 items-center justify-center'>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 hidden md:block">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-
-                <div className='hidden md:block'>Image Generation</div>
-                <div className='block md:hidden'>Image</div>
-              </div>
-            </motion.button>
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {model === 'gemma-3-27b-it' && !imageGen && (
-              <motion.button
-                type="button"
-                title="More Creative Responses (can make mistake on factual answers)"
-                initial={{ opacity: 0.5 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setCreativeRP(!creativeRP)}
-                className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${creativeRP
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
-              >
-                <div className='flex gap-2 items-center justify-center'>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 hidden md:block">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-                  </svg>
-                  <div>Creative Mode</div>
-                </div>
-              </motion.button>
-            )}
-
-            {model === 'gemini-2.5-flash-lite' && !imageGen && (
-              <>
+          <div className='overflow-y-auto flex flex-nowrap gap-1 flex-grow rounded-xl'>
+            <AnimatePresence>
+              {imageGenAvailable &&
                 <motion.button
                   type="button"
-                  title="Advance Multi-Step Reasoning"
+                  title="Generate Images"
                   initial={{ opacity: 0.5 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setAdvanceReasoning(!advanceReasoning)}
-                  className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${advanceReasoning
-                    ? 'bg-blue-100 text-blue-600'
+                  onClick={() => { setImageGen(!imageGen); setShowAddFiles(false) }}
+                  className={`p-2 rounded-xl w-96 md:w-48 transition-all text-center text-nowrap ${imageGen
+                    ? 'bg-orange-100 text-orange-600'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                     }`}
                 >
-                  <div className='flex gap-2 justify-center'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 hidden md:block">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                  <div className='flex gap-2 items-center justify-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
-                    <div className='hidden md:block'>Advance Reasoning</div>
-                    <div className='block md:hidden'>Reasoning</div>
 
+                    <div className='flex gap-1'>Image <span className='hidden md:block'> Generation</span></div>
                   </div>
-                </motion.button>
+                </motion.button>}
+            </AnimatePresence>
 
+            <AnimatePresence>
+              {model === 'gemma-3-27b-it' && !imageGen && (
                 <motion.button
                   type="button"
-                  title="Search Web for latest info"
+                  title="More Creative Responses (can make mistake on factual answers)"
                   initial={{ opacity: 0.5 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setWebSearch(!webSearch)}
-                  className={`p-2 rounded-xl w-max md:w-48 text-center text-nowrap transition-colors ${webSearch
-                    ? 'bg-purple-100 text-purple-600'
+                  onClick={() => setCreativeRP(!creativeRP)}
+                  className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${creativeRP
+                    ? 'bg-green-100 text-green-600'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                     }`}
                 >
-                  <div className='flex gap-2 justify-center'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 hidden md:block">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                  <div className='flex gap-2 items-center justify-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                     </svg>
-
-                    <div className='hidden md:block'>Web Search</div>
-                    <div className='block md:hidden'>Internet</div>
-
+                    <div>Creative Mode</div>
                   </div>
                 </motion.button>
-              </>
-            )}
-          </AnimatePresence>
+              )}
+
+              {model === 'gemini-2.5-flash-lite' && !imageGen && (
+                <>
+                  <motion.button
+                    type="button"
+                    title="Advance Multi-Step Reasoning"
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setAdvanceReasoning(!advanceReasoning)}
+                    className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${advanceReasoning
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                  >
+                    <div className='flex gap-2 justify-center'>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                      </svg>
+                      <div className='flex'><span className='hidden md:block'>Advance</span> Reasoning</div>
+
+                    </div>
+                  </motion.button>
+
+                  <motion.button
+                    type="button"
+                    title="Search Web for latest info"
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setWebSearch(!webSearch)}
+                    className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${webSearch
+                      ? 'bg-purple-100 text-purple-600'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                  >
+                    <div className='flex gap-2 justify-center'>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                      </svg>
+
+                      <div className='block'>Web Search</div>
+
+                    </div>
+                  </motion.button>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
 
           <motion.button
             whileTap={{ scale: 0.99 }}
             onClick={loading ? handleStop : sendMessage}
             disabled={uploading || (!input.trim() && !loading)}
-            className={`px-2 sm:px-6 absolute right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${loading ? 'bg-red-600 hover:bg-red-700' : getSendButtonClass()} transition-colors duration-500`}
+            className={`px-2 sm:px-6 right-2 py-2 self-end rounded-xl text-white font-medium flex gap-2 items-center ${loading ? 'bg-red-600 hover:bg-red-700' : getSendButtonClass()} transition-colors duration-500`}
           >
             {loading ? (
               <>

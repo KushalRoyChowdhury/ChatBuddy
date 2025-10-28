@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Modals = React.memo(({
@@ -56,9 +56,9 @@ const Modals = React.memo(({
   setShowMergeConflict,
   handleOverwriteLocal,
   handleOverwriteRemote,
-  usage
+  usage, 
+  imageGenAvailable
 }) => {
-  // const usage = { "basic": 500, "advance": 100, "image": 8 }
   return (
     <AnimatePresence>
       {showMergeConflict && (
@@ -511,16 +511,16 @@ const Modals = React.memo(({
                     </div>
                   </div>
 
-                  <div className='flex w-full items-center'>
+                  {imageGenAvailable && <div className='flex w-full items-center'>
                     <div className='w-[118px] text-nowrap'>Image Generation: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 10)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 10) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 25)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
-                      ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 10'} )
+                      ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 25'} )
                     </div>
-                  </div>
+                  </div>}
                 </div>
               </div>
 
@@ -919,7 +919,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600">
                 AI can make mistakes.
                 <br />
-                v2.2 (release 251027)
+                v2.2 (final release 251028)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

@@ -1,4 +1,4 @@
-// Update 2.1.1
+// Update 2.2
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -22,7 +22,7 @@ const SERVER_API_KEY = process.env.GEMINI_API_KEY;
 app.use(express.static(path.join(__dirname, 'build')));
 app.use(compression({ level: 9 }));
 app.use(cors({
-    origin: [process.env.FRONTEND_URL, '::1', 'localhost', '127.0.0.1', '0.0.0.0'],
+    origin: [process.env.FRONTEND_URL, '::1'],
     credentials: true,
 }));
 app.use(express.json());
@@ -91,7 +91,7 @@ const setOAuthCredentials = async (req, res, next) => {
         const { token } = await oauth2Client.getAccessToken();
 
         if (token !== accessToken) {
-            res.cookie('access_token', token, { httpOnly: true, maxAge: 3600 * 1000, sameSite: 'none', secure: true });
+            res.cookie('access_token', token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
         }
         next();
 
@@ -126,7 +126,7 @@ app.get('/auth/google/callback', async (req, res) => {
         const { data } = await oauth2.userinfo.get();
         const email = data.email;
 
-        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 3600 * 1000, sameSite: 'none', secure: true });
+        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
         res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, maxAge: 2592000000, sameSite: 'none', secure: true });
         res.cookie('user_email', email, { httpOnly: false, sameSite: 'none', maxAge: 2592000000, secure: true });
 
@@ -250,7 +250,7 @@ const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model
-    'gemma-3-12b-it'     // Memory, Image Safety & Format Handler
+    'gemma-3-12b-it'     // Memory & Format Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
@@ -263,9 +263,7 @@ const advance_thinking = require('./ModelInstructions/ADVANCE_THINK_NoWeb_SYS_IN
 const advance_thinking_web = require('./ModelInstructions/ADVANCE_THINK_Web_SYS_INS');
 
 const INTERNAL_MEMORY_PROMPT = require('./ModelInstructions/InstructionAbstraction/CoreInstructionMemory');
-const ImageSafetyHandler = require('./ModelInstructions/InstructionAbstraction/ImageSafetyHandler');
-
-
+const IMAGE_SAFETY_PROMPT = require('./ModelInstructions/InstructionAbstraction/ImageSafety');
 
 
 
@@ -338,7 +336,7 @@ function getIp(req) {
 const limitConfigs = {
     basic: { maxM: 5, maxD: 500 },
     advanced: { maxM: 3, maxD: 100 },
-    image: { maxM: 1, maxD: 10 },
+    image: { maxM: 3, maxD: 25 },
     basicUser: { maxM: 30, maxD: 14350 },
     advancedUser: { maxM: 15, maxD: 1000 },
     imageUser: { maxM: 10, maxD: 100 },
@@ -609,244 +607,227 @@ app.post('/model', async (req, res) => {
             return res.status(400).json({ error: { message: 'A valid chat history must be provided.' } });
         }
 
-        let INTERNAL_SYSTEM_PROMPT = '';
+        const mainModels = async () => {
 
-        if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic();
-        else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance();
-        else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web();
-        else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking();
-        else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web();
+            let contextLimit = modelIndex === 0
+                ? GEMMA_HISTORY_LIMIT_CHARS
+                : (apiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
 
-        const selectedModel = MODELS[modelIndex];
+            const truncatedHistory = getTruncatedHistory(history, contextLimit);
 
-        let finalSystemPrompt = INTERNAL_SYSTEM_PROMPT;
-        if (sys && sys.trim()) finalSystemPrompt += `\n\n--- START USER'S SYSTEM PROMPT ---\n${sys.trim()}\n--- END USER'S SYSTEM PROMPT ---`;
-        if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
-        if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- START RECENT CHATS ---\n- ${temp.join('\n- ')}\n--- END RECENT CHATS ---`;
+            const historyForSDK_NEW = truncatedHistory.map(msg => {
+                const role = msg.role === 'assistant' ? 'model' : 'user';
+                let parts = [];
 
-        let contextLimit = modelIndex === 0
-            ? GEMMA_HISTORY_LIMIT_CHARS
-            : (apiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
+                if (role === 'user' && images && images.length > 0) {
+                    const associatedImages = images.filter(img => img.id === msg.id && img.uri);
+                    associatedImages.forEach(img => {
+                        parts.push(createPartFromUri(img.uri, img.mimeType));
+                    });
+                }
 
-        const truncatedHistory = getTruncatedHistory(history, contextLimit);
+                let content;
+                try {
+                    content = JSON.parse(msg.content).response;
+                } catch (err) { content = msg.content }
+                parts.push(createPartFromText(content));
 
-        // New logic to build history with interleaved images
-        const historyForSDK_NEW = truncatedHistory.map(msg => {
-            const role = msg.role === 'assistant' ? 'model' : 'user';
-            let parts = [];
+                return { role, parts };
+            });
 
-            // If it's a user message, check for associated images
-            if (role === 'user' && images && images.length > 0) {
-                const associatedImages = images.filter(img => img.id === msg.id && img.uri);
-                associatedImages.forEach(img => {
-                    parts.push(createPartFromUri(img.uri, img.mimeType));
+            let hasFiles;
+            try {
+                hasFiles = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts.length === 2;
+            }
+            catch (err) { hasFiles = false; }
+
+            let INTERNAL_SYSTEM_PROMPT = '';
+
+            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles);
+            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles);
+            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles);
+            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles);
+            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles);
+
+            const selectedModel = MODELS[modelIndex];
+
+            let finalSystemPrompt = INTERNAL_SYSTEM_PROMPT;
+            if (sys && sys.trim()) finalSystemPrompt += `\n\n--- START USER'S SYSTEM PROMPT ---\n${sys.trim()}\n--- END USER'S SYSTEM PROMPT ---`;
+            if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
+            if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- START RECENT CHATS ---\n- ${temp.join('\n- ')}\n--- END RECENT CHATS ---`;
+
+            if (modelIndex === 0) { // Gemma logic
+                const latestUserTurn = historyForSDK_NEW.pop();
+                const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
+                const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+
+                latestUserTurn.parts = latestUserTurn.parts
+                    .filter(p => p.text === undefined)
+                    .concat(createPartFromText(gemmaMessageWithSystemPrompt)); // Add the combined prompt
+
+                const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
+
+
+                result = await genAI.models.generateContent({
+                    model: selectedModel,
+                    contents: gemmaContents,
+                    config: {
+                        temperature: creativeRP ? 2 : 1,
+                        topP: creativeRP ? 0.98 : 0.95,
+                        topK: creativeRP ? 0 : 64,
+                        safetySettings: safetySettings,
+                    }
                 });
+            } else if (modelIndex === 1) { // Gemini logic
+
+                result = await genAI.models.generateContent({
+                    model: selectedModel,
+                    contents: historyForSDK_NEW,
+                    config: {
+                        systemInstruction: {
+                            role: "system",
+                            parts: [{ text: finalSystemPrompt }]
+                        },
+                        temperature: advanceReasoning ? 0.9 : 1,
+                        topP: advanceReasoning ? 0.9 : 0.98,
+                        topK: advanceReasoning ? 64 : 128,
+                        safetySettings: safetySettings,
+                        thinkingConfig: {
+                            thinkingBudget: advanceReasoning ? -1 : 0,
+                            includeThoughts: advanceReasoning ? true : false,
+                        },
+                        ...(webSearch && {
+                            tools: [
+                                { urlContext: {} },
+                                { googleSearch: {} }
+                            ]
+                        }),
+                    }
+                });
+            } else {
+                let prompt = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts;
+
+                result = await genAI.models.generateContent({
+                    model: selectedModel,
+                    contents: prompt,
+                    config: {
+                        responseModalities: [Modality.TEXT, Modality.IMAGE],
+                        safetySettings: safetySettings,
+                    },
+                });
+
+                let thought = '';
+                let answer = '';
+                let generatedImage = null;
+
+
+                try {
+                    for (const part of result.candidates[0].content.parts) {
+                        if (part.inlineData) {
+                            const base64Image = part.inlineData.data;
+                            const mimeType = part.inlineData.mimeType || 'image/png';
+                            generatedImage = {
+                                base64Data: base64Image,
+                                mimeType: mimeType
+                            };
+                        }
+                        else if (part.text) {
+                            if (part.thought) {
+                                let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
+                                thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
+                            } else {
+                                answer = part.text;
+                            }
+                        }
+                    }
+                } catch (err) {
+
+                    let text = JSON.stringify({
+                        action: 'chat',
+                        target: [],
+                        response: 'PROHIBITED CONTENT'
+                    })
+                    return res.status(200).json({
+                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                    });
+
+                }
             }
 
-            let content;
-            try {
-                content = JSON.parse(msg.content).response;
-            } catch (err) { content = msg.content }
-            parts.push(createPartFromText(content));
+            let mainText = '';
+            if (generatedImage) {
+                mainText = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
+            } else {
 
-            return { role, parts };
-        });
+                mainText = answer.replace(/\\(?![ntr"'\\])/g, '\\');
+            }
+            return { mainText, thought }
+        }
 
+        const helper = async (mainModelText) => {
+            let found = mainModelText.match(/\[['"]?mem['"]?\s*:\s*[\s\S]*?\]/);
+            found = found ? found[0] : null;
 
-        if (modelIndex === 0) { // Gemma logic
-            const latestUserTurn = historyForSDK_NEW.pop();
+            let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst);
+            if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
+
+            contextLimit = 6000 * 4;
+
+            let shortHistory = getTruncatedHistory(history, contextLimit);
+
+            const historyForMemory = shortHistory.map(msg => {
+                const role = msg.role === 'assistant' ? 'model' : 'user';
+                let parts = [];
+
+                let content;
+                try {
+                    content = JSON.parse(msg.content).response;
+                } catch (err) { content = msg.content }
+                parts.push(createPartFromText(content));
+
+                return { role, parts };
+            });
+
+            const latestUserTurn = historyForMemory.pop();
             const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
-            const gemmaMessageWithSystemPrompt = `${finalSystemPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+            const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}\nMODEL RESPONSE: ${found || mainModelText.length < 10000 ? mainModelText : mainModelText.slice(0, 10000)}`;
 
             latestUserTurn.parts = latestUserTurn.parts
                 .filter(p => p.text === undefined)
-                .concat(createPartFromText(gemmaMessageWithSystemPrompt)); // Add the combined prompt
+                .concat(createPartFromText(memoryMessageWithSystemPrompt));
 
-            const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
-
-            result = await genAI.models.generateContent({
-                model: selectedModel,
-                contents: gemmaContents,
-                config: {
-                    temperature: creativeRP ? 2 : 1,
-                    topP: creativeRP ? 0.98 : 0.95,
-                    topK: creativeRP ? 0 : 64,
-                    safetySettings: safetySettings,
-                }
-            });
-        } else if (modelIndex === 1) { // Gemini logic
-
-            result = await genAI.models.generateContent({
-                model: selectedModel,
-                contents: historyForSDK_NEW,
-                config: {
-                    systemInstruction: {
-                        role: "system",
-                        parts: [{ text: finalSystemPrompt }]
-                    },
-                    temperature: advanceReasoning ? 0.9 : 1,
-                    topP: advanceReasoning ? 0.9 : 0.98,
-                    topK: advanceReasoning ? 64 : 128,
-                    safetySettings: safetySettings,
-                    thinkingConfig: {
-                        thinkingBudget: advanceReasoning ? -1 : 0,
-                        includeThoughts: advanceReasoning ? true : false,
-                    },
-                    ...(webSearch && {
-                        tools: [
-                            { urlContext: {} },
-                            { googleSearch: {} }
-                        ]
-                    }),
-                }
-            });
-        } else {
-            let instruction = ImageSafetyHandler;
-            let prompt = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts;
-
-            let safetycheck = instruction + prompt;
+            const memoryContents = [...historyForMemory, latestUserTurn];
 
             result = await genAI.models.generateContent({
                 model: MODELS[3],
-                contents: safetycheck,
+                contents: memoryContents,
                 config: { safetySettings: safetySettings }
             });
 
-            let safety = result.candidates[0].content.parts[0].text;
-            console.log(safety);
-
-            if (!safety) {
-                let text = "Provided Content Violates Safety.";
-                res.status(200).json({
-                    candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                });
-                return;
-            }
-
-            result = await genAI.models.generateContent({
-                model: selectedModel,
-                contents: prompt,
-                config: {
-                    responseModalities: [Modality.TEXT, Modality.IMAGE],
-                    safetySettings: safetySettings,
-                },
-            });
-
+            let text = result.candidates[0].content.parts[0].text;
+            text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+            return text;
         }
 
+        // let [mainModel, format] = await Promise.all([mainModels(), helper()]);
 
-        let thought = '';
-        let answer = '';
-        let generatedImage = null;
+        let mainModel = await mainModels();
+        let format = await helper(mainModel.mainText);
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*:\s*[\s\S]*?\]/g, '');
 
 
-        for (const part of result.candidates[0].content.parts) {
-            if (part.inlineData) {
-                const base64Image = part.inlineData.data;
-                const mimeType = part.inlineData.mimeType || 'image/png';
-                generatedImage = {
-                    base64Data: base64Image,
-                    mimeType: mimeType
-                };
-            }
-            else if (part.text) {
-                if (part.thought) {
-                    let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
-                    thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
-                } else {
-                    answer = part.text;
-                }
-            }
-        }
-
-        let mainText = '';
-        if (generatedImage) {
-            mainText = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
-        } else {
-
-            mainText = answer.replace(/\\(?![ntr"'\\])/g, '\\');
-        }
-
-        // --------------------------------------------------------------------------------------------------------------------
-
-        let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst);
-        if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
-
-        contextLimit = 1000 * 4;
-
-        let shortHistory = getTruncatedHistory(history, contextLimit);
-
-        const historyForMemory = shortHistory.map(msg => {
-            const role = msg.role === 'assistant' ? 'model' : 'user';
-            let parts = [];
-
-            let content;
-            try {
-<<<<<<< HEAD
-                content = JSON.parse(msg.content).response;
-            } catch (err) { content = msg.content }
-            parts.push(createPartFromText(content));
-=======
-                if (webSearch) {
-                    if (thought.length > 0) {
-                        text = thought + text;
-                    }
-                    await incrementHitCount(req);
-                    res.status(200).json({
-                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                    });
-                    return;
-                }
-                JSON.parse(text);
-            }
-            catch (error) {
-                console.log("JSON PARSE ERROR:", error.message);
->>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
-
-            return { role, parts };
-        });
-
-        const latestUserTurn = historyForMemory.pop();
-        const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
-        const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText} \nMODEL: ${mainText}`;
-
-        latestUserTurn.parts = latestUserTurn.parts
-            .filter(p => p.text === undefined)
-            .concat(createPartFromText(memoryMessageWithSystemPrompt));
-
-        const memoryContents = [...historyForSDK_NEW, latestUserTurn];
-
-        result = await genAI.models.generateContent({
-            model: MODELS[3],
-            contents: memoryContents,
-            config: { safetySettings: safetySettings }
-        });
-
-<<<<<<< HEAD
-        let text = result.candidates[0].content.parts[0].text;
-        text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-
+        let text = '';
         try {
-            text = JSON.parse(text);
-            text = { ...text, response: `${mainText}` };
+            text = JSON.parse(format);
+            text = { ...text, response: `${mainModel.mainText}` };
             text = JSON.stringify(text);
         } catch (err) {
-            text = mainText;
-=======
-                    res.status(200).json({
-                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                    });
-                    return;
-                }
-            }
->>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
+            text = mainModel.mainText;
         }
 
-        // --------------------------------------------------------------------------------------------------------------------
 
-
-        if (thought.length > 0) {
-            text = thought + text;
+        if (mainModel.thought.length > 0) {
+            text = mainModel.thought + text;
         }
 
         await incrementHitCount(req);
@@ -857,7 +838,6 @@ app.post('/model', async (req, res) => {
 
     } catch (error) {
         console.error("GEMINI API ERROR:: ", error);
-<<<<<<< HEAD
         if (error.toString().includes('503')) {
             const fallbackObject = {
                 action: 'chat',
@@ -887,8 +867,6 @@ app.post('/model', async (req, res) => {
             });
             return;
         }
-=======
->>>>>>> 0b5b4539b5544246571a24fda95552fe131cd3d5
 
         let errorMessage = error;
         res.status(error.status || 500).json({

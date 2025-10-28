@@ -237,7 +237,6 @@ export default function App() {
               setShowMergeConflict(true);
             } else {
               setChatSessions(driveData.data.chatSessions || []);
-              setActiveChatId(driveData.data.activeChatId || crypto.randomUUID());
               setModel(driveData.data.model || 'gemma-3-27b-it');
               setSystemPrompt(driveData.data.systemPrompt || '');
               setApiKey(driveData.data.apiKey || '');
@@ -306,7 +305,6 @@ export default function App() {
     if (driveResponse.ok) {
       const driveData = await driveResponse.json();
       setChatSessions(driveData.data.chatSessions || []);
-      setActiveChatId(driveData.data.activeChatId || crypto.randomUUID());
       setModel(driveData.data.model || 'gemma-3-27b-it');
       setSystemPrompt(driveData.data.systemPrompt || '');
       setApiKey(driveData.data.apiKey || '');
@@ -1106,7 +1104,7 @@ export default function App() {
     uploadImg(file);
   };
 
-
+  const imageGenAvailable = new Date() < new Date('2025-11-12');
 
   // --- JSX Rendering ---
   if (!isAuthenticated) {
@@ -1206,6 +1204,7 @@ export default function App() {
           handleOverwriteLocal={handleOverwriteLocal}
           handleOverwriteRemote={handleOverwriteRemote}
           usage={usage}
+          imageGenAvailable={imageGenAvailable}
         />
 
         <ChatLog
@@ -1260,6 +1259,7 @@ export default function App() {
           setAdvanceReasoning={setAdvanceReasoning}
           webSearch={webSearch}
           setWebSearch={setWebSearch}
+          imageGenAvailable={imageGenAvailable}
         />
       </main>
     </motion.div >
