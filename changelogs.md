@@ -8,24 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2] - 2025-10-28
 **Major Patch Update**
 
+### Added
+- Auto Generated Chat-Title.
+
 ### Fixed
 - Improved Token Efficiency. Now experience longer conversations with same context windows.
 - UI Improvements.
-- Memory Handling Improvements & Stability (Now handled by separate model).
-- Improved Image Handling.
-- Better Data Security.
+- Memory Improvements & Stability (Now handled by separate model).
+- Improved Image Handling for performance.
+- Improved Data Security.
 - Optimized Network Bandwidth.
 - Improved Stability for better experience.
 
-### Changed 
-- Auto Chat-Title.
+### Changed
 - Memory Management Flow.
 - Image Generation will be available till 2025-NOV-12.
+- Increased daily Image Generation limit from 10 to 25.
 
 ## [2.1.1] - 2025-10-21
 
 ### Added
-- Global Login with Google Screen.
+- Global Login with Google support.
 
 ### Fixed
 - Improved Cloud Sync Responsiveness.
@@ -53,9 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.1] - 2025-10-13
 
 ### Fixed
-- Better rendring of complex Mathematical Equations.
-- Huge performance improvements for weak Single-Core CPUs.
-- Improved Memory Load.
+- Better rendering of complex Mathematical Equations.
+- Performance improvements for weak Single-Core CPUs.
+- Improved power efficiency.
 
 ## [1.6] - 2025-10-11
 
@@ -63,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Video & Audio Sharing Support upto 20MB (Advance Model Only).
 
 ### Fixed
-- Better Context Handling with Files.
+- Improved Context Handling with Files.
 
 ## [1.5.3] - 2025-10-09
 
