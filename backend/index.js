@@ -717,6 +717,7 @@ app.post('/model', async (req, res) => {
                         safetySettings: safetySettings,
                     },
                 });
+            }
 
                 try {
                     for (const part of result.candidates[0].content.parts) {
@@ -749,7 +750,7 @@ app.post('/model', async (req, res) => {
                     });
 
                 }
-            }
+            
 
             let mainText = '';
             if (generatedImage) {
