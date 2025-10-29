@@ -29,6 +29,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **💭 Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
     -   **🤔 Model Thinking Transparency**: See the AI's step-by-step reasoning process for complex queries when using the Advanced Reasoning mode.
     -   **🔎 Google Search**: The advanced model can access Google Search to provide responses with the most up-to-date information.
+    -   **🔍 URL Context & YT video Summarization**: Paste a URL & see the rest. 
 
 -   **📝 Persistent State**: Your entire session is saved in your browser's `localStorage`, `sessionStorage`, `cookies`. `Google Drive` for Sync. This includes:
     -   Chat History
