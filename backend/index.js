@@ -808,7 +808,6 @@ app.post('/model', async (req, res) => {
         // let [mainModel, format] = await Promise.all([mainModels(), helper()]);
 
         let mainModel = await mainModels();
-        console.log(mainModel.mainText);
         let format = await helper(mainModel.mainText);
 
         mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*=\s*[\s\S]*?\]/g, '');

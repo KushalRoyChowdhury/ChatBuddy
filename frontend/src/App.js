@@ -398,7 +398,6 @@ export default function App() {
       }
       setShowImportAppDataConfirm(false);
       setAppDataToImport(null);
-      window.location.reload();
     } catch (error) {
       console.error("App Data Import Error:", error);
       alert(`App data import failed: ${error.message}`);
