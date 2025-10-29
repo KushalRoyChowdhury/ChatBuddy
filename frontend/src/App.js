@@ -132,6 +132,7 @@ export default function App() {
       let data = JSON.stringify(appData);
       data = pako.gzip(data, { level: 9 });
 
+      sessionStorage.setItem('needRead', 'true');
 
       await fetch(`${BACKEND_URL}/api/drive/write`,
         {
@@ -217,6 +218,8 @@ export default function App() {
             const profileData = await userResponse.json();
             setUserProfile(profileData);
           }
+
+          if (sessionStorage.getItem('needRead') === 'false') return;
 
           const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
           if (driveResponse.ok) {
@@ -398,6 +401,8 @@ export default function App() {
       }
       setShowImportAppDataConfirm(false);
       setAppDataToImport(null);
+      sessionStorage.setItem('needRead', 'false');
+      window.location.reload();
     } catch (error) {
       console.error("App Data Import Error:", error);
       alert(`App data import failed: ${error.message}`);
