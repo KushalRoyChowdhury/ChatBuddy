@@ -7,6 +7,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 
 ![ChatBuddy Homepage](frontend/public/screenshot/home.png) 
 
+---
 
 ## ✨ Key Features
 
@@ -22,7 +23,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **🎨 Image Generation (`gemini-2.0-image-preview`)**: Create stunning 1k resolution images in any aspect ratio from your text descriptions. Bring your ideas to life with the power of AI-driven image synthesis, perfect for creative projects, brainstorming, or just for fun **AVAILABLE TILL 2025-NOV-12**.
 
--   **🧠 Dual AI Models**: Seamlessly switch between two powerful models:
+-   **🧠 2 Models**: Seamlessly switch between two powerful models:
     -   **Basic Model (`gemma-3-27b-it`)**: A fast and capable model perfect for general conversation, quick tasks and Role-Plays.
     -   **Advanced Model (`gemini-2.5-flash`)**: A state-of-the-art model for complex reasoning, deep analysis, and creative generation.
     -   **💭 Advanced Reasoning Mode**: A special multi-pass mode for the Advanced model, designed to tackle complex problems by thinking through them step-by-step. Best for Coding & Reasoning Tasks.
@@ -38,16 +39,16 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices by linking your Google account. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device.
 
--   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations.
+-   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations (Memory managed by `Gemma3-12b-it`).
     -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
-    -   **Temporary Memory**: A short-term buffer that holds recent chats, managed automatically by the application.
+    -   **Temporary Memory**: A short-term buffer that holds recent context from different chats, managed automatically by the application.
 
--   **🔧 Full Configurability**: Tailor the AI's behavior to your exact needs through the **Options** menu.
-    -   **Custom System Prompt**: Define the AI's personality, rules, and objectives to tune its responses.
+-   **🔧 Full Configurability**: Tailor the AI's behavior to your exact needs through the **Personalization** menu.
+    -   **Custom Instructions**: Define the AI's personality, rules, and objectives to tune its responses.
     -   **Bring Your Own API Key**: Use your personal Gemini API key to unlock higher rate limits and a massive context window (up to 128k tokens with the Advanced model).
 
 -   **💻 Rich Markdown & Code Rendering**:
-    -   Full Markdown support for formatting responses.
+    -   Full GFM Markdown support for formatting responses.
     -   LaTeX Rendering for Mathematical Equations.
     -   Beautiful, syntax-highlighted code blocks.
 
@@ -56,14 +57,18 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
     -   **Import / Export Memories**: Back up or add new memories from other devices.
     -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
-    -   **Full App Reset**: A one-click option to reset the entire application to its default state.
 
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
 -   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
+-   **✨️ Aesthetic UI**:  Performance Friendly Blur in the UI.
+
+---
 
 ## ⚠️ Disclaimer
 
 **Version 2.0 and above is not backward compatible with data from v1.X** Due to significant data structure changes in this release, older `.json` chat files cannot be imported. Permanent Memories will be migrated automatically.
+
+---
 
 ## ⚙️ Technologies Used
 
@@ -77,9 +82,11 @@ This project is built with a modern and powerful tech stack:
     -   Node.js with Express.
     -   @google/genai SDK
 
+---
+
 ## 🚀 Getting Started
 
-To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting with cloud sync capabilities, which is powered by the Google Drive API, a Google Cloud project with OAuth credentials is required.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting with cloud sync capabilities, which is powered by the Google Drive API, a Google Cloud project with OAuth2 Consent Setup is required. 
 
 ### Prerequisites
 
@@ -108,7 +115,7 @@ To use ChatBuddy locally, you'll need to set up both the frontend and the backen
 
 ### Backend Setup
 
-The backend server is required for the AI to function.
+The backend server is required for the application to function.
 
 1.  **Navigate to the backend directory:**
     (Assuming you are in the `ChatBuddy` directory from the previous step)
@@ -128,7 +135,7 @@ The backend server is required for the AI to function.
 
     The backend server will start, typically on port `8000`. The frontend is pre-configured to communicate with the backend on this port.
 
-
+---
 
 ## 🤖 AI Models & API Keys
 
@@ -136,9 +143,11 @@ The backend server is required for the AI to function.
 
 ChatBuddy is designed to be flexible and powerful, giving you control over your AI experience.
 
-### Public Version and Privacy (This information is not applicable if self-hosting)
+---
 
-On the hosted version, the app works without providing any keys but has strict rate limits to ensure fair use for everyone. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
+### Public Version and Privacy Policy (This information is not applicable if self-hosting)
+
+On the hosted version, the app works without providing any keys but has strict rate limits. For a significantly better experience, it is **highly recommended** to use your own free Gemini API key.
 
 
 | Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
@@ -151,7 +160,7 @@ On the hosted version, the app works without providing any keys but has strict r
 
 > Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
 
-> **Privacy and Data Handling Policy (Public Hosted)**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). All your  Google login Credentials are stored locally in your device. 
+> **Privacy and Data Handling Policy**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). All your  Google login Credentials are stored locally in your device. 
 
 
 **How to get your key:**
@@ -159,14 +168,35 @@ On the hosted version, the app works without providing any keys but has strict r
 2.  Click "Create API key".
 3.  Copy the key and paste it into the "Gemini API Key" field in the [ChatBuddy](https://chatbuddy2025.onrender.com/) **Options** menu.
 
+---
+
 ## 🛠️ How the Memory System Works
 
-The AI can manage its own memory based on your conversation. The App listens for specific JSON commands within its responses.
+ChatBuddy uses dual-model architecture.
+
+The AI can manage its own memory based on your conversation. The App listens for specific tool call within its responses.
+
+**tool**:
+```
+[mem=User asked about AI]
+```
+
+```
+[bio=User's name is Alex]
+```
+
+**Helper**:
+```json
+{
+  "action": "temp",
+  "target": "User asked about AI",
+}
+```
 
 ```json
 {
   "action": "remember",
-  "target": "The user's name is Alex and they are a software developer.",
+  "target": "User's name is Alex.",
 }
 ```
 
@@ -177,11 +207,14 @@ This allows for dynamic and context-aware conversations that evolve over time. Y
 
 **Memory is handled by `Gemma3-12b-it`**.
 
+---
+
 ## 📜 Source Code
 
 The application source code (frontend and backend) is available on GitHub. Fork it, modify it, and make it your own. If you find it useful, please consider giving it a star! The codebase has been improved for readability, making it easier for open-source contributors to get involved.
 
+---
 
 *Thank you for using ChatBuddy!*
 
-*v2.1.1 - By KushalRoyChowdhury*
+*v2.2-LTS - By KushalRoyChowdhury*
