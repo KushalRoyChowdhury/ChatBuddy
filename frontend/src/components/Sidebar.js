@@ -44,7 +44,8 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     });
 
     if (activeChatId === chatIdToDelete) {
-      const newActiveId = chatSessions.length > 1 ? chatSessions.find(session => session.chatID !== chatIdToDelete).chatID : null;
+      // const newActiveId = chatSessions.length > 1 ? chatSessions.find(session => session.chatID !== chatIdToDelete).chatID : null;
+      const newActiveId = crypto.randomUUID();
       setActiveChatId(newActiveId);
     }
   };
@@ -92,7 +93,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen &&
         <motion.div
           layout
-          className="bg-gray-100 flex flex-col fixed top-0 left-0 overflow-hidden h-dvh"
+          className="bg-gray-50 border-r shadow flex flex-col fixed top-0 left-0 overflow-hidden h-dvh"
           initial={{ width: 0 }}
           animate={{ width: '20rem' }}
           exit={{ width: 0 }}
@@ -191,7 +192,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 top-0 left-0 bg-black bg-opacity-50 z-30"
+            className="fixed inset-0 top-0 left-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -199,7 +200,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           />
           <motion.div
             layout
-            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-100 rounded-r-xl flex flex-col z-40"
+            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 rounded-r-xl flex flex-col z-40"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}

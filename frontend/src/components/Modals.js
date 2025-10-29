@@ -67,7 +67,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMergeConflict(false)}
           />
           <motion.div
@@ -106,7 +106,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportExportOptions(false)}
           />
           <motion.div
@@ -157,7 +157,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowExportOptions(false)}
           />
           <motion.div
@@ -211,7 +211,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportConfirm(false)}
           />
           <motion.div
@@ -271,7 +271,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemoriesImportExport(false)}
           />
           <motion.div
@@ -319,7 +319,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemories(false)}
           />
 
@@ -430,7 +430,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowOptions(false)}
           />
           <motion.div
@@ -567,7 +567,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowResetConfirm(false)}
           />
           <motion.div
@@ -624,7 +624,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowSettings(false)}
           />
           <motion.div
@@ -723,7 +723,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowPersonalization(false)}
           />
           <motion.div
@@ -824,14 +824,14 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowAbout(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80%] flex flex-col"
           >
             <div className="p-5 border-b flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-800">
@@ -942,7 +942,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportAppDataConfirm(false)}
           />
           <motion.div
@@ -999,7 +999,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowNotAvailablePopup(false)}
           />
           <motion.div

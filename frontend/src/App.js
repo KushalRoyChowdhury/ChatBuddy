@@ -101,17 +101,6 @@ export default function App() {
   const [showImportAppDataConfirm, setShowImportAppDataConfirm] = useState(false);
   const [appDataToImport, setAppDataToImport] = useState(null);
 
-  // Greetings
-  let userName = userNickname || 'legend';
-  userName = userName.charAt(0).toUpperCase() + userName.slice(1);
-  const greetings = [
-    `Yo! Welcome back, ${userName}.`,
-    "Oh look, you decided to come today 🎉",
-    "Start a Conversation"
-  ];
-  const [noChatGreet] = useState(
-    greetings[Math.floor(Math.random() * greetings.length)]
-  );
 
   // Refs
   const chatEndRef = useRef(null);
@@ -494,7 +483,6 @@ export default function App() {
   const confirmImport = () => {
     if (!fileToImport) return;
     const backupPrompt = systemPrompt;
-    const backupMessages = messages;
     try {
       const importedData = JSON.parse(fileToImport);
       if (!importedData.chatHistory || !Array.isArray(importedData.chatHistory)) {
@@ -882,6 +870,28 @@ export default function App() {
     }
   };
 
+  // Greetings
+  let userName = userNickname || 'legend';
+  const [greetings, setGreetings] = useState();
+
+  useEffect(() => {
+    userName = userNickname || userProfile?.name.split(' ')[0] || 'legend';
+    userName = userName.charAt(0).toUpperCase() + userName.slice(1);
+    const listGreetings = [
+      `Yo! Welcome back, ${userName}.`,
+      // "Start a Conversation"
+    ]
+
+    setGreetings(listGreetings[Math.floor(Math.random() * listGreetings.length)]);
+
+
+  }, [userProfile]);
+
+  const [noChatGreet, setNoChatGreet] = useState();
+  useEffect(() => {
+    setNoChatGreet(greetings);
+  }, [greetings]);
+
   const chatContainerRef = useRef(); // the scrollable container
 
   const isAtBottom = () => {
@@ -1113,9 +1123,6 @@ export default function App() {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
       className="min-h-dvh font-medium max-w-[100vw] select-none bg-gray-50 flex font-sans">
       <Sidebar
         chatSessions={chatSessions}
@@ -1135,7 +1142,7 @@ export default function App() {
         setShowNotAvailablePopup={setShowNotAvailablePopup}
         setThinkingProcesses={setThinkingProcesses}
       />
-      <main className={`flex-1 w-full flex flex-col transition-all duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
+      <main className={`flex-1 w-full flex flex-col transition-all bg-white duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
         <Header
           model={model}
           handleModelToggle={handleModelToggle}
@@ -1262,6 +1269,6 @@ export default function App() {
           imageGenAvailable={imageGenAvailable}
         />
       </main>
-    </motion.div >
+    </motion.div>
   );
 }

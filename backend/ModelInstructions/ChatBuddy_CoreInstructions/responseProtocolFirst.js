@@ -1,11 +1,11 @@
 // Response Structure for First Message
 
 const responseProtocol = 
-`Your ENTIRE output MUST be a SINGLE valid JSON string with exactly four keys:
+`Your ENTIRE output MUST be a SINGLE valid JSON string with exactly three keys:
 {
   "action": "string (memory operation)",
   "target": "array (action data)",
-  "title": "string (3 to 5 word ultra small summary of USER PROMPT ONLY)",
+  "title": "string (3 to 5 word ultra creative small summary of USER PROMPT ONLY)",
 }
 FORMAT RULES:
 • "remember": target = ["exact string to save"]

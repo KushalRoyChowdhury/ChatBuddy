@@ -719,38 +719,38 @@ app.post('/model', async (req, res) => {
                 });
             }
 
-                try {
-                    for (const part of result.candidates[0].content.parts) {
-                        if (part.inlineData) {
-                            const base64Image = part.inlineData.data;
-                            const mimeType = part.inlineData.mimeType || 'image/png';
-                            generatedImage = {
-                                base64Data: base64Image,
-                                mimeType: mimeType
-                            };
-                        }
-                        else if (part.text) {
-                            if (part.thought) {
-                                let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
-                                thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
-                            } else {
-                                answer = part.text;
-                            }
+            try {
+                for (const part of result.candidates[0].content.parts) {
+                    if (part.inlineData) {
+                        const base64Image = part.inlineData.data;
+                        const mimeType = part.inlineData.mimeType || 'image/png';
+                        generatedImage = {
+                            base64Data: base64Image,
+                            mimeType: mimeType
+                        };
+                    }
+                    else if (part.text) {
+                        if (part.thought) {
+                            let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
+                            thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
+                        } else {
+                            answer = part.text;
                         }
                     }
-                } catch (err) {
-
-                    let text = JSON.stringify({
-                        action: 'chat',
-                        target: [],
-                        response: 'PROHIBITED CONTENT'
-                    })
-                    return res.status(200).json({
-                        candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                    });
-
                 }
-            
+            } catch (err) {
+
+                let text = JSON.stringify({
+                    action: 'chat',
+                    target: [],
+                    response: 'PROHIBITED CONTENT'
+                })
+                return res.status(200).json({
+                    candidates: [{ content: { parts: [{ text }], role: 'model' } }]
+                });
+
+            }
+
 
             let mainText = '';
             if (generatedImage) {
@@ -763,8 +763,6 @@ app.post('/model', async (req, res) => {
         }
 
         const helper = async (mainModelText) => {
-            let found = mainModelText.match(/\[['"]?mem['"]?\s*:\s*[\s\S]*?\]/);
-            found = found ? found[0] : null;
 
             let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst);
             if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
@@ -788,7 +786,7 @@ app.post('/model', async (req, res) => {
 
             const latestUserTurn = historyForMemory.pop();
             const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
-            const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}\nMODEL RESPONSE: ${found || mainModelText.length < 10000 ? mainModelText : mainModelText.slice(0, 10000)}`;
+            const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}\nMODEL RESPONSE: ${mainModelText.length > (5000 * 4) ? mainModelText.slice(0, (5000 * 4)) + '...' : mainModelText}}`;
 
             latestUserTurn.parts = latestUserTurn.parts
                 .filter(p => p.text === undefined)
@@ -810,9 +808,11 @@ app.post('/model', async (req, res) => {
         // let [mainModel, format] = await Promise.all([mainModels(), helper()]);
 
         let mainModel = await mainModels();
+        console.log(mainModel.mainText);
         let format = await helper(mainModel.mainText);
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*:\s*[\s\S]*?\]/g, '');
 
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*=\s*[\s\S]*?\]/g, '');
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?bio['"]?\s*=\s*[\s\S]*?\]/g, '');
 
         let text = '';
         try {

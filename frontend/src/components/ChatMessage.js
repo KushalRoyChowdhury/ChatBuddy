@@ -13,7 +13,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
       animate={{ y: 0, opacity: 1 }}
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white border shadow-sm text-black'}`}>
+      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white text-black'}`}>
         {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
 
         {msg.role === 'user' && (() => {

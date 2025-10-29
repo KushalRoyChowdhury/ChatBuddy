@@ -12,7 +12,7 @@ ${coreInstruction()}
 
 ${hasFiles &&
     `-- START STRING SNIPPET ADDITION --
-ADD A SPECIAL STRING SNIPPET IN YOUR RESPONSE: ['mem': summary_of_the_file_provided].
+ADD A SPECIAL STRING SNIPPET IN YOUR RESPONSE: ['mem'=summary_of_the_file_provided].
 YOUR RESPONSE SHOULD BE LIKE THIS: ['mem': summary_of_the_file_provided] user_facing_response.
 -- END STRING SNIPPET ADDITION --`.trim()}
 
