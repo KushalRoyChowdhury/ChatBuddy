@@ -38,7 +38,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   System Prompt & API Key
     -   Nickname
 
--   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices by linking your Google account. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device.
+-   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device.
 
 -   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations (Memory managed by `Gemma3-12b-it`).
     -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
