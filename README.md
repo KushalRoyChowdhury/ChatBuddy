@@ -216,6 +216,10 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 ---
 
+> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete & no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS`. 
+
+---
+
 *Thank you for using ChatBuddy!*
 
-*v2.2-LTS - By KushalRoyChowdhury*
+*v2.2.2-LTS - By KushalRoyChowdhury*
