@@ -830,6 +830,7 @@ export default function App() {
         webSearch: webSearch,
         images: currentChatImageUris,
         isFirst: isFirstMessage,
+        zoneInfo: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
 
       const response = await fetch(`${BACKEND_URL}/model`, {
@@ -932,7 +933,7 @@ export default function App() {
 
     } catch (error) {
       if (error.name === 'AbortError') {
-        const errorJsonString = `{"action":"none", "target":"", "response":"You stopped the message generation"}`;
+        const errorJsonString = `{"action":"none", "target":"", "response":"User stopped the message generation"}`;
         const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
         setChatSessions(prevSessions =>
           prevSessions.map(session =>
