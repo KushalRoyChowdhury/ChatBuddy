@@ -77,16 +77,6 @@ const MessageInput = React.memo(({
         onDrop={handleDrop}
         className={`max-w-4xl relative w-full bg-white mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
       >
-        {!isViewingBottom &&
-          <button
-            type='button'
-            onClick={() => { setTapBottom(true) }}
-            className='absolute right-0 -top-14 md:right-1 md:-top-14 bg-white hover:bg-slate-100 shadow-lg flex justify-center items-center rounded-full p-2 active:scale-95 transition-all'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-          </button>
-        }
 
         {fileImg && (
           <div className="p-2 border-b-0 border-gray-200">

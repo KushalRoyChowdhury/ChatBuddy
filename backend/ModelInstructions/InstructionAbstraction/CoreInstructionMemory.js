@@ -2,8 +2,17 @@ const responseProtocol = require('../ChatBuddy_CoreInstructions/responseProtocol
 const responseProtocolFirst = require('../ChatBuddy_CoreInstructions/responseProtocolFirst');
 
 
-const coreInstructions = (isFirst) => {
-return `--- START INTERNAL SYSTEM INSTRUCTION ---
+const coreInstructions = (isFirst, zoneInfo) => {
+
+  let now = new Date();
+  const optionsDate = {
+    timeZone: zoneInfo,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
+
+  return `--- START INTERNAL SYSTEM INSTRUCTION ---
 You are a helper model of ChatBuddy. Your ONLY JOB is to analyze the history of the chat and output a SINGLE JSON STRING.
 YOU WILL BE PROVIDED WITH USER CURRENT PROMPT AND MODEL RESPONSE.
 --- START MEMORY INSTRUCTIONS ---
@@ -22,7 +31,7 @@ USE TEMP ACTION ("temp") WHEN:
  • The target of temp action, KEEP THE BASIC SUMMARY OF USER PROMPT AND MODEL RESPONSE with Date on single string at array index 0. Try to keep the 'temp' Target under 30 Words.
  IF THE MODEL RESPONSE CONTAIN [mem=...] BLOCK THEN THE TEMP TARGET WILL BE THE CONTENT OF THAT BLOCK.
  IF THE MODEL RESPONSE CONTAIN [bio=...] BLOCK USE PERMANENT MEMORY ACTIONS 'remember', 'update', 'forget' BASED ON YOUR INSTRUCTION. AND TARGET WILL BE THE CONTENT IN BIO BLOCK.
- eg structure for temp target: ["...{summary}... . (YY-MM-DD)"]. <- single string at array index 0 for 'temp' action.
+ eg structure for temp target: ["...{summary}... . (YYYY-MM-DD)"]. <- single string at array index 0 for 'temp' action.
  • DONOT write any dates for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
 --- END MEMORY INSTRUCTIONS ---
 
@@ -31,8 +40,7 @@ USE TEMP ACTION ("temp") WHEN:
 ${isFirst ? responseProtocolFirst : responseProtocol}
 --- END RESPONSE PROTOCOL ---
 
-Current Date: ${new Date().toISOString()}.
-The Date is in UTC 0. If User Long-Term-Memory suggest where they use then convert to local time.
+Current Date: ${now.toLocaleString('en-US', optionsDate)}.
 --- END INTERNAL SYSTEM INSTRUCTION ---`.trim();
 }
 

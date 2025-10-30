@@ -18,6 +18,12 @@ code {
 
 /* markdown.css */
 
+.katex {
+  display: flex;
+  flex-wrap: wrap;
+  color: rgb(77, 77, 77);
+}
+
 .markdown-content h1 {
   font-size: 1.8rem;
   font-weight: bold;
@@ -111,7 +117,7 @@ code {
 }
 
 /* Responsive: Horizontal scroll on small screens */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .markdown-content table {
     display: block;
     overflow-x: auto;

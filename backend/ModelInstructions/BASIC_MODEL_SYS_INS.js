@@ -1,26 +1,43 @@
 const coreInstruction = require('./InstructionAbstraction/CoreInstructions');
 const model = require('./Model_Context_Data/BASIC');
 
-const utcDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const BASIC_MODEL_INSTRUCTION = (hasFiles) => {
+const BASIC_MODEL_INSTRUCTION = (hasFiles, zoneInfo) => {
+
+    let now = new Date();
+    const optionsDate = {
+        timeZone: zoneInfo,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    const optionsDay = {
+        timeZone: zoneInfo,
+        weekday: 'long'
+    };
+
+
     return `--- START INTERNAL SYSTEM INSTRUCTION ---
 
 -- START CORE INSTRUCTIONS --
 ${coreInstruction()}
 -- END CORE INSTRUCTIONS --
 
-${hasFiles &&
-    `-- START STRING SNIPPET ADDITION --
+${hasFiles ?
+        `-- START STRING SNIPPET ADDITION --
 ADD A SPECIAL STRING SNIPPET IN YOUR RESPONSE: ['mem': summary_of_the_file_provided].
 YOUR RESPONSE SHOULD BE LIKE THIS: ['mem'=summary_of_the_file_provided] user_facing_response.
--- END STRING SNIPPET ADDITION --`.trim()}
+-- END STRING SNIPPET ADDITION --` : ''.trim()}
 
 -- START MODEL INSTRUCTIONS --
 ${model}
 -- END MODEL INSTRUCTIONS --    
 
-Current Date/Time 0 UTC: ${new Date().toISOString()}, ${utcDays[new Date().getUTCDay()]}.
+Current Date: ${now.toLocaleString('en-US', optionsDate)}, ${new Intl.DateTimeFormat('en-US', optionsDay).format(now)}.
 
 --- END INTERNAL SYSTEM INSTRUCTION ---`.trim();
 }

@@ -9,6 +9,25 @@ import Sidebar from './components/Sidebar';
 import useMediaQuery from './hooks/useMediaQuery';
 import Login from './components/Login';
 
+const compress = (string, level) => {
+  const compressed = pako.gzip(string, { level });
+  return btoa(String.fromCharCode.apply(null, compressed));
+};
+
+const decompress = (base64String) => {
+  // atob decodes the base64 string back to a binary string.
+  const binaryString = atob(base64String);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  // Decompress and return as a string, ready for JSON.parse()
+  return pako.ungzip(bytes, { to: 'string' });
+};
+
+
+
 // --- Application Constants ---
 const MEMORY_LIMIT_CHARS = 2000 * 4;
 const TEMP_MEMORY_LIMIT_CHARS = 6000 * 4;
@@ -22,7 +41,7 @@ const getTextToRender = (msg) => {
       if (typeof parsedData.response === 'string') {
         textToRender = parsedData.response;
       }
-    } catch (e) { console.log(e); }
+    } catch (e) { }
   }
   return textToRender;
 };
@@ -39,14 +58,40 @@ export default function App() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   // --- State Management ---
-  const [chatSessions, setChatSessions] = useState(() => JSON.parse(localStorage.getItem('chatSessions')) || []);
+  const [chatSessions, setChatSessions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('chatSessions');
+      if (!saved) return [];
+
+      try {
+        return JSON.parse(decompress(saved)) || [];
+      } catch {
+        return JSON.parse(saved) || [];
+      }
+    } catch {
+      return [];
+    }
+  });
   const [activeChatId, setActiveChatId] = useState(() => sessionStorage.getItem('activeChatId') || crypto.randomUUID());
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [model, setModel] = useState(() => localStorage.getItem('selectedModel') || 'gemma-3-27b-it');
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('systemPrompt') || '');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('geminiApiKey') || '');
-  const [memories, setMemories] = useState(() => JSON.parse(localStorage.getItem('chatMemories')) || []);
+  const [memories, setMemories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('chatMemories');
+      if (!saved) return [];
+
+      try {
+        return JSON.parse(decompress(saved)) || [];
+      } catch {
+        return JSON.parse(saved) || [];
+      }
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isViewingBottom, setIsViewingBottom] = useState(false);
@@ -59,16 +104,65 @@ export default function App() {
 
 
   // --- New/Modified State ---
-  const [tempMemories, setTempMemories] = useState(() => JSON.parse(localStorage.getItem('chatTempMemories')) || []);
-  const [thinkingProcesses, setThinkingProcesses] = useState(() => JSON.parse(localStorage.getItem('thinkingProcesses')) || {});
+  const [tempMemories, setTempMemories] = useState(() => {
+    try {
+      const data = localStorage.getItem('chatTempMemories');
+      if (!data) return [];
+      try {
+        return JSON.parse(decompress(data)) || [];
+      } catch {
+        return JSON.parse(data) || [];
+      }
+    } catch {
+      return [];
+    }
+  });
+
+  const [thinkingProcesses, setThinkingProcesses] = useState(() => {
+    try {
+      const data = localStorage.getItem('thinkingProcesses');
+      if (!data) return {};
+      try {
+        return JSON.parse(decompress(data)) || {};
+      } catch {
+        return JSON.parse(data) || {};
+      }
+    } catch {
+      return {};
+    }
+  });
+
   const [uploadedImages, setUploadedImages] = useState(() => {
-    const saved = localStorage.getItem('uploadedImages');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('uploadedImages');
+      if (!saved) return [];
+
+      try {
+        return JSON.parse(decompress(saved)) || [];
+      } catch {
+        return JSON.parse(saved) || [];
+      }
+    } catch {
+      return [];
+    }
   });
+
+
   const [messageImageMap, setMessageImageMap] = useState(() => {
-    const saved = localStorage.getItem('messageImageMap');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('messageImageMap');
+      if (!saved) return [];
+
+      try {
+        return JSON.parse(decompress(saved)) || [];
+      } catch {
+        return JSON.parse(saved) || [];
+      }
+    } catch {
+      return [];
+    }
   });
+
 
   // UI-related state
   const [showOptions, setShowOptions] = useState(false);
@@ -152,12 +246,12 @@ export default function App() {
 
 
   // --- State Persistence Effects ---
-  useEffect(() => { localStorage.setItem('chatSessions', JSON.stringify(chatSessions)); }, [chatSessions]);
+  useEffect(() => { localStorage.setItem('chatSessions', compress(JSON.stringify(chatSessions), 9)); }, [chatSessions]);
   useEffect(() => { sessionStorage.setItem('activeChatId', activeChatId); }, [activeChatId]);
   useEffect(() => { localStorage.setItem('selectedModel', model); }, [model]);
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
   useEffect(() => { localStorage.setItem('geminiApiKey', apiKey); }, [apiKey]);
-  useEffect(() => { localStorage.setItem('chatMemories', JSON.stringify(memories)); }, [memories]);
+  useEffect(() => { localStorage.setItem('chatMemories', compress(JSON.stringify(memories), 4)); }, [memories]);
   useEffect(() => { localStorage.setItem('userNickname', userNickname); }, [userNickname]);
 
   useEffect(() => {
@@ -186,13 +280,13 @@ export default function App() {
   }, [isDesktop]);
 
   // --- Modified Persistence ---
-  useEffect(() => { localStorage.setItem('chatTempMemories', JSON.stringify(tempMemories)); }, [tempMemories]);
-  useEffect(() => { localStorage.setItem('thinkingProcesses', JSON.stringify(thinkingProcesses)); }, [thinkingProcesses]);
+  useEffect(() => { localStorage.setItem('chatTempMemories', compress(JSON.stringify(tempMemories), 6)); }, [tempMemories]);
+  useEffect(() => { localStorage.setItem('thinkingProcesses', compress(JSON.stringify(thinkingProcesses), 9)); }, [thinkingProcesses]);
   useEffect(() => {
-    localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages));
+    localStorage.setItem('uploadedImages', compress(JSON.stringify(uploadedImages), 6));
   }, [uploadedImages]); // Stores the image URI
   useEffect(() => {
-    localStorage.setItem('messageImageMap', JSON.stringify(messageImageMap));
+    localStorage.setItem('messageImageMap', compress(JSON.stringify(messageImageMap), 9));
   }, [messageImageMap]); // Stores the image data to show in chat. 
 
   const isBottomAtView = useInView(chatEndRef);
@@ -273,6 +367,8 @@ export default function App() {
   const handleResetApp = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      localStorage.clear();
+      sessionStorage.clear();
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -331,6 +427,8 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      localStorage.clear();
+      sessionStorage.clear();
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -648,13 +746,14 @@ export default function App() {
     const isFirstMessage = messages.length === 0;
 
     setChatSessions(prevSessions => {
-      const sessionExists = prevSessions.some(session => session.chatID === currentChatId);
-      if (sessionExists) {
-        return prevSessions.map(session =>
-          session.chatID === currentChatId
-            ? { ...session, chat: [...session.chat, userMessage] }
-            : session
-        );
+      const sessionIndex = prevSessions.findIndex(session => session.chatID === currentChatId);
+      if (sessionIndex > -1) {
+        const updatedSession = {
+          ...prevSessions[sessionIndex],
+          chat: [...prevSessions[sessionIndex].chat, userMessage]
+        };
+        const otherSessions = prevSessions.filter((_, index) => index !== sessionIndex);
+        return [updatedSession, ...otherSessions];
       } else {
         return [{ chatID: currentChatId, title: 'New Chat', chat: [userMessage] }, ...prevSessions];
       }
@@ -730,7 +829,7 @@ export default function App() {
         advanceReasoning: advanceReasoning,
         webSearch: webSearch,
         images: currentChatImageUris,
-        isFirst: isFirstMessage
+        isFirst: isFirstMessage,
       };
 
       const response = await fetch(`${BACKEND_URL}/model`, {
@@ -882,12 +981,11 @@ export default function App() {
     userName = userNickname || userProfile?.name.split(' ')[0] || 'legend';
     userName = userName.charAt(0).toUpperCase() + userName.slice(1);
     const listGreetings = [
-      `Yo! Welcome back, ${userName}.`,
-      // "Start a Conversation"
+      "Start a Conversation",
+      `Yo! Welcome back, ${userName}.`
     ]
 
     setGreetings(listGreetings[Math.floor(Math.random() * listGreetings.length)]);
-
 
   }, [userProfile]);
 
@@ -1230,6 +1328,9 @@ export default function App() {
           noChatGreet={noChatGreet}
           setModel={setModel}
           systemPrompt={systemPrompt}
+          setTapBottom={setTapBottom}
+          setIsViewingBottom={setIsViewingBottom}
+          activeChatId={activeChatId}
         />
 
         <MessageInput

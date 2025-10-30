@@ -1,4 +1,4 @@
-// Update 2.2
+// Update 2.2.2
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -91,6 +91,7 @@ const setOAuthCredentials = async (req, res, next) => {
         const { token } = await oauth2Client.getAccessToken();
 
         if (token !== accessToken) {
+            oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
             res.cookie('access_token', token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
         }
         next();
@@ -583,7 +584,7 @@ app.post('/upload', async (req, res) => {
 
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
-    let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst } = req.body;
+    let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
 
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
@@ -641,11 +642,11 @@ app.post('/model', async (req, res) => {
 
             let INTERNAL_SYSTEM_PROMPT = '';
 
-            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles);
-            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles);
-            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles);
-            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles);
-            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles);
+            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles, zoneInfo);
+            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles, zoneInfo);
+            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles, zoneInfo);
+            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles, zoneInfo);
+            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles, zoneInfo);
 
             const selectedModel = MODELS[modelIndex];
 
@@ -764,7 +765,7 @@ app.post('/model', async (req, res) => {
 
         const helper = async (mainModelText) => {
 
-            let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst);
+            let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
             if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
 
             contextLimit = 6000 * 4;

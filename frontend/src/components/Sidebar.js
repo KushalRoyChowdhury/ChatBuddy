@@ -92,12 +92,9 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     <AnimatePresence>
       {isSidebarOpen &&
         <motion.div
-          layout
-          className="bg-gray-50 border-r shadow flex flex-col fixed top-0 left-0 overflow-hidden h-dvh"
-          initial={{ width: 0 }}
+          className="bg-gray-50 border-r shadow flex flex-col fixed top-0 left-0 z-40 transition-none w-0 overflow-hidden h-dvh"
           animate={{ width: '20rem' }}
           exit={{ width: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div className="flex min-w-80 justify-between items-center mb-4 flex-shrink-0 p-4">
             <h1 className="text-xl font-bold">Chats</h1>
@@ -192,14 +189,13 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 top-0 left-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-30"
+            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
           />
           <motion.div
-            layout
             className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 rounded-r-xl flex flex-col z-40"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}

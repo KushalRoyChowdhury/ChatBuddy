@@ -9,7 +9,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
   const [isImageLoaded, setIsImageLoaded] = useState(true);
   return (
     <motion.div
-      initial={{ y: 50, opacity: 0 }}
+      initial={{ y: 0, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
