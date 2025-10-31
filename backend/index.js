@@ -675,9 +675,9 @@ app.post('/model', async (req, res) => {
                     model: selectedModel,
                     contents: gemmaContents,
                     config: {
-                        temperature: creativeRP ? 2 : 1,
+                        temperature: creativeRP ? 1.5 : 1,
                         topP: creativeRP ? 0.98 : 0.95,
-                        topK: creativeRP ? 0 : 64,
+                        topK: creativeRP ? 256 : 64,
                         safetySettings: safetySettings,
                     }
                 });
