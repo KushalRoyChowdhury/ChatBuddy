@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved Data Compression (Backward Compatible & Auto Migration).
 - Real-Time local time awareness on models.
+- Now clears localStorage on logout. 
 
 ## [2.2.1-LTS] - 2025-10-29
 
