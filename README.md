@@ -161,7 +161,7 @@ On the hosted version, the app works without providing any keys but has strict r
 
 > Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
 
-> **Privacy and Data Handling Policy**: None of your chats, memories, KEYs are logged/stored on the server. All data stays between you and API service provider. For more details read [Google ToS](https://ai.google.dev/gemini-api/terms). If you use the File Upload feature, the files will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). All your  Google login Credentials are stored locally in your device. 
+> **Privacy and Data Handling Policy**: None of your chats, memories, KEYs are logged/stored on the server. If you use uploada file, it will be stored for next 48 hours from uploading in Google Cloud Project (based on [Google Cloud Files Policy](https://ai.google.dev/gemini-api/docs/files)). All your  Google login Credentials are stored locally in cookies securely.
 
 
 **How to get your key:**
