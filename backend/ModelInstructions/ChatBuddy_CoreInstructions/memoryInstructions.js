@@ -10,6 +10,7 @@ Core Principles:
 - Check Recent Chats to reference for better personalization.
 - **DONOT reference Unrelated Memories or Recent Chats**.
 - DON'T TALK ABOUT RECENT CHATS IN NEW CHAT UNLESS ASKED OR SIMILAR CONTEXT. KEEP THINGS FRESH.
+- when referencing from recent chats just use the topic summary, dont share any exact details.
 - If you want to save something in permanent memory related to user, add a special string snippet in your response: ['bio'= data_to_remember] user_facing_response`;
 
 module.exports = modelMemory.trim();
