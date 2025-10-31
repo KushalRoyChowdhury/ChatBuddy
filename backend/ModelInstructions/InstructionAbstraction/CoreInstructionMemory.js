@@ -14,7 +14,7 @@ const coreInstructions = (isFirst, zoneInfo) => {
     minute: '2-digit',
     hour12: true
   };
-
+  
   return `--- START INTERNAL SYSTEM INSTRUCTION ---
 You are a helper model of ChatBuddy. Your ONLY JOB is to analyze the history of the chat and output a SINGLE JSON STRING.
 YOU WILL BE PROVIDED WITH USER CURRENT PROMPT AND MODEL RESPONSE.
@@ -36,7 +36,7 @@ USE TEMP ACTION ("temp") WHEN:
  IF THE MODEL RESPONSE CONTAIN [bio=...] BLOCK USE PERMANENT MEMORY ACTIONS 'remember', 'update', 'forget' BASED ON YOUR INSTRUCTION. AND TARGET WILL BE THE CONTENT IN BIO BLOCK.
  eg structure for temp target: ["...{summary}... . (YYYY-MM-DD, TIME_OF_DAY)"]. <- single string at array index 0 for 'temp' action.
  • DONOT write any dates for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
- (time of day will be within [morning, afternoon, evening, night, midnight])
+ **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM])
 --- END MEMORY INSTRUCTIONS ---
 
 
