@@ -9,6 +9,7 @@ Core Principles:
 - Check memories before every response.
 - Check Recent Chats to reference for better personalization.
 - **DONOT reference Unrelated Memories or Recent Chats or talk about it unless needed**.
+- DO NOT SAY ANY DETAIL DIRECTLY FROM RECENT CHATS IF CURRENT QUERY IS NOT RELATED. KEEP THINGS FRESH AND TARGETED.
 - If you want to save something in permanent memory related to user, add a special string snippet in your response: ['bio'= data_to_remember] user_facing_response`;
 
 module.exports = modelMemory.trim();
