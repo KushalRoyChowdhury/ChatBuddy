@@ -75,7 +75,7 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState(() => sessionStorage.getItem('activeChatId') || crypto.randomUUID());
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [model, setModel] = useState(() => localStorage.getItem('selectedModel') || 'gemma-3-27b-it');
+  const [model, setModel] = useState(() => sessionStorage.getItem('selectedModel') || 'gemma-3-27b-it');
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('systemPrompt') || '');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('geminiApiKey') || '');
   const [memories, setMemories] = useState(() => {
@@ -153,11 +153,23 @@ export default function App() {
       const saved = localStorage.getItem('messageImageMap');
       if (!saved) return [];
 
+      let parsed;
       try {
-        return JSON.parse(decompress(saved)) || [];
+        parsed = JSON.parse(decompress(saved)) || [];
       } catch {
-        return JSON.parse(saved) || [];
+        parsed = JSON.parse(saved) || [];
       }
+
+      const now = Date.now();
+      const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+
+      const filtered = parsed.filter(obj => {
+        if (!obj.saved) return false;
+        const diff = now - new Date(obj.saved).getTime();
+        return diff < FORTY_EIGHT_HOURS;
+      });
+
+      return filtered;
     } catch {
       return [];
     }
@@ -194,6 +206,7 @@ export default function App() {
   const [userNickname, setUserNickname] = useState(() => localStorage.getItem('userNickname') || '');
   const [showImportAppDataConfirm, setShowImportAppDataConfirm] = useState(false);
   const [appDataToImport, setAppDataToImport] = useState(null);
+  const [isCheckingLogin, setIsCheckingLogin] = useState(true);
 
 
   // Refs
@@ -208,9 +221,10 @@ export default function App() {
   const saveDataToDrive = useCallback(async () => {
     if (!isAuthenticated) return;
 
+    const lastModified = new Date().toISOString();
+
     const appData = {
       chatSessions,
-      model,
       systemPrompt,
       apiKey,
       memories,
@@ -219,8 +233,9 @@ export default function App() {
       uploadedImages,
       messageImageMap,
       userNickname,
-      lastModified: new Date().toISOString()
+      lastModified: lastModified
     };
+    localStorage.setItem('lastModified', lastModified);
 
     try {
       let data = JSON.stringify(appData);
@@ -248,10 +263,10 @@ export default function App() {
   // --- State Persistence Effects ---
   useEffect(() => { localStorage.setItem('chatSessions', compress(JSON.stringify(chatSessions), 9)); }, [chatSessions]);
   useEffect(() => { sessionStorage.setItem('activeChatId', activeChatId); }, [activeChatId]);
-  useEffect(() => { localStorage.setItem('selectedModel', model); }, [model]);
+  useEffect(() => { sessionStorage.setItem('selectedModel', model); }, [model]);
   useEffect(() => { localStorage.setItem('systemPrompt', systemPrompt); }, [systemPrompt]);
   useEffect(() => { localStorage.setItem('geminiApiKey', apiKey); }, [apiKey]);
-  useEffect(() => { localStorage.setItem('chatMemories', compress(JSON.stringify(memories), 4)); }, [memories]);
+  useEffect(() => { localStorage.setItem('chatMemories', compress(JSON.stringify(memories), 6)); }, [memories]);
   useEffect(() => { localStorage.setItem('userNickname', userNickname); }, [userNickname]);
 
   useEffect(() => {
@@ -280,10 +295,10 @@ export default function App() {
   }, [isDesktop]);
 
   // --- Modified Persistence ---
-  useEffect(() => { localStorage.setItem('chatTempMemories', compress(JSON.stringify(tempMemories), 6)); }, [tempMemories]);
+  useEffect(() => { localStorage.setItem('chatTempMemories', compress(JSON.stringify(tempMemories), 8)); }, [tempMemories]);
   useEffect(() => { localStorage.setItem('thinkingProcesses', compress(JSON.stringify(thinkingProcesses), 9)); }, [thinkingProcesses]);
   useEffect(() => {
-    localStorage.setItem('uploadedImages', compress(JSON.stringify(uploadedImages), 6));
+    localStorage.setItem('uploadedImages', compress(JSON.stringify(uploadedImages), 9));
   }, [uploadedImages]); // Stores the image URI
   useEffect(() => {
     localStorage.setItem('messageImageMap', compress(JSON.stringify(messageImageMap), 9));
@@ -299,12 +314,19 @@ export default function App() {
     }
   }, [isBottomAtView]);
 
+  let hasRun = useRef(null);
+
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const checkAuthStatus = async () => {
       try {
+        setIsCheckingLogin(true);
         const response = await fetch(`${BACKEND_URL}/auth/status`, { credentials: 'include' });
         const data = await response.json();
         setIsAuthenticated(data.isAuthenticated);
+        setIsCheckingLogin(false);
         if (data.isAuthenticated) {
 
           const userResponse = await fetch(`${BACKEND_URL}/auth/user`, { credentials: 'include' });
@@ -319,18 +341,32 @@ export default function App() {
           if (driveResponse.ok) {
             const driveData = await driveResponse.json();
             const localLastModified = localStorage.getItem('lastModified');
-            if (localLastModified && new Date(localLastModified) > new Date(driveData.modifiedTime)) {
-              setShowMergeConflict(true);
+            if (localLastModified === driveData.data.lastModified) {
+              console.log("No Changes");
+              return;
             } else {
+              console.log("Syncing...");
               setChatSessions(driveData.data.chatSessions || []);
-              setModel(driveData.data.model || 'gemma-3-27b-it');
               setSystemPrompt(driveData.data.systemPrompt || '');
               setApiKey(driveData.data.apiKey || '');
               setMemories(driveData.data.memories || []);
               setTempMemories(driveData.data.tempMemories || []);
               setThinkingProcesses(driveData.data.thinkingProcesses || {});
               setUploadedImages(driveData.data.uploadedImages || []);
-              setMessageImageMap(driveData.data.messageImageMap || []);
+              setMessageImageMap(() => {
+                const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+                const now = Date.now();
+
+                const incoming = driveData.data.messageImageMap || [];
+
+                return Array.isArray(incoming)
+                  ? incoming.filter(obj => {
+                    if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
+                    const diff = now - new Date(obj.saved).getTime();
+                    return diff < FORTY_EIGHT_HOURS;
+                  })
+                  : [];
+              });
               setUserNickname(driveData.data.userNickname || '');
             }
           }
@@ -340,6 +376,25 @@ export default function App() {
       }
     };
     checkAuthStatus();
+
+    const purgeExpiredImages = () => {
+      const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+      const now = Date.now();
+
+      setMessageImageMap(prev =>
+        prev.filter(obj => {
+          if (!obj.saved) return false;
+          const diff = now - new Date(obj.saved).getTime();
+          return diff < FORTY_EIGHT_HOURS;
+        })
+      );
+    };
+
+    const interval = setInterval(purgeExpiredImages, 10000);
+    purgeExpiredImages();
+
+    return () => clearInterval(interval); // cleanup 🔥
+
   }, []);
 
   useEffect(() => {
@@ -368,7 +423,6 @@ export default function App() {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
       localStorage.clear();
-      sessionStorage.clear();
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -389,22 +443,7 @@ export default function App() {
   };
 
   const handleOverwriteLocal = async () => {
-    const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
-    if (driveResponse.ok) {
-      const driveData = await driveResponse.json();
-      setChatSessions(driveData.data.chatSessions || []);
-      setModel(driveData.data.model || 'gemma-3-27b-it');
-      setSystemPrompt(driveData.data.systemPrompt || '');
-      setApiKey(driveData.data.apiKey || '');
-      setMemories(driveData.data.memories || []);
-      setTempMemories(driveData.data.tempMemories || []);
-      setThinkingProcesses(driveData.data.thinkingProcesses || {});
-      setUploadedImages(driveData.data.uploadedImages || []);
-      setMessageImageMap(driveData.data.messageImageMap || []);
-      setUserNickname(driveData.data.userNickname || '');
-      localStorage.setItem('lastModified', new Date().toISOString());
-    }
-    setShowMergeConflict(false);
+
   };
 
   const handleOverwriteRemote = () => {
@@ -720,7 +759,8 @@ export default function App() {
           {
             id: messageID,
             base64Data: resized,
-            mimeType: 'image/jpeg'
+            mimeType: 'image/jpeg',
+            saved: new Date().toISOString(),
           }
         ]);
         setCurrentBase64Image(null);
@@ -933,7 +973,7 @@ export default function App() {
 
     } catch (error) {
       if (error.name === 'AbortError') {
-        const errorJsonString = `{"action":"none", "target":"", "response":"User stopped the message generation"}`;
+        const errorJsonString = `{"action":"none", "target":"", "response":"User cancelled the response."}`;
         const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
         setChatSessions(prevSessions =>
           prevSessions.map(session =>
@@ -1220,12 +1260,21 @@ export default function App() {
   const imageGenAvailable = new Date() < new Date('2025-11-12');
 
   // --- JSX Rendering ---
+
+  if (isCheckingLogin) {
+    return <div></div>;
+  }
+
   if (!isAuthenticated) {
+    localStorage.clear();
     return <Login handleLogin={handleLogin} />;
   }
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
       className="min-h-dvh font-medium max-w-[100vw] select-none bg-gray-50 flex font-sans">
       <Sidebar
         chatSessions={chatSessions}

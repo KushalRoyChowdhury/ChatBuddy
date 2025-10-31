@@ -1,4 +1,4 @@
-// Update 2.2.2
+// Update 2.2.3
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -820,7 +820,7 @@ app.post('/model', async (req, res) => {
             text = { ...text, response: `${mainModel.mainText}` };
             text = JSON.stringify(text);
         } catch (err) {
-            text = mainModel.mainText;
+            text = mainModel.mainText + '..';
         }
 
 

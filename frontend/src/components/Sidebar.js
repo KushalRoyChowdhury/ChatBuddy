@@ -7,6 +7,10 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   const [renameValue, setRenameValue] = useState('');
   const [userData, setUserData] = useState(null);
 
+  useEffect(() => {
+    setSearchTerm("");
+  }, [activeChatId]);
+
   const handleLogout = async () => {
     try {
       await fetch('/auth/logout');
@@ -44,7 +48,6 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     });
 
     if (activeChatId === chatIdToDelete) {
-      // const newActiveId = chatSessions.length > 1 ? chatSessions.find(session => session.chatID !== chatIdToDelete).chatID : null;
       const newActiveId = crypto.randomUUID();
       setActiveChatId(newActiveId);
     }
@@ -85,6 +88,8 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       ))
     );
   });
+
+
 
   const activeChat = chatSessions.find(session => session.chatID === activeChatId);
 
@@ -295,4 +300,4 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   return isDesktop ? desktopSidebar : mobileSidebar;
 };
 
-export default Sidebar;
+export default React.memo(Sidebar);

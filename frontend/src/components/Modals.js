@@ -56,7 +56,7 @@ const Modals = React.memo(({
   setShowMergeConflict,
   handleOverwriteLocal,
   handleOverwriteRemote,
-  usage, 
+  usage,
   imageGenAvailable
 }) => {
   return (
@@ -328,7 +328,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
           >
             {/* Header */}
             <div className="p-5 border-b flex justify-between items-center">
@@ -831,7 +831,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80%] flex flex-col"
+            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
           >
             <div className="p-5 border-b flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-800">
@@ -857,46 +857,40 @@ const Modals = React.memo(({
                 </svg>
               </button>
             </div>
-            <div className="p-5 overflow-y-auto flex-grow space-y-6">
+            <div className="p-5 overflow-y-auto font-normal flex-grow space-y-6">
               <div className="p-4 bg-gray-50 rounded-lg mt-4">
-                <h3 className="font-medium text-gray-800 mb-2">
-                  About ChatBuddy
-                </h3>
                 <p className="text-sm text-gray-600">
-                  ChatBuddy is a Free for All AI Chatapp. Available with 2 AI
-                  models (Basic and Advanced).
+                  ChatBuddy is a Free for All AI Chatapp. Available with 2 AI models (Basic and Advanced).
+                  <br />
                   <br />
                   Basic model:{' '}
-                  <span className="font-medium">Gemma3 27b.</span> Best for
-                  Conversation & Role-Plays.
+                  <span className="font-semibold">Gemma3 27b.</span> Best for Conversation & Role-Plays.
                   <br />
                   <br />
                   Advanced model:{' '}
-                  <span className="font-medium">Gemini 2.5 Flash.</span> Best for
-                  Coding & Reasoning Tasks.
+                  <span className="font-semibold">Gemini 2.5 Flash.</span> Best for Coding Math & Reasoning Tasks.
                   <br />
                   <br />
-                  <span className="font-semibold">NOTE</span>: Advance
-                  Reasoning Mode can take significatly longer time to respond
-                  on complex tasks.
+                  <span className="font-semibold">NOTE</span>: Advance Reasoning Mode can take significatly longer time to respond on complex tasks.
                   <br />
                   <br />
-                  You can add your Gemini API key for Higher Rate Limits and
-                  Context Window (offering upto 128k).
+                  You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
                   <br />
                   <br />
-                  Basic Model Supports 6k Context Window. Advance Model
-                  Supports 64k Context Window (Default Key).
+                  Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
                   <br />
                   <br />
-                  With the Without Personal Key the RateLimits are: Basic Model (7
-                  RPM / 500 RPD), Advance Model (3 RPM / 100 RPD), Image
-                  Generation (1RPM, 10RPD)
+                  With the Without Personal Key the RateLimits are: Basic Model (7RPM / 500 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
                   <br />
                   <br />
-                  With your own API Key the RateLimits are: Basic (30 RPM /
-                  14,350 RPD), Advance (15 RPM / 1000 RPD), Image Generation
-                  (10RPM, 100RPD) for FREE.
+                  With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD){imageGenAvailable && ', Image Generation (10RPM, 100RPD)'}.
+                  {imageGenAvailable &&
+                    <>
+                      <br />
+                      <br />
+                      <span className="font-semibold">NOTE</span>: Image Generation is only available till 2025-NOV-12.
+                    </>
+                  }
                   <br />
                   <br />
                   Aditionally the app Source Code is available on 👉
@@ -909,7 +903,7 @@ const Modals = React.memo(({
                       GitHub
                     </a>
                   </span>
-                  👈. 
+                  👈.
                   <br />
                   <br />
                   Thank You for using ChatBuddy.
@@ -919,7 +913,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600">
                 AI can make mistakes.
                 <br />
-                v2.2.2-LTS (release 251030)
+                v2.2.3-LTS (release 251030)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

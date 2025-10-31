@@ -42,7 +42,7 @@ const ChatLog = React.memo(({
           exit={{ opacity: 0 }}
           type='button'
           onClick={() => { setTapBottom(true) }}
-          className='fixed bottom-32 md:bottom-[8.5rem] z-50 bg-white hover:bg-slate-100 shadow flex justify-center items-center rounded-full p-1 active:scale-95 transition-all'>
+          className='fixed bottom-32 md:bottom-[8.5rem] z-30 bg-white hover:bg-slate-100 shadow flex justify-center items-center rounded-full p-1 active:scale-95 transition-all'>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
