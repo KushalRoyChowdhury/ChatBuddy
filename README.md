@@ -38,7 +38,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   System Prompt & API Key
     -   Nickname
 
--   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device.
+-   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device. File used in Google Drive is `chatbuddy_data.bin` (auto-created).
 
 -   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations (Memory managed by `Gemma3-12b-it`).
     -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
@@ -216,10 +216,10 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 ---
 
-> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete & no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS`. 
+> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete & no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above. 
 
 ---
 
 *Thank you for using ChatBuddy!*
 
-*v2.2.2-LTS - By KushalRoyChowdhury*
+*v2.2.3-LTS - By KushalRoyChowdhury*
