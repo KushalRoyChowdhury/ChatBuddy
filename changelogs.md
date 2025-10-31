@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete—no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS`. 
+> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete—no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above. 
+
+## [2.2.3-LTS] - 2025-10-31
+
+### Fixed
+- UI Stability.
+- Performance Improvements.
+- Improved Security.
+
+### Changed
+- Dynamic Cloud Sync.
+- Images older than 48hrs will be deleted due to localStorage constraints.
+- Clears localStorage on token expiration & authentication failure.
+- Deleting `chatbuddy_data.bin` from Google Drive may result in data loss.
 
 ## [2.2.2-LTS] - 2025-10-30
 
@@ -16,9 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved general experience.
 
 ### Changed
-- Improved Data Compression (Backward Compatible & Auto Migration).
+- Improved Data Compression (Backward Compatible & Auto-Migration).
 - Real-Time local time awareness on models.
-- Now clears localStorage on logout. 
+- Clears localStorage on logout. 
 
 ## [2.2.1-LTS] - 2025-10-29
 
