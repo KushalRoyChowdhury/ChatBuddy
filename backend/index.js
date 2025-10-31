@@ -677,7 +677,7 @@ app.post('/model', async (req, res) => {
                     config: {
                         temperature: creativeRP ? 1 : 0.9,
                         topP: creativeRP ? 0.98 : 0.9,
-                        topK: creativeRP ? 256 : 128,
+                        topK: creativeRP ? 128 : 64,
                         safetySettings: safetySettings,
                     }
                 });
