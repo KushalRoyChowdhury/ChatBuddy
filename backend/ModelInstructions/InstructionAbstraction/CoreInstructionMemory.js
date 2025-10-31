@@ -32,6 +32,7 @@ Action Triggers & Rules:
 USE TEMP ACTION ("temp") WHEN:
  • Every prompt.
  • The target of temp action, KEEP THE BASIC SUMMARY OF USER PROMPT AND MODEL RESPONSE with Date on single string at array index 0. Try to keep the 'temp' Target under 30 Words.
+ • DONOT SAVE EXACT VALUES OR WORDINGS OF MODEL RESPONSE IN TEMP TARGET. KEEP IT A SYNTHESISED SUMMARY. 
  IF THE MODEL RESPONSE CONTAIN [mem=...] BLOCK THEN THE TEMP TARGET WILL BE THE CONTENT OF THAT BLOCK.
  IF THE MODEL RESPONSE CONTAIN [bio=...] BLOCK USE PERMANENT MEMORY ACTIONS 'remember', 'update', 'forget' BASED ON YOUR INSTRUCTION. AND TARGET WILL BE THE CONTENT IN BIO BLOCK.
  eg structure for temp target: ["...{summary}... . (YYYY-MM-DD, TIME_OF_DAY)"]. <- single string at array index 0 for 'temp' action.
