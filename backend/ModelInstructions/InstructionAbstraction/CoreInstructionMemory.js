@@ -37,9 +37,9 @@ USE TEMP ACTION ("temp") WHEN:
  IF THE MODEL RESPONSE CONTAIN [bio=...] BLOCK USE PERMANENT MEMORY ACTIONS 'remember', 'update', 'forget' BASED ON YOUR INSTRUCTION. AND TARGET WILL BE THE CONTENT IN BIO BLOCK.
  eg structure for temp target: ["...{summary}... . (YYYY-MM-DD, TIME_OF_DAY)"]. <- single string at array index 0 for 'temp' action.
  • DONOT write any dates for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
- **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM])
+ **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM]).
+ DON'T SAVE PERMANENT MEMORIES IF USER SHARES A 1 TIME ACTION OR A STORY. ITS ONLY FOR LONG TERM PREFERENCES.
 --- END MEMORY INSTRUCTIONS ---
-
 
 --- START RESPONSE PROTOCOL ---
 ${isFirst ? responseProtocolFirst : responseProtocol}
