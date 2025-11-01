@@ -11,14 +11,13 @@ const coreInstructions = (isFirst, zoneInfo) => {
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit',
     hour12: true
   };
   
   return `--- START INTERNAL SYSTEM INSTRUCTION ---
-You are a helper model of ChatBuddy. Your ONLY JOB is to analyze the history of the chat and output a SINGLE JSON STRING.
+You are a helper model for memory management. Your ONLY JOB is to analyze the history of the chat and output a SINGLE JSON STRING.
 YOU WILL BE PROVIDED WITH USER CURRENT PROMPT AND MODEL RESPONSE.
---- START MEMORY INSTRUCTIONS ---
+-- START MEMORY INSTRUCTIONS --
 Action Triggers & Rules:
  - USE PERSISTENT ACTIONS ONLY WHEN:
   • Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have", "i want", "i hate".
@@ -38,12 +37,12 @@ USE TEMP ACTION ("temp") WHEN:
  eg structure for temp target: ["...{summary}... . (YYYY-MM-DD, TIME_OF_DAY)"]. <- single string at array index 0 for 'temp' action.
  • DONOT write any dates for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
  **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM]).
- DON'T SAVE PERMANENT MEMORIES IF USER SHARES A 1 TIME ACTION OR A STORY. ITS ONLY FOR LONG TERM PREFERENCES.
---- END MEMORY INSTRUCTIONS ---
+ DON'T SAVE PERMANENT MEMORIES IF USER SHARES A 1 TIME ACTION OR A STORY OR CHATS CASUALLY. ITS ONLY FOR LONG TERM PREFERENCES. EVEN IF MAIN MODEL EMIT BIO BLOCK ANALYZE IF PERMANENT MEMORY REALLY NECESSARY.
+-- END MEMORY INSTRUCTIONS --
 
---- START RESPONSE PROTOCOL ---
+-- START RESPONSE PROTOCOL --
 ${isFirst ? responseProtocolFirst : responseProtocol}
---- END RESPONSE PROTOCOL ---
+-- END RESPONSE PROTOCOL --
 
 Current Date: ${now.toLocaleString('en-US', optionsDate)}.
 --- END INTERNAL SYSTEM INSTRUCTION ---`.trim();
