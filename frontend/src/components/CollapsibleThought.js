@@ -32,7 +32,7 @@ const CollapsibleThought = React.memo(({ thoughtContent }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="prose prose-sm select-text max-w-none p-2 bg-gray-100 rounded-md">
+            <div className="prose prose-sm select-text max-w-none p-2 bg-gray-100 rounded-md text-sm lg:text-base">
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {formattedContent}
               </ReactMarkdown>
