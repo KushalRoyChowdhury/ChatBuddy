@@ -811,8 +811,9 @@ app.post('/model', async (req, res) => {
         let mainModel = await mainModels();
         let format = await helper(mainModel.mainText);
 
-        mainModel.mainText = mainModel.mainText.replace(/(?<!`)\[(?:bio|mem)\s*=\s*[\s\S]*?\](?!`)/g, '');
-
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*=\s*[\s\S]*?\]/g, '');
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?bio['"]?\s*=\s*[\s\S]*?\]/g, '');
+        
         let text = '';
         try {
             text = JSON.parse(format);
