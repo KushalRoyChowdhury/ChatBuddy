@@ -914,7 +914,7 @@ const Modals = React.memo(({
                 AI can make mistakes.
                 <br />
                 v2.2.4-LTS (release 251102)
-                <br />
+                <br/>
                 By: Kushal Roy Chowdhury
               </div>
             </div>
