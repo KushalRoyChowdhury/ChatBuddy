@@ -22,7 +22,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }) =
       </SyntaxHighlighter>
     </div>
   ) : (
-    <code className="bg-gray-200 text-red-600 px-1 text-wrap rounded" {...props}>
+    <code className="bg-gray-200 text-red-600 px-1 text-wrap rounded text-sm lg:text-base" {...props}>
       {children}
     </code>
   );
