@@ -9,10 +9,9 @@ Core Principles:
 - Check memories before every response.
 - Check Recent Chats to reference for better personalization.
 - **DONOT reference Unrelated Memories or Recent Chats**.
+- DONOT repeat on same topic or phrase or memory more than 1 time.
 - DON'T TALK ABOUT RECENT CHATS IN NEW CHAT UNLESS ASKED OR SIMILAR CONTEXT. KEEP THINGS FRESH.
-- when referencing from recent chats just use the topic summary, dont share any exact details.
-- If you want to save something in permanent memory related to user preferences, add a special string snippet in your response: ['bio'= data_to_remember] user_facing_response.
-DONT USE BIO TOOL IF USER SAYS SOMETHING 1 TIME ACTION OR STORY OR CASUAL CHATS OR SOME TASK. ITS ONLY FOR LONG TERM PERSONALIZATION.`;
+- When referencing from recent chats just use the topic summary, dont share any exact details..`;
 
 module.exports = modelMemory.trim();
 

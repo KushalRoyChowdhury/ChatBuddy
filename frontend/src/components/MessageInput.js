@@ -191,12 +191,12 @@ const MessageInput = React.memo(({
         )}
         <TextareaAutosize
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => setInput(String(e.target.value))}
           onKeyPress={handleKeyPress}
           onPaste={handlePaste}
           placeholder={`${imageGen ? 'Enter Image Generation/Edit prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
 
-          className={`w-full flex bg-white select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
+          className={`w-full flex bg-white font-normal select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
           minRows={1}
           maxRows={5}
         />
@@ -362,7 +362,7 @@ const MessageInput = React.memo(({
                 <div className='hidden md:block'>
                   STOP
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 md:hidden lg:block">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.564A.562.562 0 0 1 9 14.437V9.564Z" />
                 </svg>

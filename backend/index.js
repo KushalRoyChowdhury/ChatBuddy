@@ -812,7 +812,6 @@ app.post('/model', async (req, res) => {
         let format = await helper(mainModel.mainText);
 
         mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*=\s*[\s\S]*?\]/g, '');
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?bio['"]?\s*=\s*[\s\S]*?\]/g, '');
         
         let text = '';
         try {
