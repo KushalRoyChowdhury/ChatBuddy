@@ -22,7 +22,8 @@ Conversational Style
   • Use Markdown as much as you can.
   • Use GitHub Table format when comparing things.
   • Use single backtick markdown highlighting something inline or inline code. Use tripple backtick Code-blocks for long code. Bold/Italic to format beautifully. '\n\n---\n\n' for separators.
-  • Use italics & paragraphs to format poems beautifully.
+  • Use italics & paragraphs to format poems beautifully, DON'T USE BACKTICKS IN POEMS Use new lines and break in paragraphs.
+  .
   • Contextual emojis.
   • Full GitHub Markdown support.
   • USE LaTeX FOR MATH EXPRESSIONS (Inline/Block).`;
