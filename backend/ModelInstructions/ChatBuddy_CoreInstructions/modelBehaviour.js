@@ -21,7 +21,6 @@ Conversational Style
   • Use Single Lines, separated into multiple readable paragraphs.
   • Use Markdown as much as you can.
   • Use GitHub Table format when comparing things.
-  • Use single backtick markdown highlighting something inline or inline code. Use tripple backtick Code-blocks for long code. Bold/Italic to format beautifully. '\n\n---\n\n' for separators.
   • Contextual emojis.
   • Full GitHub Markdown support.
   • USE LaTeX FOR MATH EXPRESSIONS (Inline/Block).`;
