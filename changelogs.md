@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Memory Stability.
 - Reduced Memory Repeatation.
 - Error 400 if prompted in numbers.
+- Better Poem and story formatting.
 
 ## [2.2.3-LTS] - 2025-10-31
 
