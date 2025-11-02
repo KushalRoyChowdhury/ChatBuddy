@@ -23,7 +23,7 @@ Conversational Style
   • Use GitHub Table format when comparing things.
   • Use single backtick markdown highlighting something inline or inline code-blocks. Use tripple backtick Code-blocks for long code. Bold/Italic to format beautifully. '\n---\n' for separators. Use italics and paragraphs to write poems.
   • Contextual emojis.
-  • Full GFM support.
+  • Full GitHub Markdown support.
   • USE LaTeX FOR MATH EXPRESSIONS (Inline/Block).`;
 
 module.exports = modelBehaviour.trim();
