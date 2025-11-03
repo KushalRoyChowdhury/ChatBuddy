@@ -18,8 +18,6 @@ const MessageInput = React.memo(({
   handleDragOver,
   handleDragLeave,
   handleDrop,
-  isViewingBottom,
-  setTapBottom,
   fileImg,
   setFileImg,
   setUploadedImages,
@@ -66,21 +64,20 @@ const MessageInput = React.memo(({
     };
   }, [showAddFiles, setShowAddFiles]);
   return (
-    <footer className="bg-white border border-b-0 border-x-0 md:border-none p-1 md:pb-5 sticky bottom-0 rounded-t-3xl md:rounded-none">
+    <footer className="bg-white/70 backdrop-blur-lg border border-b-0 border-x-0 md:border-none p-1 md:pb-5 sticky bottom-0 rounded-t-3xl md:rounded-none">
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          // sendMessage();
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`max-w-4xl relative w-full bg-white mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
+        className={`max-w-4xl relative w-full mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
       >
 
         {fileImg && (
-          <div className="p-2 border-b-0 border-gray-200">
-            <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
+          <div className="p-2 border-b-0 border-gray-200/95">
+            <div className="relative inline-block bg-gray-100/95 p-1 rounded-lg">
               {uploading ? (
                 <div className="h-20 w-20 flex items-center justify-center">
                   <svg
@@ -132,8 +129,8 @@ const MessageInput = React.memo(({
         )}
 
         {fileDoc && (
-          <div className="p-2 border-b-0 border-gray-200">
-            <div className="relative inline-block bg-gray-100 p-1 rounded-lg">
+          <div className="p-2 border-b-0 border-gray-200/95">
+            <div className="relative inline-block bg-gray-100/95 p-1 rounded-lg">
               {uploading ? (
                 <div className="h-20 w-20 flex items-center justify-center">
                   <svg
@@ -196,7 +193,7 @@ const MessageInput = React.memo(({
           onPaste={handlePaste}
           placeholder={`${imageGen ? 'Enter Image Generation/Edit prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
 
-          className={`w-full flex bg-white font-normal select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
+          className={`w-full flex bg-transparent font-normal select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
           minRows={1}
           maxRows={5}
         />

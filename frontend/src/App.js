@@ -1381,6 +1381,7 @@ export default function App() {
           setIsViewingBottom={setIsViewingBottom}
           activeChatId={activeChatId}
           setShowMemories={setShowMemories}
+          fileImg={fileImg}
         />
 
         <MessageInput
