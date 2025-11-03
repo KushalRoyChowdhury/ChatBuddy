@@ -1380,6 +1380,7 @@ export default function App() {
           setTapBottom={setTapBottom}
           setIsViewingBottom={setIsViewingBottom}
           activeChatId={activeChatId}
+          setShowMemories={setShowMemories}
         />
 
         <MessageInput

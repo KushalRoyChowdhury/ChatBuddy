@@ -17,6 +17,7 @@ const ChatLog = React.memo(({
   systemPrompt,
   setTapBottom,
   activeChatId,
+  setShowMemories
 }) => {
 
   const chatEndRefTrigger = React.useRef(null);
@@ -24,6 +25,7 @@ const ChatLog = React.memo(({
   const isBottomAtView = useInView(chatEndRefTrigger);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const timer = setTimeout(() => {
       chatEndRefTrigger.current.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -78,6 +80,7 @@ const ChatLog = React.memo(({
                   messageImageMap={messageImageMap}
                   getTextToRender={getTextToRender}
                   getUserBubbleClass={getUserBubbleClass}
+                  setShowMemories={setShowMemories}
                 />
               );
             })}

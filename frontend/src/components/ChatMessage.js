@@ -5,7 +5,7 @@ import CollapsibleThought from './CollapsibleThought';
 import ChatBubbleMessage from './ChatBubbleMessage';
 import AiImage from './AiImage';
 
-const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, getUserBubbleClass }) => {
+const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, getUserBubbleClass, setShowMemories }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(true);
   return (
     <motion.div
@@ -13,7 +13,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
       animate={{ opacity: 1 }}
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-white w-full text-black'}`}>
+      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-transparent px-0 w-full text-black'}`}>
         {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
 
         {msg.role === 'user' && (() => {
@@ -68,7 +68,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
           <div className="mt-2 text-xs text-gray-500 italic border-t-2 border-b-2 p-2 font-medium flex justify-between items-center gap-2">
             <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : msg.model === 'image' ? 'ImageGen' : 'Basic'}</span>
             <div className="flex gap-2">
-              {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium transition-all bg-yellow-100 hover:bg-yellow-200 text-yellow-800">Memory Updated</span> : null}
+              {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span onClick={() => setShowMemories(true)} className="inline-flex cursor-pointer items-center px-2 py-0.5 rounded text-xs font-medium transition-all bg-yellow-100 hover:bg-yellow-200 text-yellow-800">Memory Updated</span> : null}
             </div>
           </div>
         )}
