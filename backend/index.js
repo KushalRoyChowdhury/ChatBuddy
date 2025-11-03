@@ -675,9 +675,9 @@ app.post('/model', async (req, res) => {
                     model: selectedModel,
                     contents: gemmaContents,
                     config: {
-                        temperature: creativeRP ? 1 : 0.9,
-                        topP: creativeRP ? 0.98 : 0.9,
-                        topK: creativeRP ? 128 : 64,
+                        temperature: creativeRP ? 2 : 1,
+                        topP: creativeRP ? 1 : 0.9,
+                        topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
                     }
                 });
@@ -691,9 +691,9 @@ app.post('/model', async (req, res) => {
                             role: "system",
                             parts: [{ text: finalSystemPrompt }]
                         },
-                        temperature: advanceReasoning ? 0.9 : 1,
-                        topP: advanceReasoning ? 0.9 : 0.98,
-                        topK: advanceReasoning ? 64 : 128,
+                        temperature: advanceReasoning ? 1 : 1.5,
+                        topP: advanceReasoning ? 0.95 : 0.99,
+                        topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
                             thinkingBudget: advanceReasoning ? -1 : 0,
