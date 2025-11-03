@@ -32,8 +32,8 @@ USE TEMP ACTION ("temp") WHEN:
  • Every prompt.
  • The target of temp action, KEEP THE BASIC SUMMARY OF USER PROMPT AND MODEL RESPONSE with Date on single string at array index 0.
  • DONOT SAVE EXACT VALUES OR WORDINGS OF MODEL RESPONSE IN TEMP TARGET. KEEP IT A SYNTHESISED SHORT SUMMARY under 30 words. 
- IF THE MODEL RESPONSE CONTAIN [mem=...] BLOCK THEN THE TEMP TARGET WILL BE THE CONTENT OF THAT BLOCK.
- eg structure for temp target: ["...{summary}... . (YYYY-MM-DD, TIME_OF_DAY)"].
+ IF THE MODEL RESPONSE CONTAIN ['file'=...] BLOCK THEN THE TEMP TARGET WILL BE THE CONTENT OF THAT BLOCK.
+ eg structure for temp target: ["...{summary}... . Talked on (YYYY-MM-DD, TIME_OF_DAY)"].
  • DONOT write any dates for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
  DONT USE 'remember' ACTION UNLESS ITS TOLD BY USER OR CONTEXT SIGNIFY THEIR PREFERENCES OR HABITS. ITS ONLY FOR CRITICAL USER INFO NOT GENERAL CONVERSATION TONE.
  **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM]) FOLLOW THESE TIMINGS STRICTLY EVEN IF ITS CONTRADICTORY WITH YOUR GENERAL KNOWLEDGE.

@@ -768,7 +768,7 @@ app.post('/model', async (req, res) => {
             let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
             if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
 
-            contextLimit = 6000 * 4;
+            contextLimit = 2000 * 4;
 
             let shortHistory = getTruncatedHistory(history, contextLimit);
 
@@ -806,12 +806,11 @@ app.post('/model', async (req, res) => {
             return text;
         }
 
-        // let [mainModel, format] = await Promise.all([mainModels(), helper()]);
 
         let mainModel = await mainModels();
         let format = await helper(mainModel.mainText);
 
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?mem['"]?\s*=\s*[\s\S]*?\]/g, '');
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?\s*=\s*[\s\S]*?\]/g, '');
         
         let text = '';
         try {
