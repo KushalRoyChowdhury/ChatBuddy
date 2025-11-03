@@ -1,4 +1,4 @@
-// Update 2.2.3
+// Update 2.2.4
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

@@ -137,15 +137,29 @@ export default function App() {
       const saved = localStorage.getItem('uploadedImages');
       if (!saved) return [];
 
+      let parsed;
       try {
-        return JSON.parse(decompress(saved)) || [];
+        parsed = JSON.parse(decompress(saved)) || [];
       } catch {
-        return JSON.parse(saved) || [];
+        parsed = JSON.parse(saved) || [];
       }
+
+      const now = Date.now();
+      const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+
+      const filtered = parsed.filter(obj => {
+        if (!obj || !obj.saved) return false;
+
+        const diff = now - new Date(obj.saved).getTime();
+        return diff < FORTY_EIGHT_HOURS;
+      });
+
+      return filtered;
     } catch {
       return [];
     }
   });
+
 
 
   const [messageImageMap, setMessageImageMap] = useState(() => {
@@ -352,7 +366,21 @@ export default function App() {
               setMemories(driveData.data.memories || []);
               setTempMemories(driveData.data.tempMemories || []);
               setThinkingProcesses(driveData.data.thinkingProcesses || {});
-              setUploadedImages(driveData.data.uploadedImages || []);
+              setUploadedImages(() => {
+                const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+                const now = Date.now();
+
+                const incoming = driveData.data.uploadedImages || [];
+
+                return Array.isArray(incoming)
+                  ? incoming.filter(obj => {
+                    if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
+                    const diff = now - new Date(obj.saved).getTime();
+                    return diff < FORTY_EIGHT_HOURS;
+                  })
+                  : [];
+              });
+
               setMessageImageMap(() => {
                 const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
                 const now = Date.now();
@@ -393,7 +421,7 @@ export default function App() {
     const interval = setInterval(purgeExpiredImages, 10000);
     purgeExpiredImages();
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
 
   }, []);
 
@@ -1131,7 +1159,8 @@ export default function App() {
           chatId: activeChatId,
           uri: result.uri,
           mimeType: result.mimeType,
-          id: null
+          id: null,
+          saved: new Date().toISOString(),
         }
       ]);
 
