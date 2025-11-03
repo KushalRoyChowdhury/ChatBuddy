@@ -177,11 +177,6 @@ ChatBuddy uses dual-model architecture.
 
 The AI can manage its own memory based on your conversation. The App listens for specific tool call within its responses.
 
-**tool**:
-```
-[mem=User asked about AI]
-```
-
 **Helper**:
 ```json
 {
