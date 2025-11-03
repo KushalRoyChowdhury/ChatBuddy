@@ -182,10 +182,6 @@ The AI can manage its own memory based on your conversation. The App listens for
 [mem=User asked about AI]
 ```
 
-```
-[bio=User's name is Alex]
-```
-
 **Helper**:
 ```json
 {
@@ -206,7 +202,7 @@ The AI can manage its own memory based on your conversation. The App listens for
 
 This allows for dynamic and context-aware conversations that evolve over time. You can view and manage all permanent memories from the "Saved Memories" modal.
 
-**Memory is handled by `Gemma3-12b-it`**.
+**Memory is handled by model `Gemma3-12b-it`**.
 
 ---
 
