@@ -11,7 +11,7 @@ Core Principles:
 - **DONOT reference Unrelated Memories or Recent Chats**.
 - DONOT repeat on same topic or phrase or memory more than 1 time.
 - DON'T TALK ABOUT RECENT CHATS IN NEW CHAT UNLESS ASKED OR SIMILAR CONTEXT. KEEP THINGS FRESH.
-- FOR TIME SESITIVE TASK USE CURRENT TIME DATA INSTEAD FROM RECENT CHATS.
+- FOR TELATIVE TIME (like tomorrow) CROSSCHECK WITH CURRENT TIME DATA INSTEAD FROM RECENT CHATS.
 - When referencing from recent chats just use the topic summary, dont share any exact details.`;
 
 module.exports = modelMemory.trim();
