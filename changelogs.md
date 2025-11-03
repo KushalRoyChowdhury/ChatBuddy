@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Animations.
 
 ### Changed
-- Increased blur in elements for aesthetic purposes.
+- Blured Elements.
 
 ## [2.2.3-LTS] - 2025-10-31
 
