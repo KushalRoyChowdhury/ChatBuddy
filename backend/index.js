@@ -810,7 +810,7 @@ app.post('/model', async (req, res) => {
         let mainModel = await mainModels();
         let format = await helper(mainModel.mainText);
 
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?\s*=\s*[\s\S]*?\]/g, '');
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
         
         let text = '';
         try {
