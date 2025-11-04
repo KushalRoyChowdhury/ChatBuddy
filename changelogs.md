@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete—no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above. 
 
-## [2.2.4-LTS] - 2025-11-03
+## [2.2.5-LTS] - 2025-11-04
+
+### Fixed
+- Enhanced Rendering of LaTeX Equations (Physics, Chemistry).
+- UI Fixes.
+- Issue where File UI disappears after uploading a file.
+- UI Stability.
+
+### Changed
+- Tuned Model's Generation Parameters.
+
+## [2.2.4-LTS] - 2025-11-02
 
 ### Fixed
 - Improved Model Responses.
