@@ -175,7 +175,7 @@ On the hosted version, the app works without providing any keys but has strict r
 
 ChatBuddy uses dual-model architecture.
 
-The AI can manage its own memory based on your conversation. The App listens for specific tool call within its responses.
+The AI can manage its own memory based on your conversation. The Helper Model scans for memory operation based on command/context.
 
 **Helper**:
 ```json
