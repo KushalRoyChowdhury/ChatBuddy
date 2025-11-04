@@ -31,14 +31,17 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **🔎 Google Search**: The advanced model can access Google Search to provide responses with the most up-to-date information.
     -   **🔍 URL Context & YT video Summarization**: Paste a URL & see the rest. 
 
--   **📝 Persistent State**: Your entire session is saved in your browser's `localStorage`, `sessionStorage`, `cookies`. `Google Drive` for Sync. This includes:
+-   **📝 Persistent State**: Your entire session is saved in your browser's `localStorage`. `Google Drive` for Sync. This includes:
     -   Chat History
     -   Saved Memories
     -   Model Selection
-    -   System Prompt & API Key
+    -   System Prompt
+    -   API Key
     -   Nickname
 
 -   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices. All data is securely stored in your Google Drive, ensuring you have access to your conversations anytime, anywhere, any device. File used in Google Drive is `chatbuddy_data.bin` (auto-created).
+
+-   **Daily Usage Counter**: Track your daily usage and limits across different models easily through `Options` modal.
 
 -   **🧠 Advance Memory System**: The AI has a sophisticated memory system to maintain context and learn from your conversations (Memory managed by `Gemma3-12b-it`).
     -   **Permanent Memory**: Instruct the AI to `remember`, `forget`, or `update` key information for long-term recall. AI can also remember specific things based on context.
@@ -55,9 +58,9 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 -   **🛠️ Utility Features**:
     -   **Export Chat**: Save your conversation history to a human-readable `.txt` file or a complete `.json` backup.
-    -   **Import Chat**: Load a previous chat session from a `.json` file to continue where you left off.
+    -   **Import Chat**: Load a different chat session from a `.json` file.
     -   **Import / Export Memories**: Back up or add new memories from other devices.
-    -   **Clear Chat/Memory**: Easily manage your session by clearing the chat or temporary memory.
+    -   **App Import/Export**: Easily export your full app data including Chats, Memories, Recent Context, URLs, etc. And Import later or on another device.
 
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
 -   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
@@ -67,7 +70,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 ## ⚠️ Disclaimer
 
-**Version 2.0 and above is not backward compatible with data from v1.X** Due to significant data structure changes in this release, older `.json` chat files cannot be imported. Permanent Memories will be migrated automatically.
+**Version 2.0 and above is not backward compatible with data from v1.X** Due to significant data structure changes in this release, older `.json` files & chats cannot be imported. Permanent Memories will be migrated automatically.
 
 ---
 
@@ -175,27 +178,27 @@ On the hosted version, the app works without providing any keys but has strict r
 
 ChatBuddy uses dual-model architecture.
 
-The AI can manage its own memory based on your conversation. The Helper Model scans for memory operation based on command/context.
+The AI can manage its own memory based on your conversation. The Helper Model scans for memory operation based on command (remember, update/change, forget)/context.
 
 **Helper**:
 ```json
 {
   "action": "temp",
-  "target": "User asked about AI",
+  "target": ["User asked about AI. {date}{time_of_day}"],
 }
 ```
 
 ```json
 {
   "action": "remember",
-  "target": "User's name is Alex.",
+  "target": ["User's name is Alex."],
 }
 ```
 
 -   `"action"`: Can be `remember`, `forget`, `update`, or `temp`.
 -   `"target"`: The piece of information to act upon.
 
-This allows for dynamic and context-aware conversations that evolve over time. You can view and manage all permanent memories from the "Saved Memories" modal.
+This allows for dynamic and context-aware conversations that evolve over time. You can view and manage all permanent memories from the `Saved Memories` modal.
 
 **Memory is handled by model `Gemma3-12b-it`**.
 
@@ -207,10 +210,10 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 ---
 
-> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete & no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above. 
+> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete & no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above or the latest available version. 
 
 ---
 
 *Thank you for using ChatBuddy!*
 
-*v2.2.4-LTS - By KushalRoyChowdhury*
+*v2.2.5-LTS - By KushalRoyChowdhury*
