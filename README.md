@@ -7,8 +7,6 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 
 ![ChatBuddy Homepage](frontend/public/screenshot/home.png) 
 
----
-
 ## ✨ Key Features
 
 ChatBuddy is more than just a simple chatbot. It's packed with advanced features designed for power users and developers.
