@@ -34,6 +34,10 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   };
 
   const deleteChat = (chatIdToDelete) => {
+    if (loading) {
+      setShowNotAvailablePopup(true);
+      return;
+    }
     const chatMessages = chatSessions.find(session => session.chatID === chatIdToDelete)?.chat || [];
     const messageIdsToDelete = new Set(chatMessages.map(msg => msg.id));
 
@@ -194,14 +198,14 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-30"
+            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
           />
           <motion.div
-            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 rounded-r-xl flex flex-col z-40"
+            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 rounded-r-xl flex flex-col z-50"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}

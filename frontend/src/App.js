@@ -765,7 +765,8 @@ export default function App() {
             id: messageID,
             base64Data: null,
             mimeType: null,
-            fileName: fileName
+            fileName: fileName,
+            saved: new Date().toISOString(),
           }
         ]);
       }

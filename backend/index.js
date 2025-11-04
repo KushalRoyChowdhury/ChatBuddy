@@ -1,4 +1,4 @@
-// Update 2.2.4
+// Update 2.2.5
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -692,7 +692,7 @@ app.post('/model', async (req, res) => {
                             parts: [{ text: finalSystemPrompt }]
                         },
                         temperature: advanceReasoning ? 1 : 1.8,
-                        topP: advanceReasoning ? 0.95 : 0.99,
+                        topP: advanceReasoning ? 0.95 : 0.9,
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {

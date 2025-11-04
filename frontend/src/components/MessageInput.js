@@ -64,7 +64,7 @@ const MessageInput = React.memo(({
     };
   }, [showAddFiles, setShowAddFiles]);
   return (
-    <footer className="bg-white/70 backdrop-blur-lg border border-b-0 border-x-0 md:border-none p-1 md:pb-5 sticky bottom-0 rounded-t-3xl md:rounded-none">
+    <footer className="bg-white/70 backdrop-blur-lg border border-b-0 border-x-0 md:border-none p-1 md:pt-0 md:pb-5 sticky z-40 bottom-0 rounded-t-3xl md:rounded-none">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -216,10 +216,10 @@ const MessageInput = React.memo(({
           <AnimatePresence>
             {showAddFiles &&
               <motion.div
-                initial={{ width: 0, height: 0, opacity: 0, x: -30, y: 20 }}
-                animate={{ width: "auto", height: "auto", opacity: 1, x: 0, y: 0 }}
-                exit={{ width: 0, height: 0, opacity: 0, x: -10, y: 10 }}
-                className={`absolute w-max h-max left-9 flex flex-col bottom-16 overflow-hidden bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200`}
+                initial={{ height: 0, opacity: 0, y: 5 }}
+                animate={{ height: "auto", opacity: 1, y: 0 }}
+                exit={{ height: 0, opacity: 0, y: 5 }}
+                className={`absolute z-40 w-max h-max left-0 flex flex-col bottom-14 overflow-hidden bg-white/95 backdrop-blur-3xl rounded-xl shadow-lg border border-gray-200`}
                 ref={addFilesMenuRef}
               >
                 {!imageGen && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}

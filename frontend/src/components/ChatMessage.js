@@ -66,7 +66,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
 
         {msg.role === 'assistant' && (
           <div className="mt-2 text-xs text-gray-500 italic border-t-2 border-b-2 p-2 font-medium flex justify-between items-center gap-2">
-            <span>Using: {msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : msg.model === 'image' ? 'ImageGen' : 'Basic'}</span>
+            <span>Model: {msg.model === 'gemini-2.5-flash-lite' ? ' Advanced' : msg.model === 'image' ? ' ImageGen' : ' Basic'}</span>
             <div className="flex gap-2">
               {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span onClick={() => setShowMemories(true)} className="inline-flex cursor-pointer items-center px-2 py-0.5 rounded text-xs font-medium transition-all bg-yellow-100 hover:bg-yellow-200 text-yellow-800">Memory Updated</span> : null}
             </div>
