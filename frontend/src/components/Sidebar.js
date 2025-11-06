@@ -211,7 +211,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             onClick={() => setIsSidebarOpen(false)}
           />
           <motion.div
-            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50/90 dark:bg-[rgb(10,10,10)]/90 border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col z-50"
+            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 dark:bg-[rgb(10,10,10)] border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col z-50"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
