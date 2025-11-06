@@ -18,6 +18,24 @@ code {
 
 /* markdown.css */
 
+:root {
+  --markdown-h1-color: #222;
+  --markdown-h2-color: #2c3e50;
+  --markdown-h3-color: #2c3e50;
+  --markdown-table-even-row-bg: #f9fafa;
+  --markdown-table-th-bg: #e9ecef;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --markdown-h1-color: #fff;
+    --markdown-h2-color: #ebebeb;
+    --markdown-h3-color: #d6d6d6;
+    --markdown-table-even-row-bg: #272727;
+    --markdown-table-th-bg: #3a3a3a;
+  }
+}
+
 .katex {
   display: flex;
   flex-wrap: wrap;
@@ -38,12 +56,14 @@ code {
 
 .markdown-content h2 {
   font-size: 1.6rem;
-  color: #2c3e50;
+  font-weight: 400;
+  color: var(--markdown-h2-color);
 }
 
 .markdown-content h3 {
   font-size: 1.3rem;
-  color: #2c3e50;
+  font-weight: 500;
+  color: var(--markdown-h3-color);
 }
 
 .markdown-content a {
@@ -68,7 +88,7 @@ ol {
 
 .markdown-content blockquote {
   border-left: 4px solid #ccc;
-  color: #666;
+  color: #7a7a7a;
   padding-left: 1em;
   margin: 1em 0;
   font-style: italic;
@@ -82,17 +102,14 @@ ol {
 }
 
 .markdown-content table {
-  width: 100%;
+  width: 98%;
   border-collapse: collapse;
-  margin: 1.5em 0;
+  margin: 1.5em auto;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(1, 0, 0, 0.1);
   border-radius: 8px;
-  overflow: hidden;
   font-size: 0.95em;
-  background-color: white;
   table-layout: auto;
-  border: 1px solid black;
 }
 
 .markdown-content th,
@@ -101,13 +118,11 @@ ol {
   text-align: left;
   border-bottom: 1px solid #e0e0e0;
   transition: background-color 0.2s ease;
-  border: 1px solid #495057;
 }
 
 .markdown-content th {
-  background: #e9ecef;
+  background: var(--markdown-table-th-bg);
   font-weight: 600;
-  color: #495057;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.85em;
@@ -119,15 +134,23 @@ ol {
 }
 
 .markdown-content tr:nth-child(even) {
-  background-color: #f9fafa;
+  background-color: var(--markdown-table-even-row-bg);
 }
 
 /* Responsive: Horizontal scroll on small screens */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .markdown-content table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
+    width: 99%;
+    margin: 1.5em 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
+
+  .markdown-content tbody {
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
 }

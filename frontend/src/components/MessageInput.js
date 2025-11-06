@@ -13,7 +13,6 @@ const MessageInput = React.memo(({
   uploading,
   model,
   imageGen,
-  getSendButtonClass,
   isDragging,
   handleDragOver,
   handleDragLeave,
@@ -44,6 +43,11 @@ const MessageInput = React.memo(({
   const addFilesMenuRef = useRef(null);
   const addFilesButtonRef = useRef(null);
 
+  const getSendButtonClass = () => {
+    if (loading || uploading || !input.trim()) return 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed';
+    return imageGen ? 'bg-orange-600 hover:bg-orange-700 dark:bg-orange-900 dark:hover:bg-orange-950' : model === 'gemini-2.5-flash-lite' ? 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/60 dark:hover:bg-blue-600/40' : 'bg-green-600 hover:bg-green-700 dark:bg-green-600/60 dark:hover:bg-green-600/40';
+  };
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -64,20 +68,20 @@ const MessageInput = React.memo(({
     };
   }, [showAddFiles, setShowAddFiles]);
   return (
-    <footer className="bg-white/70 backdrop-blur-lg border border-b-0 border-x-0 md:border-none p-1 md:pt-0 md:pb-5 sticky z-40 bottom-0 rounded-t-3xl md:rounded-none">
-      <form
+    <footer className="bg-white dark:bg-black/20 dark:md:bg-transparent backdrop-blur-lg md:backdrop-blur-none md:bg-gradient-to-b from-transparent to-white dark:to-black border border-b-0 border-x-0 md:border-none p-1 md:pt-0 md:pb-5 sticky z-40 bottom-0 rounded-t-3xl md:rounded-none">
+      <motion.form
         onSubmit={(e) => {
           e.preventDefault();
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`max-w-4xl relative w-full mx-auto md:border rounded-2xl md:shadow-lg transition-colors ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
+        className={`max-w-4xl relative transition-all md:backdrop-blur-lg w-full mx-auto md:border md:bg-white/40 md:dark:bg-[rgb(30,30,30)]/30 dark:md:border-gray-700 rounded-2xl md:shadow-lg ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
       >
 
         {fileImg && (
-          <div className="p-2 border-b-0 border-gray-200/95">
-            <div className="relative inline-block bg-gray-100/95 p-1 rounded-lg">
+          <div className="p-2 border-b-0 border-gray-200/95 dark:border-gray-700/95">
+            <div className="relative inline-block bg-gray-100/95 dark:bg-gray-700/95 p-1 rounded-lg">
               {uploading ? (
                 <div className="h-20 w-20 flex items-center justify-center">
                   <svg
@@ -130,11 +134,11 @@ const MessageInput = React.memo(({
 
         {fileDoc && (
           <div className="p-2 border-b-0 border-gray-200/95">
-            <div className="relative inline-block bg-gray-100/95 p-1 rounded-lg">
+            <div className="relative inline-block bg-gray-100/95 dark:bg-gray-700/80 p-1 rounded-lg">
               {uploading ? (
                 <div className="h-20 w-20 flex items-center justify-center">
                   <svg
-                    className="animate-spin h-10 w-10 text-gray-500"
+                    className="animate-spin h-10 w-10 text-gray-500 dark:text-gray-200"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -146,6 +150,8 @@ const MessageInput = React.memo(({
                       r="10"
                       stroke="currentColor"
                       strokeWidth="4"
+                      strokeLinecap="round"
+
                     ></circle>
                     <path
                       className="opacity-75"
@@ -156,7 +162,7 @@ const MessageInput = React.memo(({
                 </div>
               ) : (
                 <div className="h-20 w-20 flex flex-col items-center justify-center p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500 dark:text-gray-200">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -193,7 +199,7 @@ const MessageInput = React.memo(({
           onPaste={handlePaste}
           placeholder={`${imageGen ? 'Enter Image Generation/Edit prompt...' : `Ask anything... (Model: ${model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'})`}`}
 
-          className={`w-full flex bg-transparent font-normal select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
+          className={`w-full bg-blend-darken flex bg-transparent font-normal select-text items-center px-4 py-3 resize-none outline-none transition-all rounded-2xl`}
           minRows={1}
           maxRows={5}
         />
@@ -219,7 +225,7 @@ const MessageInput = React.memo(({
                 initial={{ height: 0, opacity: 0, y: 5 }}
                 animate={{ height: "auto", opacity: 1, y: 0 }}
                 exit={{ height: 0, opacity: 0, y: 5 }}
-                className={`absolute z-40 w-max h-max left-0 flex flex-col bottom-14 overflow-hidden bg-white/95 backdrop-blur-3xl rounded-xl shadow-lg border border-gray-200`}
+                className={`absolute z-40 w-max h-max left-0 flex flex-col bottom-14 overflow-hidden bg-white/95 dark:bg-[rgb(30,30,30)]/95 backdrop-blur-3xl rounded-xl shadow-lg border border-gray-200 dark:border-gray-700`}
                 ref={addFilesMenuRef}
               >
                 {!imageGen && <button onClick={() => { fileDocInputRef.current?.click() }} className='p-4 pb-1 text-nowrap hover:scale-105 transition-all'>Upload Files</button>}
@@ -239,11 +245,11 @@ const MessageInput = React.memo(({
             onClick={() => { setShowAddFiles(!showAddFiles) }}
             className={`aspect-square flex items-center justify-center`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-7 ${showAddFiles ? 'hidden' : 'block'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-7 dark:text-gray-300 ${showAddFiles ? 'hidden' : 'block'}`}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
 
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`size-7 ${!showAddFiles ? 'hidden' : 'block'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`size-7 dark:text-gray-300 ${!showAddFiles ? 'hidden' : 'block'}`}>
               <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" />
             </svg>
 
@@ -262,8 +268,8 @@ const MessageInput = React.memo(({
                   whileTap={{ scale: 0.97 }}
                   onClick={() => { setImageGen(!imageGen); setShowAddFiles(false) }}
                   className={`p-2 rounded-xl w-48 transition-all text-center text-nowrap ${imageGen
-                    ? 'bg-orange-100 text-orange-600'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-orange-100/90 text-orange-600 dark:bg-orange-950/80 dark:text-orange-300'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-950/90 dark:text-gray-400 dark:hover:bg-gray-950/90'
                     }`}
                 >
                   <div className='flex gap-2 items-center justify-center'>
@@ -286,8 +292,8 @@ const MessageInput = React.memo(({
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setCreativeRP(!creativeRP)}
                   className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${creativeRP
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-green-100/90 text-green-600 dark:bg-green-600/60 dark:text-green-200'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-950/90 dark:text-gray-400 dark:hover:bg-gray-950/90'
                     }`}
                 >
                   <div className='flex gap-2 items-center justify-center'>
@@ -309,8 +315,8 @@ const MessageInput = React.memo(({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setAdvanceReasoning(!advanceReasoning)}
                     className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${advanceReasoning
-                      ? 'bg-blue-100 text-blue-600'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      ? 'bg-blue-100/90 text-blue-600 dark:bg-blue-600/60 dark:text-blue-200'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-950/90 dark:text-gray-400 dark:hover:bg-gray-950/90'
                       }`}
                   >
                     <div className='flex gap-2 justify-center'>
@@ -330,8 +336,8 @@ const MessageInput = React.memo(({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setWebSearch(!webSearch)}
                     className={`p-2 rounded-xl w-48 text-center text-nowrap transition-colors ${webSearch
-                      ? 'bg-purple-100 text-purple-600'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      ? 'bg-purple-100/90 text-purple-600 dark:bg-purple-600/60 dark:text-purple-200'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-950/90 dark:text-gray-400 dark:hover:bg-gray-950/90'
                       }`}
                   >
                     <div className='flex gap-2 justify-center'>
@@ -376,7 +382,7 @@ const MessageInput = React.memo(({
             )}
           </motion.button>
         </div>
-      </form>
+      </motion.form>
     </footer>
   );
 });

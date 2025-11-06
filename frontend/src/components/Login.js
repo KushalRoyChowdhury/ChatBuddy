@@ -5,10 +5,10 @@ import { useState } from 'react';
 export default function Login({ handleLogin }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   return (
-    <div className="flex flex-col select-none items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-5 bg-white flex items-center justify-center gap-5 rounded-2xl shadow-md">
+    <div className="flex flex-col select-none items-center justify-center min-h-screen bg-gray-100 dark:bg-black">
+      <div className="p-5 bg-white dark:bg-[rgb(30,30,30)] flex items-center justify-center gap-5 rounded-2xl shadow-md dark:shadow-lg dark:shadow-[rgb(50,50,50)]">
 
-        <div className={`w-52 h-52 overflow-hidden rounded-lg bg-gray-200 hidden md:block`}>
+        <div className={`w-52 h-52 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-950 dark:brightness-[0.85] hidden md:block`}>
           <img onLoad={() => setIsImageLoaded(true)} src={logo} alt="ChatBuddy Logo" className={`w-full h-full object-contain transition-all duration-500 ease-in-out ${isImageLoaded ? 'opacity-100 blur-none scale-[1.2]' : 'opacity-0 blur-md scale-150'}`} />
         </div>
 
@@ -17,7 +17,7 @@ export default function Login({ handleLogin }) {
           <p className="mb-6">Please log in to continue.</p>
           <button
             onClick={handleLogin}
-            className="bg-white border active:scale-[0.98] transition-all border-gray-300 flex gap-2 justify-center items-center w-full hover:bg-gray-50 text-gray-800 font-medium py-2 px-4 rounded-full shadow-sm duration-200"
+            className="bg-white dark:bg-[rgb(40,40,40)] dark:text-gray-50 border active:scale-[0.98] transition-all border-gray-300 flex gap-2 justify-center items-center w-full hover:bg-gray-50 dark:hover:bg-[rgb(50,50,50)] text-gray-800 font-medium py-2 px-4 rounded-full shadow-sm duration-200"
           >
             <svg width="25" height="25" viewBox="-0.5 0 48 48" xmlns="http://www.w3.org/2000/svg">
               <path d="M9.83 24c0-1.52.25-2.99.7-4.36L2.62 13.6C1.08 16.73.21 20.26.21 24s.87 7.26 2.41 10.39l7.9-6.05c-.45-1.36-.7-2.82-.7-4.34" fill="#FBBC05" />

@@ -106,14 +106,14 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportExportOptions(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6">
               <h3 className="text-lg font-bold text-gray-800">Manage Chat</h3>
@@ -157,24 +157,24 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowExportOptions(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white/95 dark:bg-[rgb(50,50,50)]/95  rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
                 Choose Export Format
               </h3>
-              <p className="text-sm text-gray-600 mt-2 mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
                 <b>Export as JSON</b> for a complete, lossless backup that can be
                 imported later. (
                 <span className="italic">
-                  If the chat has images that will not be backed up
+                  If the chat has images / files that will not be exported
                 </span>
                 ).
                 <br />
@@ -182,22 +182,22 @@ const Modals = React.memo(({
                 <b>Export as TXT</b> for a simple, human-readable version.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-end gap-3 rounded-b-xl">
               <button
                 onClick={() => setShowExportOptions(false)}
-                className="px-4 py-2 border rounded-lg text-sm font-medium"
+                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={exportChatAsTxt}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+                className="px-4 py-2 bg-gray-600 transition-colors text-white rounded-lg text-sm font-medium hover:bg-gray-700"
               >
                 Export as TXT
               </button>
               <button
                 onClick={exportChatAsJson}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="px-4 py-2 transition-colors bg-blue-600 dark:bg-blue-800 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-900"
               >
                 Export as JSON
               </button>
@@ -211,14 +211,14 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportConfirm(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6 text-center">
               <svg
@@ -236,27 +236,20 @@ const Modals = React.memo(({
                 />
               </svg>
               <h3 className="text-lg font-bold">Import Chat?</h3>
-              <p className="text-sm text-gray-500 mt-2">
-                This will <b>replace</b> your current chat and system prompt.
-                This action cannot be undone.
-                <br />
-                <br />
-                Please export your current chat first if you wish to save it.
-              </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-center gap-4 rounded-b-xl">
               <button
                 onClick={() => {
                   setShowImportConfirm(false);
                   setFileToImport(null);
                 }}
-                className="px-6 py-2 border rounded-lg"
+                className="px-6 py-2 border dark:border-gray-400 rounded-lg"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmImport}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-2 bg-blue-600 dark:bg-blue-800 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-900"
               >
                 Yes, Import
               </button>
@@ -271,28 +264,28 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemoriesImportExport(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
                 Manage Memories
               </h3>
-              <p className="text-sm text-gray-600 mt-2 mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
                 Import a list of memories to append them to your current list,
                 or export your current list to a JSON file.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-end gap-3 rounded-b-xl">
               <button
                 onClick={() => setShowMemoriesImportExport(false)}
-                className="px-4 py-2 border rounded-lg text-sm font-medium"
+                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
               >
                 Cancel
               </button>
@@ -304,7 +297,7 @@ const Modals = React.memo(({
               </button>
               <button
                 onClick={exportMemoriesAsJson}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 dark:bg-blue-800 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-900"
               >
                 Export Memories
               </button>
@@ -319,7 +312,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemories(false)}
           />
 
@@ -328,11 +321,11 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
           >
             {/* Header */}
             <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
                 Saved Memories
               </h2>
               <button
@@ -346,31 +339,31 @@ const Modals = React.memo(({
             {/* Body */}
             <div className="p-5 overflow-y-auto flex-grow">
               {/* Memory Usage Indicator */}
-              <div className="mb-4 p-3 border rounded-lg bg-gray-50">
-                <div className="flex justify-between items-center text-sm text-gray-600 mb-1">
+              <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-transparent dark:text-gray-200 dark:border-gray-400">
+                <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-200 mb-1">
                   <span>Memory Usage</span>
                   <span>{memoryUsagePercent.toFixed(1)}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                   <div
                     className="bg-yellow-500 h-2.5 rounded-full"
                     style={{ width: `${memoryUsagePercent}%` }}
                   ></div>
                 </div>
-                <div className="text-right text-xs text-gray-500 mt-1">
+                <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {memories.join('\n').length} / {MEMORY_LIMIT_CHARS} characters
                 </div>
               </div>
 
               {/* Memories List or Empty State */}
               {memories.length > 0 ? (
-                <ul className="space-y-3 select-text text-sm text-gray-700">
+                <ul className="space-y-3 select-text text-sm text-gray-700 dark:text-gray-200">
                   {[...memories].reverse().map((mem) => (
                     <li
                       key={mem}
-                      className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50"
+                      className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-[rgb(30,30,30)]"
                     >
-                      <span className="flex-1 prose prose-sm max-w-none m-0 text-gray-700 whitespace-pre-wrap">
+                      <span className="flex-1 prose prose-sm max-w-none m-0 font-normal text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
                         {mem}
                       </span>
                       <button
@@ -400,14 +393,14 @@ const Modals = React.memo(({
                   ))}
                 </ul>
               ) : (
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-500 dark:text-gray-200">
                   No saved memories yet.
                 </p>
               )}
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(30,30,30)] flex justify-end gap-3 rounded-b-xl">
               <button
                 onClick={() => { setShowMemoriesImportExport(true); setShowMemories(false); }}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
@@ -416,7 +409,7 @@ const Modals = React.memo(({
               </button>
               <button
                 onClick={() => setShowMemories(false)}
-                className="px-4 py-2 border rounded-lg text-sm font-medium"
+                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
               >
                 Close
               </button>
@@ -430,18 +423,18 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowOptions(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
           >
             {/* Modal Header */}
             <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">Options</h2>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Options</h2>
               <button
                 onClick={() => setShowOptions(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -466,7 +459,7 @@ const Modals = React.memo(({
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto flex-grow space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Gemini API Key
                 </label>
                 <input
@@ -476,24 +469,24 @@ const Modals = React.memo(({
                   className="w-full px-3 select-text py-2 border border-gray-300 rounded-lg"
                   placeholder="Optional: Use your own key"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Get your Gemini key for free: Google AI Studio {'>'} API Keys {'>'} Generate
                 </p>
-                <p className="text-xs text-gray-500 mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400">
+                <p className="text-xs text-gray-500 dark:text-gray-300 mt-2 p-2 bg-yellow-50 dark:bg-yellow-950 border-l-4 border-yellow-400">
                   NOTE: Use your own API key to use the app with Higher Limits and
                   greater Context Window. Default Access has stricter Rate Limits and
                   Context Window. Changing API KEY does not change model behavior.
                 </p>
               </div>
 
-              <div className='border p-2 rounded-lg text-sm font-medium text-gray-700 select-none'>
+              <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
                 Used Today
-                <div className='text-sm font-normal text-gray-500 ml-2'>
+                <div className='text-sm font-normal text-gray-500 dark:text-gray-400 ml-2'>
                   <div className='flex items-center w-full'>
                     <div className='w-[118px] text-nowrap'>Basic Model: </div>
                     <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
                       <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.basic}{apiKey.trim().length > 32 ? ' / 14350' : ' / 500'} )
@@ -504,7 +497,7 @@ const Modals = React.memo(({
                     <div className='w-[118px] text-nowrap'>Advance Model: </div>
                     <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
                       <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.advance}{apiKey.trim().length > 32 ? ' / 1000' : ' / 100'} )
@@ -515,7 +508,7 @@ const Modals = React.memo(({
                     <div className='w-[118px] text-nowrap'>Image Generation: </div>
                     <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
                       <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 25)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
                       ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 25'} )
@@ -527,13 +520,13 @@ const Modals = React.memo(({
               <div className="pt-4 flex gap-2 items-center justify-center flex-col-reverse md:flex-row-reverse border-t">
                 <button
                   onClick={exportAppData}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all duration-300 ease-in-out hover:border-blue-100 text-sm font-medium"
+                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all dark:hover:bg-blue-900 duration-300 ease-in-out hover:border-blue-100 dark:hover:border-blue-900 dark:hover:text-blue-200 text-sm font-medium"
                 >
                   Export App Data
                 </button>
                 <button
                   onClick={handleImportAppDataClick}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all duration-300 ease-in-out hover:border-blue-100 text-sm font-medium"
+                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all dark:hover:bg-blue-900 duration-300 ease-in-out hover:border-blue-100 dark:hover:border-blue-900 dark:hover:text-blue-200 text-sm font-medium"
                 >
                   Import App Data
                 </button>
@@ -624,30 +617,30 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowSettings(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-xs"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-xs"
           >
             <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
                 Settings
               </h3>
               {isAuthenticated && userProfile && (
                 <div className="flex items-center p-2 mb-3 border rounded-lg">
                   <img src={userProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
                   <div className="ml-3 flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{userProfile.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{userProfile.email}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{userProfile.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userProfile.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
                     title="Sign Out"
-                    className="ml-2 flex-shrink-0 text-gray-500 hover:text-red-600 p-1 rounded-full"
+                    className="ml-2 flex-shrink-0 text-gray-500 dark:text-gray-200 hover:text-red-600 p-1 rounded-full"
                   >
                     <svg
                       width="25"
@@ -679,7 +672,7 @@ const Modals = React.memo(({
                     setShowPersonalization(true);
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-green-100 text-green-800 hover:bg-green-200"
+                  className="w-full p-2 rounded-md bg-green-100 dark:bg-green-600/60 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-950"
                 >
                   Personalization
                 </button>
@@ -688,7 +681,7 @@ const Modals = React.memo(({
                     handleMemoriesClick();
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
+                  className="w-full p-2 rounded-md bg-yellow-50 dark:bg-yellow-600/60 text-yellow-800 dark:text-yellow-100 hover:bg-yellow-100 dark:hover:bg-yellow-950"
                 >
                   Saved Memories
                 </button>
@@ -697,7 +690,7 @@ const Modals = React.memo(({
                     handleOptionsClick();
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
+                  className="w-full p-2 rounded-md bg-indigo-100 dark:bg-indigo-600/60 text-indigo-800 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-950"
                 >
                   Options
                 </button>
@@ -706,7 +699,7 @@ const Modals = React.memo(({
                     setShowAbout(true);
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  className="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-600/60 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-950"
                 >
                   About
                 </button>
@@ -723,18 +716,18 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowPersonalization(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
           >
             {/* Modal Header */}
             <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">Personalization</h2>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Personalization</h2>
               <button
                 onClick={() => setShowPersonalization(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -759,7 +752,7 @@ const Modals = React.memo(({
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto flex-grow space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   User Nickname
                 </label>
                 <div className='relative'>
@@ -778,7 +771,7 @@ const Modals = React.memo(({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Custom Instructions
                 </label>
 
@@ -824,17 +817,17 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowAbout(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
           >
             <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
                 About ChatBuddy
               </h2>
               <button
@@ -858,8 +851,8 @@ const Modals = React.memo(({
               </button>
             </div>
             <div className="p-5 overflow-y-auto font-normal flex-grow space-y-6">
-              <div className="p-4 bg-gray-50 rounded-lg mt-4">
-                <p className="text-sm text-gray-600">
+              <div className="p-4 bg-gray-50 dark:bg-[rgb(40,40,40)]/95 rounded-lg mt-4">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   ChatBuddy is a Free for All AI Chatapp. Available with 2 AI models (Basic and Advanced).
                   <br />
                   <br />
@@ -910,10 +903,10 @@ const Modals = React.memo(({
                 </p>
               </div>
 
-              <div className="text-center text-gray-600">
+              <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.2.5-LTS (release 251104)
+                v2.3.0-LTS (release 251106)
                 <br/>
                 By: Kushal Roy Chowdhury
               </div>
@@ -936,14 +929,14 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportAppDataConfirm(false)}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6 text-center">
               <svg
@@ -960,17 +953,17 @@ const Modals = React.memo(({
                   d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
                 />
               </svg>
-              <h3 className="mb-2 text-lg font-bold text-gray-800">
+              <h3 className="mb-2 text-lg font-bold text-gray-800 dark:text-gray-200">
                 Import App Data?
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 This will replace all current application data, including chats, memories, and settings. This action is not revertable.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(40,40,40)] flex justify-center gap-4 rounded-b-xl">
               <button
                 onClick={() => setShowImportAppDataConfirm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                className="px-6 py-2 border border-gray-300 dark:border-gray-400 rounded-lg text-gray-700 dark:text-gray-100 hover:bg-gray-100 font-medium"
               >
                 Cancel
               </button>

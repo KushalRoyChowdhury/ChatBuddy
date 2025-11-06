@@ -46,12 +46,6 @@ const getTextToRender = (msg) => {
   return textToRender;
 };
 
-const getUserBubbleClass = (msgModel) => {
-  return msgModel === 'gemini-2.5-flash-lite'
-    ? 'bg-blue-100 text-blue-900 rounded-br-none'
-    : msgModel === 'image' ? 'bg-orange-100 text-orange-900 rounded-br-none' : 'bg-green-100 text-green-900 rounded-br-none';
-};
-
 export default function App() {
   useEffect(() => { fetch(`${BACKEND_URL}/health`, { method: 'GET' }) }, []);
 
@@ -1106,10 +1100,6 @@ export default function App() {
     checkLimit();
   }, []);
 
-  const getSendButtonClass = () => {
-    if (loading || uploading || !input.trim()) return 'bg-gray-400 cursor-not-allowed';
-    return imageGen ? 'bg-orange-600 hover:bg-orange-700' : model === 'gemini-2.5-flash-lite' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700';
-  };
   const memoryUsagePercent = (memories.join('\n').length / MEMORY_LIMIT_CHARS) * 100;
 
   const isMobileDevice = () => {
@@ -1304,7 +1294,7 @@ export default function App() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-dvh font-medium max-w-[100vw] select-none bg-gray-50 flex font-sans">
+      className="min-h-dvh font-medium max-w-[100vw] select-none bg-gray-50 dark:bg-black flex font-sans">
       <Sidebar
         chatSessions={chatSessions}
         activeChatId={activeChatId}
@@ -1323,7 +1313,7 @@ export default function App() {
         setShowNotAvailablePopup={setShowNotAvailablePopup}
         setThinkingProcesses={setThinkingProcesses}
       />
-      <main className={`flex-1 w-full flex flex-col transition-all bg-white duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
+      <main className={`flex-1 w-full flex flex-col transition-all bg-white dark:bg-[rgb(25,25,25)] duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
         <Header
           model={model}
           handleModelToggle={handleModelToggle}
@@ -1400,7 +1390,6 @@ export default function App() {
           thinkingProcesses={thinkingProcesses[activeChatId] || []}
           messageImageMap={messageImageMap}
           getTextToRender={getTextToRender}
-          getUserBubbleClass={getUserBubbleClass}
           loading={loading}
           modelUsed={modelUsed}
           chatEndRef={chatEndRef}
@@ -1424,7 +1413,6 @@ export default function App() {
           uploading={uploading}
           model={model}
           imageGen={imageGen}
-          getSendButtonClass={getSendButtonClass}
           isDragging={isDragging}
           handleDragOver={handleDragOver}
           handleDragLeave={handleDragLeave}

@@ -11,6 +11,12 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     setSearchTerm("");
   }, [activeChatId]);
 
+  useEffect(() => {
+    document.title = (chatSessions.find(session => session.chatID === activeChatId)?.title || 'ChatBuddy') === 'New Chat' ? 'ChatBuddy' : (chatSessions.find(session => session.chatID === activeChatId)?.title || 'ChatBuddy');
+  }, [chatSessions, activeChatId]);
+
+
+
   const handleLogout = async () => {
     try {
       await fetch('/auth/logout');
@@ -101,7 +107,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
     <AnimatePresence>
       {isSidebarOpen &&
         <motion.div
-          className="bg-gray-50 border-r shadow flex flex-col fixed top-0 left-0 z-40 transition-none w-0 overflow-hidden h-dvh"
+          className="bg-gray-50 dark:bg-[rgb(10,10,10)] border-r dark:border-gray-600 shadow flex flex-col fixed top-0 left-0 z-40 transition-none w-0 overflow-hidden h-dvh"
           animate={{ width: '20rem' }}
           exit={{ width: 0 }}
         >
@@ -123,7 +129,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             {filteredChatSessions.map(session => (
               <div
                 key={session.chatID}
-                className={`p-2 h-10 mb-2 rounded-md cursor-pointer group flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200' : 'hover:bg-gray-200'}`}
+                className={`p-2 h-10 mb-2 rounded-md cursor-pointer group flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200 dark:bg-blue-950' : 'hover:bg-gray-200 dark:hover:bg-gray-900'}`}
                 onClick={() => {
                   if (loading) {
                     setShowNotAvailablePopup(true);
@@ -166,11 +172,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           </div>
           <div className="p-4 min-w-80">
             {activeChat && activeChat.chat.length > 0 ? (
-              <button onClick={() => setShowExportOptions(true)} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300 mb-2">Export Chat</button>
+              <button onClick={() => setShowExportOptions(true)} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Export Chat</button>
             ) : (
-              <button onClick={handleImportClick} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300 mb-2">Import Chat</button>
+              <button onClick={handleImportClick} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Import Chat</button>
             )}
-            <button onClick={handleSettingsClick} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300">Settings</button>
+            <button onClick={handleSettingsClick} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700">Settings</button>
           </div>
           {userData && (
             <div className="p-4 min-w-80 border-t border-gray-300">
@@ -198,14 +204,14 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-50"
+            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-sm bg-opacity-50 z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
           />
           <motion.div
-            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 rounded-r-xl flex flex-col z-50"
+            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50/90 dark:bg-[rgb(10,10,10)]/90 border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col z-50"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
@@ -229,7 +235,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
               {filteredChatSessions.map(session => (
                 <div
                   key={session.chatID}
-                  className={`p-2 h-10 mb-2 rounded-md cursor-pointer flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200' : 'hover:bg-gray-200'}`}
+                  className={`p-2 h-10 mb-2 rounded-md cursor-pointer flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200 dark:bg-blue-950' : 'hover:bg-gray-200 dark:hover:bg-gray-900'}`}
                   onClick={() => {
                     if (loading) {
                       setShowNotAvailablePopup(true);
@@ -273,11 +279,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             </div>
             <div className="p-4">
               {activeChat && activeChat.chat.length > 0 ? (
-                <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300 mb-2">Export Chat</button>
+                <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Export Chat</button>
               ) : (
-                <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300 mb-2">Import Chat</button>
+                <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Import Chat</button>
               )}
-              <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 hover:bg-gray-300">Settings</button>
+              <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700">Settings</button>
             </div>
             {userData && (
               <div className="p-4 border-t border-gray-300">

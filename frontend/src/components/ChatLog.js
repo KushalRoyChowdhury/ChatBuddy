@@ -45,7 +45,7 @@ const ChatLog = React.memo(({
           exit={{ opacity: 0 }}
           type='button'
           onClick={() => { setTapBottom(true) }}
-          className={`fixed z-10 bg-white hover:bg-slate-100 shadow flex justify-center items-center rounded-full p-1 active:scale-95 transition-all ${fileImg ? 'bottom-[14.5rem] md:bottom-[15.2rem]' : 'bottom-32 md:bottom-[8.5rem]'}`}>
+          className={`fixed z-10 bg-white/90 dark:bg-black/70 backdrop-blur-md dark:hover:bg-gray-900 hover:bg-slate-100 shadow flex justify-center items-center rounded-full p-2 active:scale-95 transition-all ${fileImg ? 'bottom-[14.5rem] md:bottom-[15.2rem]' : 'bottom-32 md:bottom-[8.5rem]'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
@@ -53,14 +53,14 @@ const ChatLog = React.memo(({
       }
       <div className="space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 bg-white rounded-xl border max-w-2xl mx-auto">
+          <div className="text-center py-12 text-gray-500 bg-transparent dark:text-gray-100 dark:border-gray-500 rounded-xl border max-w-2xl mx-auto">
             <p className="text-lg mb-3">{noChatGreet}</p>
             <div className="flex justify-center gap-4 mt-4">
-              <div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 hover:bg-green-100 active:scale-95 transition-all rounded-lg cursor-pointer">
-                <div className="font-medium w-24 text-green-600">Basic</div>
+              <div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-950 active:scale-95 transition-all rounded-lg cursor-pointer">
+                <div className="font-medium w-24 text-green-600 dark:text-green-400">Basic</div>
               </div>
-              <div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 hover:bg-blue-100 transition-all active:scale-95 rounded-lg cursor-pointer">
-                <div className="font-medium w-24 text-blue-600">Advanced</div>
+              <div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-950 transition-all active:scale-95 rounded-lg cursor-pointer">
+                <div className="font-medium w-24 text-blue-600 dark:text-blue-400">Advanced</div>
               </div>
             </div>
             {systemPrompt.trim() && (
@@ -89,7 +89,7 @@ const ChatLog = React.memo(({
         )}
         {loading && (<>
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start">
-            <div className="max-w-3xl rounded-2xl p-4 bg-white border shadow-sm text-black flex items-center gap-3">
+            <div className="max-w-3xl rounded-2xl p-4 bg-white dark:bg-transparent border dark:border-gray-600 shadow-sm text-black dark:text-gray-100 flex items-center gap-3">
               <span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span>
               <div className="flex space-x-1">
                 <motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} />

@@ -15,7 +15,7 @@ const CollapsibleThought = React.memo(({ thoughtContent }) => {
   const formattedContent = thoughtContent.replace(/\\n/g, '\n');
 
   return (
-    <div className="mb-2 border-b border-dashed border-gray-300 pb-2">
+    <div className="mb-2 border-b border-dashed border-gray-300 dark:border-gray-400 pb-2">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full text-left text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
@@ -32,7 +32,7 @@ const CollapsibleThought = React.memo(({ thoughtContent }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="prose prose-sm select-text max-w-none p-2 bg-gray-100 rounded-md text-sm lg:text-base">
+            <div className="prose prose-sm select-text max-w-none p-2 bg-gray-100 dark:bg-gray-900 rounded-md text-sm lg:text-base">
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {formattedContent}
               </ReactMarkdown>
