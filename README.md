@@ -63,6 +63,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
 -   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
 -   **✨️ Aesthetic UI**:  Performance Friendly Blur in the UI.
+-   **🌗 Auto Dark Mode**: The UI automatically adapts to your system's theme, providing a comfortable viewing experience in both light and dark environments.
 
 ---
 
@@ -156,7 +157,7 @@ On the hosted version, the app works without providing any keys but has strict r
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 3      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100 / Image Gen: 25 | Basic: 14,350 / Advanced: 1000 / Image Gen: 100 |
+| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / Advanced: 1000                  |
 
 > **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
 
@@ -214,4 +215,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v2.2.5-LTS - By KushalRoyChowdhury*
+*v2.3.0-LTS - By KushalRoyChowdhury*
