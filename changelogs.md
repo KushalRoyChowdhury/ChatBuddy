@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - UI Enhancements.
 - Tuned Glassmorphism.
+- Table Rendering on Small Screens.
 
 ## [2.2.5-LTS] - 2025-11-04
 
