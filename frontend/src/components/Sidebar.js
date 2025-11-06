@@ -204,7 +204,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-sm bg-opacity-50 z-50"
+            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

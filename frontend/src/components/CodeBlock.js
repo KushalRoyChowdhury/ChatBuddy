@@ -50,7 +50,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }) =
       </SyntaxHighlighter>
     </div>
   ) : (
-    <code className="bg-gray-200 dark:bg-gray-800 text-red-600 dark:text-red-500 px-1 text-wrap rounded text-sm lg:text-base" {...props}>
+    <code className="bg-gray-200 dark:bg-[#282C34] text-red-600 dark:text-red-500 px-1 text-wrap rounded text-sm lg:text-base" {...props}>
       {children}
     </code>
   );
