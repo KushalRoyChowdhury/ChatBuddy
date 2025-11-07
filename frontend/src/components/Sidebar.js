@@ -204,22 +204,22 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className={`fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black bg-opacity-50 z-50 ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'}`}
+            className={`fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black bg-opacity-50 z-50 ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
           />
           <motion.div
-            className="fixed top-0 left-0 h-full w-96 max-w-[80%] bg-gray-50 dark:bg-[rgb(10,10,10)] border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col z-50"
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="fixed top-0 left-0 h-full overflow-hidden w-96 max-w-[80%] bg-gray-50 dark:bg-[rgb(10,10,10)] border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col z-50"
+            initial={{ width: 0 }}
+            animate={{ width: 'auto' }}
+            exit={{ width: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30}}
           >
             <div className="flex justify-between items-center mb-4 flex-shrink-0 p-4">
               <h1 className="text-xl font-bold">Chats</h1>
-              <button onClick={createNewChat} className="p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
+              <button onClick={createNewChat} className="p-2 rounded-md text-nowrap bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
             </div>
             <div className="mb-4 flex-shrink-0 px-4">
               <input
