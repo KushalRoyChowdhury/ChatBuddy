@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions, isSidebarOpen, setIsSidebarOpen, isDesktop, handleSettingsClick, handleImportClick, setShowExportOptions, setTempMemories, setUploadedImages, setMessageImageMap, loading, setShowNotAvailablePopup, setThinkingProcesses }) => {
+const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions, isSidebarOpen, setIsSidebarOpen, isDesktop, handleSettingsClick, handleImportClick, setShowExportOptions, setTempMemories, setUploadedImages, setMessageImageMap, loading, setShowNotAvailablePopup, setThinkingProcesses, glassMode }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
@@ -204,7 +204,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       {isSidebarOpen && (
         <>
           <motion.div
-            className="fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black backdrop-blur-[1px] bg-opacity-50 z-50"
+            className={`fixed inset-0 transition-none top-0 left-0 bottom-0 bg-black bg-opacity-50 z-50 ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -215,7 +215,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
             <div className="flex justify-between items-center mb-4 flex-shrink-0 p-4">
               <h1 className="text-xl font-bold">Chats</h1>

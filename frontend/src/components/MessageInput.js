@@ -69,7 +69,7 @@ const MessageInput = React.memo(({
     };
   }, [showAddFiles, setShowAddFiles]);
   return (
-    <footer className={`dark:md:bg-transparent ${glassMode ? 'backdrop-blur-sm bg-white/70 dark:bg-[rgb(25,25,25)]/70' : 'backdrop-blur-none bg-white dark:bg-[rgb(25,25,25)]'} md:backdrop-blur-none md:bg-gradient-to-b from-transparent to-white dark:to-black border border-b-0 border-x-0 md:border-none p-1 md:pt-0 md:pb-5 sticky z-40 bottom-0 rounded-t-3xl md:rounded-none will-change-transform md:will-change-auto`}>
+    <footer className={`dark:md:bg-transparent ${glassMode ? 'backdrop-blur-sm bg-white/70 dark:bg-[rgb(25,25,25)]/70' : 'backdrop-blur-none bg-white dark:bg-[rgb(25,25,25)]'} md:backdrop-blur-none md:bg-gradient-to-b from-transparent to-white dark:to-black border border-b-0 border-x-0 md:border-none p-1 md:pt-0 md:pb-5 sticky z-40 bottom-0 rounded-t-3xl md:rounded-none`}>
       <motion.form
         onSubmit={(e) => {
           e.preventDefault();
@@ -77,7 +77,7 @@ const MessageInput = React.memo(({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`max-w-4xl relative transition-all ${glassMode ? 'md:backdrop-blur-sm md:bg-white/40 md:dark:bg-[rgb(25,25,25)]/70' : 'backdrop-blur-none md:bg-white md:dark:bg-[rgb(25,25,25)]'} w-full mx-auto md:border dark:md:border-gray-700 rounded-2xl md:shadow-lg md:will-change-transform ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
+        className={`max-w-4xl relative transition-all ${glassMode ? 'md:backdrop-blur-sm md:bg-white/40 md:dark:bg-[rgb(25,25,25)]/70' : 'backdrop-blur-none md:bg-white md:dark:bg-[rgb(25,25,25)]'} w-full mx-auto md:border dark:md:border-gray-700 rounded-2xl md:shadow-lg ${isDragging ? 'border-2 border-blue-500 bg-blue-50' : ''}`}
       >
 
         {fileImg && (

@@ -1316,6 +1316,7 @@ export default function App() {
         loading={loading}
         setShowNotAvailablePopup={setShowNotAvailablePopup}
         setThinkingProcesses={setThinkingProcesses}
+        glassMode={glassMode}
       />
       <main className={`flex-1 w-full flex flex-col transition-all bg-white dark:bg-[rgb(25,25,25)] duration-300 ${isSidebarOpen && 'lg:ml-[20rem]'}`}>
         <Header
