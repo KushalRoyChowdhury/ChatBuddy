@@ -215,6 +215,10 @@ export default function App() {
   const [showImportAppDataConfirm, setShowImportAppDataConfirm] = useState(false);
   const [appDataToImport, setAppDataToImport] = useState(null);
   const [isCheckingLogin, setIsCheckingLogin] = useState(true);
+  const [glassMode, setGlassMode] = useState(() => (localStorage.getItem('glass') === '1' ? true : false) || false);
+
+  useEffect(() => { localStorage.setItem('glass', glassMode ? '1' : '0'); }, [glassMode]);
+
 
 
   // Refs
@@ -1320,6 +1324,7 @@ export default function App() {
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          glassMode={glassMode}
         />
         <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept="application/json" className="hidden" />
         <input type="file" ref={memoryFileInputRef} onChange={handleMemoryFileSelected} accept="application/json" className="hidden" />
@@ -1383,6 +1388,8 @@ export default function App() {
           handleOverwriteRemote={handleOverwriteRemote}
           usage={usage}
           imageGenAvailable={imageGenAvailable}
+          glassMode={glassMode}
+          setGlassMode={setGlassMode}
         />
 
         <ChatLog
@@ -1441,6 +1448,7 @@ export default function App() {
           webSearch={webSearch}
           setWebSearch={setWebSearch}
           imageGenAvailable={imageGenAvailable}
+          glassMode={glassMode}
         />
       </main>
     </motion.div>

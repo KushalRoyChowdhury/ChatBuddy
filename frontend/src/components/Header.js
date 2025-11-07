@@ -3,10 +3,11 @@ import React from 'react';
 const Header = React.memo(({
   model,
   handleModelToggle,
-  toggleSidebar
+  toggleSidebar,
+  glassMode
 }) => {
   return (
-    <header className="bg-white/70 dark:bg-[rgb(25,25,25)]/70 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-20">
+    <header className={`${glassMode ? 'backdrop-blur-sm bg-white/70 dark:bg-[rgb(25,25,25)]/70' : 'backdrop-blur-none bg-white dark:bg-[rgb(25,25,25)]'} shadow-sm p-4 sticky top-0 z-20`}>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <button onClick={toggleSidebar} className="p-2 rounded-md">

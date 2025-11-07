@@ -57,7 +57,9 @@ const Modals = React.memo(({
   handleOverwriteLocal,
   handleOverwriteRemote,
   usage,
-  imageGenAvailable
+  imageGenAvailable,
+  glassMode,
+  setGlassMode
 }) => {
   return (
     <AnimatePresence>
@@ -67,8 +69,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
-            onClick={() => setShowMergeConflict(false)}
+            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
@@ -106,7 +107,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowImportExportOptions(false)}
           />
           <motion.div
@@ -157,7 +158,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowExportOptions(false)}
           />
           <motion.div
@@ -211,7 +212,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowImportConfirm(false)}
           />
           <motion.div
@@ -264,7 +265,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowMemoriesImportExport(false)}
           />
           <motion.div
@@ -312,7 +313,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowMemories(false)}
           />
 
@@ -423,7 +424,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowOptions(false)}
           />
           <motion.div
@@ -477,6 +478,20 @@ const Modals = React.memo(({
                   greater Context Window. Default Access has stricter Rate Limits and
                   Context Window. Changing API KEY does not change model behavior.
                 </p>
+              </div>
+
+              <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
+                <button onClick={() => setGlassMode(!glassMode)} className="w-full p-2 active:scale-[0.99] transition-all duration-75 rounded-md text-start text-gray-600 dark:text-gray-200">
+                  <div className='flex items-center justify-between'>
+                    <div>Advance Rendering</div>
+                    <div className='w-10 h-5 bg-gray-200 rounded-full flex items-center'>
+                      <div className={`rounded-full border shadow-md transition-all duration-150 ${glassMode ? 'translate-x-full bg-blue-500 w-5 h-5' : 'translate-x-1 bg-green-400 w-4 h-4'}`}></div>
+                    </div>
+                  </div>
+                  <div className='text-gray-500 dark:text-gray-400 text-xs italic mt-1 mr-12'>
+                    Turning on Advance Rendering will improve visual fidelity but may negatively impact performance on weak systems and will drain more power.
+                  </div>
+                </button>
               </div>
 
               <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
@@ -560,7 +575,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowResetConfirm(false)}
           />
           <motion.div
@@ -617,7 +632,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowSettings(false)}
           />
           <motion.div
@@ -716,7 +731,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowPersonalization(false)}
           />
           <motion.div
@@ -817,7 +832,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowAbout(false)}
           />
           <motion.div
@@ -906,8 +921,8 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.3.0-LTS (release 251106)
-                <br/>
+                v2.3.1-LTS (release 251107)
+                <br />
                 By: Kushal Roy Chowdhury
               </div>
             </div>
@@ -929,7 +944,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowImportAppDataConfirm(false)}
           />
           <motion.div
@@ -986,7 +1001,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-[1px] inset-0 bg-black bg-opacity-50"
+            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
             onClick={() => setShowNotAvailablePopup(false)}
           />
           <motion.div
