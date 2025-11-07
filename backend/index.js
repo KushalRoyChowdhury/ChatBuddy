@@ -48,18 +48,6 @@ app.use((req, res, next) => {
     }
 });
 
-app.use('/debug', (req, res) => {
-    res.json({
-        protocol: req.protocol,
-        secure: req.secure,
-        headers: {
-            'x-forwarded-proto': req.get('x-forwarded-proto'),
-            'x-forwarded-host': req.get('x-forwarded-host'),
-            origin: req.get('origin')
-        }
-    });
-});
-
 // Google Drive API setup
 const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
@@ -105,13 +93,39 @@ const setOAuthCredentials = async (req, res, next) => {
 };
 
 
-app.get('/auth/google', (req, res) => {
-    const url = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: scopes,
-        prompt: 'consent'
-    });
-    res.redirect(url);
+app.get('/auth/google', async (req, res) => {
+    try {
+        const authUrlOptions = {
+            access_type: 'offline',
+            scope: scopes,
+        };
+
+        const refreshToken = req.cookies.refresh_token;
+
+        if (refreshToken) {
+            oauth2Client.setCredentials({ refresh_token: refreshToken });
+            const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
+            const { data } = await oauth2.userinfo.get();
+            if (data.email) {
+                authUrlOptions.login_hint = data.email;
+            }
+        } else {
+            authUrlOptions.prompt = 'consent';
+        }
+
+        const url = oauth2Client.generateAuthUrl(authUrlOptions);
+        res.redirect(url);
+    } catch (error) {
+        console.error('Error generating auth URL:', error);
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        const url = oauth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: scopes,
+            prompt: 'consent', 
+        });
+        res.redirect(url);
+    }
 });
 
 app.get('/auth/google/callback', async (req, res) => {
@@ -119,18 +133,23 @@ app.get('/auth/google/callback', async (req, res) => {
     try {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
-
-        const oauth2 = google.oauth2({
-            auth: oauth2Client,
-            version: 'v2'
-        });
+ 
+        const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
         const { data } = await oauth2.userinfo.get();
-        const email = data.email;
-
-        res.cookie('access_token', tokens.access_token, { httpOnly: true, maxAge: 86400000, sameSite: 'none', secure: true });
-        res.cookie('refresh_token', tokens.refresh_token, { httpOnly: true, maxAge: 2592000000, sameSite: 'none', secure: true });
-        res.cookie('user_email', email, { httpOnly: false, sameSite: 'none', maxAge: 2592000000, secure: true });
-
+ 
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: isProduction,
+        };
+ 
+        res.cookie('access_token', tokens.access_token, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 }); // 1 day
+        if (tokens.refresh_token) {
+            res.cookie('refresh_token', tokens.refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 }); // 30 days
+        }
+        res.cookie('user_email', data.email, { ...cookieOptions, httpOnly: false, maxAge: 30 * 24 * 60 * 60 * 1000 });
+ 
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
         console.error('Error getting tokens:', error);
@@ -139,7 +158,7 @@ app.get('/auth/google/callback', async (req, res) => {
 });
 
 app.get('/auth/status', (req, res) => {
-    if (req.cookies.access_token) {
+    if (req.cookies.access_token && req.cookies.refresh_token && req.cookies.user_email) {
         res.json({ isAuthenticated: true });
     } else {
         res.json({ isAuthenticated: false });

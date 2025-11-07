@@ -52,19 +52,19 @@ code {
   font-size: 1.8rem;
   font-weight: bold;
   color: #222;
-  margin: 0px 1rem;
+  margin: 1.5rem 0;
 }
 
 .markdown-content h2 {
   font-size: 1.6rem;
-  margin: 0px 1rem;
+  margin: 1.5rem 0;
   font-weight: 400;
   color: var(--markdown-h2-color);
 }
 
 .markdown-content h3 {
   font-size: 1.3rem;
-  margin: 0px 1rem;
+  margin: 1.5rem 0;
   font-weight: 500;
   color: var(--markdown-h3-color);
 }

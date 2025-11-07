@@ -6,7 +6,7 @@ const Header = React.memo(({
   toggleSidebar
 }) => {
   return (
-    <header className="bg-white/40 dark:bg-black/10 backdrop-blur-lg shadow-sm p-4 sticky top-0 z-20">
+    <header className="bg-white/70 dark:bg-[rgb(25,25,25)]/70 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-20">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <button onClick={toggleSidebar} className="p-2 rounded-md">

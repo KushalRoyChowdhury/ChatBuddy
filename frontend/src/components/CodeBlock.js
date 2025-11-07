@@ -25,7 +25,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }) =
     setCopyButtonText("Copied");
   };
 
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     // Check if dark mode is enabled

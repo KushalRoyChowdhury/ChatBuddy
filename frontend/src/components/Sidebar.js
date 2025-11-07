@@ -115,7 +115,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             <h1 className="text-xl font-bold">Chats</h1>
             <button onClick={createNewChat} className="p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
           </div>
-          <div className="mb-4 min-w-72 flex-shrink-0 px-4">
+          <div className="mb-4 min-w-80 flex-shrink-0 px-4">
             <input
               type="text"
               placeholder="Search Chats..."
