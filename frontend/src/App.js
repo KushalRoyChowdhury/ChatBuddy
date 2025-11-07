@@ -514,6 +514,7 @@ export default function App() {
     const appData = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
+      if (key === 'glass') continue;
       appData[key] = localStorage.getItem(key);
     }
     const jsonString = JSON.stringify(appData, null, 2);
@@ -604,7 +605,6 @@ export default function App() {
 
   const exportChatAsJson = () => {
     const exportData = {
-      systemPrompt: systemPrompt,
       chatHistory: messages,
     };
     const jsonString = JSON.stringify(exportData, null, 2);

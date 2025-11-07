@@ -106,7 +106,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportExportOptions(false)}
           />
           <motion.div
@@ -157,7 +157,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowExportOptions(false)}
           />
           <motion.div
@@ -211,7 +211,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportConfirm(false)}
           />
           <motion.div
@@ -264,7 +264,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemoriesImportExport(false)}
           />
           <motion.div
@@ -312,7 +312,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowMemories(false)}
           />
 
@@ -423,7 +423,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowOptions(false)}
           />
           <motion.div
@@ -617,7 +617,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowSettings(false)}
           />
           <motion.div
@@ -716,7 +716,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowPersonalization(false)}
           />
           <motion.div
@@ -817,7 +817,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowAbout(false)}
           />
           <motion.div
@@ -929,7 +929,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute backdrop-blur-sm inset-0 bg-black bg-opacity-50"
+            className="absolute backdrop-blur-[2px] inset-0 bg-black bg-opacity-50"
             onClick={() => setShowImportAppDataConfirm(false)}
           />
           <motion.div
