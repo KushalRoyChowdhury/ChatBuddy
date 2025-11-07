@@ -61,7 +61,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
     -   **App Import/Export**: Easily export your full app data including Chats, Memories, Recent Context, URLs, etc. And Import later or on another device.
 
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI that works beautifully on both desktop and mobile devices.
--   **🚄 Performance Friendly**: Experience a smooth and snappy UI with memoized components.
+-   **🚄 Performance Friendly**: Enjoy a smooth and snappy UI with memoized components; if performance issues arise, advanced rendering can be toggled off in settings.
 -   **✨️ Aesthetic UI**:  Performance Friendly Blur in the UI.
 -   **🌗 Auto Dark Mode**: The UI automatically adapts to your system's theme, providing a comfortable viewing experience in both light and dark environments.
 
@@ -215,4 +215,4 @@ The application source code (frontend and backend) is available on GitHub. Fork 
 
 *Thank you for using ChatBuddy!*
 
-*v2.3.0-LTS - By KushalRoyChowdhury*
+*v2.3.1-LTS - By KushalRoyChowdhury*
