@@ -206,7 +206,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
 
       <>
         <motion.div
-          className={`fixed inset-0 top-0 left-0 bottom-0 transition-all bg-black bg-opacity-50 z-50 ${isSidebarOpen ? 'block opacity-100' : 'hidden opacity-0'} ${glassMode ? 'backdrop-blur-[1px]' : ''}`}
+          className={`fixed inset-0 top-0 left-0 bottom-0 overflow-hidden transition-all bg-black bg-opacity-50 z-50 ${isSidebarOpen ? 'block opacity-100' : 'hidden opacity-0'} ${glassMode ? 'backdrop-blur-[1px]' : ''}`}
 
           onClick={() => setIsSidebarOpen(false)}
         />
