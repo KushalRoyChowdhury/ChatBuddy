@@ -7,7 +7,7 @@
 /backend/.env
 /frontend/.env
 /backend/rate-limiter-db.json
-/.aiexclude
+
  
 # Logs
 logs
@@ -19,4 +19,6 @@ yarn-error.log*
 # Build output
 /dist
 /build
+
+/.aiexclude
 /GEMINI.md
