@@ -157,3 +157,24 @@ ol {
   }
 
 }
+
+/* Animation for SidePanel */
+.sidebar.show {
+  animation: 250ms slideInLeft cubic-bezier(.32, .88, .7, 1.05);
+}
+
+.sidebar.hide {
+  animation: 250ms slideOutLeft cubic-bezier(.32, .88, .7, 1.05);
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
