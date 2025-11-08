@@ -30,7 +30,7 @@ const decompress = (base64String) => {
 
 // --- Application Constants ---
 const MEMORY_LIMIT_CHARS = 2000 * 4;
-const TEMP_MEMORY_LIMIT_CHARS = 6000 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 1500 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const getTextToRender = (msg) => {
