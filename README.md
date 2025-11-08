@@ -36,7 +36,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash`).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
--   **🔎 Google Search**: The advanced model can access Google Search for up-to-date information.
+-   **🔎 Google Search & URL Context**: The advanced model can access web for up-to-date information.
 -   **📝 Persistent State**: Your session is saved in `localStorage` and can be synced with Google Drive.
 -   **🔄 Cross-Device Sync**: Sync your chat history and memories across multiple devices via Google Drive.
 -   **🧠 Advanced Memory System**: A sophisticated memory system to maintain context and learn from conversations.
