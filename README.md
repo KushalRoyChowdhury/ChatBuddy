@@ -14,6 +14,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
   - [Prerequisites](#prerequisites)
   - [Frontend Setup](#frontend-setup)
   - [Backend Setup](#backend-setup)
+- [📂 Project Structure](#-project-structure)
 - [🤖 AI Models & API Keys](#-ai-models--api-keys)
   - [Public Version and Privacy Policy](#public-version-and-privacy-policy)
   - [How to get your key](#how-to-get-your-key)
@@ -99,6 +100,12 @@ To use ChatBuddy locally, you'll need to set up both the frontend and the backen
     npm start
     ```
     The backend server will start on port `8000`.
+
+---
+
+## 📂 Project Structure
+
+For a detailed explanation of the project structure, please see the [Project Structure](ProjectStructure.md) file.
 
 ---
 
