@@ -59,7 +59,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 ## 🚀 Getting Started
 
-To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting with cloud sync capabilities (Google Drive API), a Google Cloud project with OAuth2 Consent Setup is required.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting, a Google Cloud project with OAuth2 Consent Setup is required.
 
 ### Prerequisites
 
@@ -152,6 +152,9 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 -   `"action"`: Can be `remember`, `forget`, `update`, or `temp`.
 -   `"target"`: The information to act upon.
 
+-   AI can also remember things based on context.
+-   AI can reference recent conversations even in different chat sessions. To delete recent context delete the chat.
+
 You can view and manage permanent memories from the `Saved Memories` modal.
 
 > Memory is managed by model `gemma3-12b`.
@@ -172,7 +175,7 @@ The application source code is available on GitHub. If you find it useful, pleas
 
 ## 📝 Future Updates
 
-With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete and no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed.
+With the release of `ChatBuddy v2.2.2-LTS`, this project is now considered feature-complete and no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For forking version `2.2.2` & above is recommended. 
 
 ---
 
