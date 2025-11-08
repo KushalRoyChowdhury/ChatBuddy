@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Performance in Dark Mode.
 - Tuned Glassmorphism.
 - UI Enhancements.
+- Improved and fast login flow. 
 
 ## [2.3.0-LTS] - 2025-11-06
 
