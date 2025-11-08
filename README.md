@@ -46,6 +46,7 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI.
 -   **🌗 Auto Dark Mode**: The UI automatically adapts to your system's theme.
 -   **🚄 Performance Friendly**: Enjoy a smooth and snappy UI with memoized components; for an even smoother experience, especially on lower-end devices, you can toggle off **Advanced Rendering** in the **Settings** menu.
+-   **In-App Daily Usage Tracker** *(Experimental)*: Track daily usage of each model in-app.
 
 ---
 
