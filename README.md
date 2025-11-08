@@ -32,8 +32,8 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions.
--   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model and a state-of-the-art advanced model for complex tasks.
+-   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
+-   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash`).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
 -   **🔎 Google Search**: The advanced model can access Google Search for up-to-date information.
@@ -152,6 +152,8 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 -   `"target"`: The information to act upon.
 
 You can view and manage permanent memories from the `Saved Memories` modal.
+
+> Memory is managed by model `gemma3-12b`.
 
 ---
 
