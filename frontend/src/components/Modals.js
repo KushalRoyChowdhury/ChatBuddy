@@ -489,7 +489,7 @@ const Modals = React.memo(({
                     </div>
                   </div>
                   <div className='text-gray-500 dark:text-gray-400 text-xs italic mt-1 mr-12'>
-                    Turning on Advance Rendering will improve visual fidelity but may negatively impact performance on weak systems and will drain more power.
+                    Enabling Advanced Rendering enhances visual fidelity with effects like glassmorphism, but it may increase GPU load, potentially impacting performance on less powerful hardware. If you experience noticeable lag or increased power consumption, it is recommended to disable this setting for a smoother experience.
                   </div>
                 </button>
               </div>

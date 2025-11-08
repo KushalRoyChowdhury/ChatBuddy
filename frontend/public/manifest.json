@@ -3,7 +3,7 @@
   "name": "ChatBuddy",
   "description": "A Friendly Tuned AI ChatApp",
   "lang": "en-US",
-  "orientation": "any",
+  "orientation": "poitrait",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
