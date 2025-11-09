@@ -53,13 +53,13 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 ## ⚙️ Technologies Used
 
 -   **Frontend**: React, Tailwind CSS, Framer Motion
--   **Backend**: Node.js with Express, @google/genai SDK
+-   **Backend**: Node.js with Express, @google/genai SDK, @googleapis
 
 ---
 
 ## 🚀 Getting Started
 
-To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting, a Google Cloud project with OAuth2 Consent Setup is required.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting, a Google Cloud project with OAuth2 Consent Setup & Gemini API Key is required.
 
 ### Prerequisites
 
