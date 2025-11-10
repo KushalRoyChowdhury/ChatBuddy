@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-2.3.1-blue)](changelogs.md)
 
-Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models directly to your browser.
+Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models to your browser, powered by the Gemini API.
 
 ### [![Live Demo](https://img.shields.io/badge/Try%20Live%20Now-Click%20Here-brightgreen)](https://chatbuddy2026.onrender.com)
 
