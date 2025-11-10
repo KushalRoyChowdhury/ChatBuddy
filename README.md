@@ -16,7 +16,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🎨 Image Generation** (`gemini-2.0-flash-image`): Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
+-   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
 -   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b-it`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash-lite`).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
@@ -131,7 +131,7 @@ On the hosted version, the app has strict rate limits. It is **highly recommende
 | Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / Advanced: 15 /                      |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / Advanced: 15                        |
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / Advanced: 1000                  |
 
 > **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
