@@ -16,8 +16,8 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
--   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b-it`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash-lite`).
+-   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12. Due to model depreciation.***
+-   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-3-27b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-2.5-flash-lite`*).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
 -   **🔎 Google Search & URL Context**: The advanced model can access web for up-to-date information.
@@ -30,7 +30,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **📱 Responsive Design**: A clean, modern, and fully responsive UI.
 -   **🌗 Auto Dark Mode**: The UI automatically adapts to your system's theme.
 -   **🚄 Performance Friendly**: Enjoy a smooth and snappy UI with memoized components; for an even smoother experience, especially on lower-end devices, you can toggle off **Advanced Rendering** in the **Settings** menu.
--   **In-App Daily Usage Tracker** *(Experimental)*: Track daily usage of each model in-app.
+-   **📊 In-App Daily Usage Tracker** *(Experimental)*: Track daily usage of each model in-app.
 
 ---
 
@@ -69,7 +69,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 
 ## 🚀 Getting Started
 
-To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting, a Google Cloud project with OAuth2 Consent Setup & Gemini API Key is required.
+To use ChatBuddy locally, you'll need to set up both the frontend and the backend. For self-hosting, a Google Cloud project with OAuth2 Consent Setup & Gemini API Key is required first.
 
 ### Prerequisites
 
@@ -126,19 +126,31 @@ Powered by the official Google AI SDK (`@google/genai`).
 
 ### Public Version and Privacy Policy
 
-On the hosted version, the app has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
+The hosted version's general access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
 
-| Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
-| --------------------- | ------------------------------------------ | ----------------------------------------------- |
-| **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / Advanced: 15                        |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / Advanced: 1000                  |
+| FEATURE               | GENERAL ACCESS                      | PERSONAL KEY ACCESS               |
+| --------------------- | ----------------------------------- | --------------------------------- |
+| **Context Window**    | Basic: 6k / Advanced: 64k           | Basic: 6k / Advanced: 128k        |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3              | Basic: 30 / Advanced: 15          |
+| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100          | Basic: 14,350 / Advanced: 1000    |
 
-> **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
+*Context Sizes mentioned here uses server-side truncation to avoid **TPM** limit hits*.
 
-> Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
+> **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. However uploaded files are stored for 48 hours on Google Cloud (according to [Gemini Files API Policy](https://ai.google.dev/gemini-api/docs/files)). Google login credentials are stored locally in httpOnly cookies.
 
-> **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. Uploaded files are stored for 48 hours on Google Cloud. Google login credentials are stored locally in http cookies.
+> To avoid file save in external project consider using your own API Key.
+
+> Your own API key limits are shown safely under Google’s free quota.
+
+---
+
+Official API RateLimits of model used *(Updated as of: September 2025, limits may change in future)*:
+
+| MODEL (Free Tier)          | RPM    | RPD      | TPM      |
+| -------------------------- | ------ | -------- | -------- |
+| **gemma-3-12b-it**         | 30     | 14,400   | 15,000   |
+| **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
+| **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
 
 ### How to get your key
 
@@ -167,7 +179,7 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 
 You can view and manage permanent memories from the `Saved Memories` modal.
 
-> Memory is managed by model `gemma3-12b-it`.
+> Memory is managed by model `gemma-3-12b-it`.
 
 ---
 
