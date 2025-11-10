@@ -448,7 +448,11 @@ export default function App() {
   const handleResetApp = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      const glass = localStorage.getItem('glass');
       localStorage.clear();
+      if (glass) {
+        localStorage.setItem('glass', glass);
+      }
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -1289,7 +1293,11 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
+    const glass = localStorage.getItem('glass');
     localStorage.clear();
+    if (glass) {
+      localStorage.setItem('glass', glass);
+    }
     return <Login handleLogin={handleLogin} />;
   }
 
