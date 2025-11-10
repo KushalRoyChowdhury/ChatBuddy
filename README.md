@@ -1,39 +1,23 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI
 
-Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models directly to your browser. Built with React and Node.js, and powered by the latest `@google/genai` SDK (AI Models can not run locally), it offers a persistent, configurable, and highly interactive chat experience.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-2.3.1-blue)](changelogs.md)
 
-### Try Live Now: *👉 [Click Here](https://chatbuddy2026.onrender.com) 👈*
+Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models directly to your browser.
+
+### [![Live Demo](https://img.shields.io/badge/Try%20Live%20Now-Click%20Here-brightgreen)](https://chatbuddy2026.onrender.com)
 
 ![ChatBuddy Homepage](frontend/public/screenshot/home.png)
 
-## 📜 Table of Contents
-
-- [✨ Key Features](#-key-features)
-- [⚙️ Technologies Used](#️-technologies-used)
-- [🚀 Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Frontend Setup](#frontend-setup)
-  - [Backend Setup](#backend-setup)
-- [📂 Project Structure](#-project-structure)
-- [🤖 AI Models & API Keys](#-ai-models--api-keys)
-  - [Public Version and Privacy Policy](#public-version-and-privacy-policy)
-  - [How to get your key](#how-to-get-your-key)
-- [🛠️ How the Memory System Works](#️-how-the-memory-system-works)
-- [🤝 Contributing](#-contributing)
-- [📜 Source Code](#️-source-code)
-- [📝 Future Updates](#-future-updates)
-- [⚠️ Disclaimer](#️-disclaimer)
-
+---
 ## ✨ Key Features
-
-ChatBuddy is more than just a simple chatbot. It's packed with advanced features designed for power users and developers.
 
 -   **💬 Multi-Chat Support**: Manage multiple conversations at once. Each chat is saved independently, allowing you to switch between different topics and contexts without losing your history.
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
--   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash`).
+-   **🎨 Image Generation** (`gemini-2.0-flash-image`): Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12.***
+-   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (`gemma3-27b-it`) and a state-of-the-art advanced model for complex tasks (`gemini-2.5-flash-lite`).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
 -   **🔎 Google Search & URL Context**: The advanced model can access web for up-to-date information.
@@ -50,10 +34,36 @@ ChatBuddy is more than just a simple chatbot. It's packed with advanced features
 
 ---
 
-## ⚙️ Technologies Used
+## 🛠️ Built With
 
--   **Frontend**: React, Tailwind CSS, Framer Motion
--   **Backend**: Node.js with Express, @google/genai SDK, @googleapis
+-   [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+-   [![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+-   [![Express.js](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white)](https://expressjs.com/)
+-   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+-   [![Google Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+
+<details>
+<summary>⚙️ Technologies Used</summary>
+
+-   **Frontend**:
+    -   React
+    -   Tailwind CSS
+    -   Framer Motion for animations.
+    -   `react-markdown` for rendering Markdown.
+    -   `katex` for rendering LaTeX.
+    -   `react-syntax-highlighter` for code highlighting.
+-   **Backend**:
+    -   Node.js with Express
+    -   `@google/genai` SDK for AI models.
+    -   `googleapis` for Google Drive sync.
+    -   `express-fileupload` for file uploads.
+    -   `pako` for data compression.
+-   **Build Tools & Utilities**:
+    -   `react-scripts`
+    -   `nodemon`
+    -   `dotenv`
+
+</details>
 
 ---
 
@@ -121,14 +131,14 @@ On the hosted version, the app has strict rate limits. It is **highly recommende
 | Feature               | Without Personal Key (Free Tier)           | With Personal Key (Free Tier)                   |
 | --------------------- | ------------------------------------------ | ----------------------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k                  | Basic: 6k / *Advanced: 128k*                    |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3 / Image Gen: 3      | Basic: 30 / Advanced: 15 / Image Gen: 10        |
+| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3                     | Basic: 30 / Advanced: 15 /                      |
 | **Rate Limits (RPD)** | Basic: 500 / Advanced: 100                 | Basic: 14,350 / Advanced: 1000                  |
 
 > **NOTE:** *Context Window sizes are only for chat history. Memories, System Prompts and other Referencing features are not counted towards the mentioned limits.*
 
 > Your own API key limits are shown according to Google’s free quota *(Updated: September 2025)*.
 
-> **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. Uploaded files are stored for 48 hours on Google Cloud. Google login credentials are stored locally in cookies.
+> **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. Uploaded files are stored for 48 hours on Google Cloud. Google login credentials are stored locally in http cookies.
 
 ### How to get your key
 
@@ -157,13 +167,31 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 
 You can view and manage permanent memories from the `Saved Memories` modal.
 
-> Memory is managed by model `gemma3-12b`.
+> Memory is managed by model `gemma3-12b-it`.
+
+---
+
+## 📜 Changelog
+
+For a detailed list of changes, see the [Changelog](changelogs.md).
 
 ---
 
 ## 🤝 Contributing
 
 This project is considered feature-complete, but contributions for stability and security are welcome. If you find a bug or have a suggestion for improvement, please open an issue or submit a pull request.
+
+---
+
+## 👥 Contributors
+
+-   [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)
+
+---
+
+## 📧 Contact
+
+[Kushal Roy Chowdhury](mailto:contact.kushalprojects@gmail.com)
 
 ---
 
@@ -175,7 +203,13 @@ The application source code is available on GitHub. If you find it useful, pleas
 
 ## 📝 Future Updates
 
-With the release of `ChatBuddy v2.2.2-LTS`, this project is now considered feature-complete and no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For forking version `2.2.2` & above is recommended. 
+With the release of `ChatBuddy v2.2.2-LTS`, this project is now considered feature-complete and no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For forking, version `2.2.2` & above is recommended. 
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -187,4 +221,6 @@ With the release of `ChatBuddy v2.2.2-LTS`, this project is now considered featu
 
 *Thank you for using ChatBuddy!*
 
-*v2.3.1-LTS - By KushalRoyChowdhury*
+---
+
+*v2.3.1-LTS - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
