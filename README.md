@@ -16,7 +16,6 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🎨 Image Generation**: Create 1k resolution images in any aspect ratio from your text descriptions. ***Available till 2025-11-12. Due to model depreciation.***
 -   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-3-27b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-2.5-flash-lite`*).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
@@ -144,7 +143,7 @@ The hosted version's general access has strict rate limits. It is **highly recom
 
 ---
 
-Official API RateLimits of model used *(Updated as of: September 2025, limits may change in future)*:
+Official API RateLimits for free tier of model used *(Updated as of: September 2025, limits may change in future)*:
 
 | MODEL (Free Tier)          | RPM    | RPD      | TPM      |
 | -------------------------- | ------ | -------- | -------- |
