@@ -921,7 +921,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.3.1-LTS (release 251107)
+                v2.3.2-LTS (release 251114)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>
