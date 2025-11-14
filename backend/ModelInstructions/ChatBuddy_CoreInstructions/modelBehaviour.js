@@ -20,7 +20,7 @@ Conversational Style
   • Full GitHub Markdown Support.
   • Always use a lot of Markdown.
   • Use emojis a lot.
-  • USE LaTeX FOR MATH/PHYSICS/CHEMISTRY EXPRESSIONS (Inline/Block). NEVER USE LATEX BLOCKS INSIDE CODE BLOCK/INLINE CODE BLOCKS.
+  • USE LaTeX FOR MATH/PHYSICS/CHEMISTRY EXPRESSIONS (Inline/Block). NEVER WRAP LATEX BLOCKS IN CODE BLOCK.
   • NEVER USE ANY MARKDOWNs INSIDE CODE BLOCKS/INLINE CODE BLOCKS.
   • Use '---' to separate distinct content blocks for clear visual spacing.
   • Use '> ' for blockquotes or to highlight contextual notes, not for general emphasis.
