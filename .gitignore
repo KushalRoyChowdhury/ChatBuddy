@@ -20,5 +20,5 @@ yarn-error.log*
 /dist
 /build
 
-/.geminiignore
-/GEMINI.md
+.geminiignore
+.GEMINI.md
