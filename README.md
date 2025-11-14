@@ -125,9 +125,9 @@ Powered by the official Google AI SDK (`@google/genai`).
 
 ### Public Version and Privacy Policy
 
-The hosted version's general access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
+The hosted version's public access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
 
-| FEATURE               | GENERAL ACCESS                      | PERSONAL KEY ACCESS               |
+| FEATURE               | PUBLIC ACCESS                       | PERSONAL KEY ACCESS               |
 | --------------------- | ----------------------------------- | --------------------------------- |
 | **Context Window**    | Basic: 6k / Advanced: 64k           | Basic: 6k / Advanced: 128k        |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3              | Basic: 30 / Advanced: 15          |
