@@ -38,9 +38,20 @@ function fixKatexEscaping(markdownString) {
   });
 }
 
+/**
+ * Converts latex code blocks to katex blocks.
+ * @param {string} markdownString The raw markdown content.
+ * @returns {string} The processed string.
+ */
+function stripLatexWrapper(markdownString) {
+  const latexBlockRegex = /\u0060\u0060\u0060latex\n([\s\S]*?)\n\u0060\u0060\u0060/g;
+  return markdownString.replace(latexBlockRegex, '$$$1$$');
+}
+
 
 const ChatBubbleMessage = React.memo(({ content }) => {
-  const fixedContent = fixKatexEscaping(content);
+  const strippedContent = stripLatexWrapper(content);
+  const fixedContent = fixKatexEscaping(strippedContent);
 
   return (
     <div className="prose prose-sm max-w-none select-text prose-p:text-inherit markdown-content text-sm lg:text-base">
