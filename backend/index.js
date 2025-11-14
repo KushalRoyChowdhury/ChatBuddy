@@ -269,7 +269,7 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
 const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
-    'gemini-2.0-flash-preview-image-generation',    // Image Model
+    'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-3-12b-it'     // Memory & Format Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
@@ -352,7 +352,7 @@ function getIp(req) {
 }
 
 const limitConfigs = {
-    basic: { maxM: 5, maxD: 500 },
+    basic: { maxM: 5, maxD: 700 },
     advanced: { maxM: 3, maxD: 100 },
     image: { maxM: 3, maxD: 25 },
     basicUser: { maxM: 30, maxD: 14350 },
@@ -517,7 +517,6 @@ app.post('/checkLimit', async (req, res) => {
     }
 });
 
-// --- Troll ---
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'), (err) => {
         if (err) {
