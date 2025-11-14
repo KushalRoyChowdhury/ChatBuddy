@@ -64,8 +64,8 @@ const ChatLog = React.memo(({
               </div>
             </div>
             {systemPrompt.trim() && (
-              <div className="mt-4 p-3 bg-indigo-50 rounded-lg md:max-w-md max-w-[80%] mx-auto">
-                <p className="text-sm text-indigo-700">Custom Instruction is active.</p>
+              <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-950 rounded-lg md:max-w-md max-w-[80%] mx-auto">
+                <p className="text-sm text-indigo-700 dark:text-indigo-200">Custom Instruction is active.</p>
               </div>
             )}
           </div>

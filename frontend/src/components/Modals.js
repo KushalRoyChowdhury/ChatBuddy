@@ -165,7 +165,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white/95 dark:bg-[rgb(50,50,50)]/95  rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white/95 dark:bg-[rgb(50,50,50)] rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
@@ -322,7 +322,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
           >
             {/* Header */}
             <div className="p-5 border-b flex justify-between items-center">
@@ -431,7 +431,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
           >
             {/* Modal Header */}
             <div className="p-5 border-b flex justify-between items-center">
@@ -639,7 +639,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-xs"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-xs"
           >
             <div className="p-4">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
@@ -738,7 +738,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
           >
             {/* Modal Header */}
             <div className="p-5 border-b flex justify-between items-center">
@@ -839,7 +839,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
           >
             <div className="p-5 border-b flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -951,7 +951,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)]/95 rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6 text-center">
               <svg
@@ -1008,11 +1008,11 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-md"
           >
             <div className="p-6 text-center">
-              <h3 className="text-lg font-bold">Action Not Available</h3>
-              <p className="text-sm text-gray-500 mt-2">
+              <h3 className="text-lg font-bold dark:text-[rgb(255,255,255)] text-gray-800">Action Not Available</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 This action is not available while the model is responding.
               </p>
             </div>

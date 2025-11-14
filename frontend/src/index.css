@@ -22,9 +22,13 @@ code {
   --markdown-h1-color: #222;
   --markdown-h2-color: #2c3e50;
   --markdown-h3-color: #2c3e50;
+  --markdown-h4-color: #2c3e50;
+  --markdown-h5-color: #2c3e50;
+  --markdown-h6-color: #2c3e50;
   --markdown-table-even-row-bg: #f9fafa;
   --markdown-table-th-bg: #e9ecef;
   --hr-color: #686868;
+  --katex-color: #4d4d4d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,16 +36,20 @@ code {
     --markdown-h1-color: #fff;
     --markdown-h2-color: #ebebeb;
     --markdown-h3-color: #d6d6d6;
+    --markdown-h4-color: #d6d6d6;
+    --markdown-h5-color: #d6d6d6;
+    --markdown-h6-color: #d6d6d6;
     --markdown-table-even-row-bg: #272727;
     --markdown-table-th-bg: #3a3a3a;
     --hr-color: #dadada;
+    --katex-color: #efefef;
   }
 }
 
 .katex {
   display: flex;
   flex-wrap: wrap;
-  color: rgb(77, 77, 77);
+  color: var(--katex-color);
 }
 
 .markdown-content hr {
@@ -53,7 +61,7 @@ code {
 .markdown-content h1 {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #222;
+  color: var(--markdown-h1-color);
   margin: 1.5rem 0;
 }
 
@@ -69,6 +77,27 @@ code {
   margin: 1.5rem 0;
   font-weight: 500;
   color: var(--markdown-h3-color);
+}
+
+.markdown-content h4 {
+  font-size: 1.2rem;
+  margin: 1.5rem 0;
+  font-weight: 500;
+  color: var(--markdown-h4-color);
+}
+
+.markdown-content h5 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0;
+  font-weight: 500;
+  color: var(--markdown-h5-color);
+}
+
+.markdown-content h6 {
+  font-size: 1rem;
+  margin: 1.5rem 0;
+  font-weight: 500;
+  color: var(--markdown-h6-color);
 }
 
 .markdown-content a {
