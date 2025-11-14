@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.2-LTS] - 2025-11-14
 
 ### Fixed
-- Improved List rendering. 
+- Improved List rendering.
+- Improved consistency in Dark Mode.
 
 ## [2.3.1-LTS] - 2025-11-07
 
