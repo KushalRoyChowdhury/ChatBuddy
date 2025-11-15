@@ -233,8 +233,6 @@ export default function App() {
   const saveDataToDrive = useCallback(async () => {
     if (!isAuthenticated) return;
 
-    const lastModified = new Date().toISOString();
-
     const appData = {
       chatSessions,
       systemPrompt,
@@ -244,10 +242,8 @@ export default function App() {
       thinkingProcesses,
       uploadedImages,
       messageImageMap,
-      userNickname,
-      lastModified: lastModified
+      userNickname
     };
-    localStorage.setItem('lastModified', lastModified);
 
     try {
       let data = JSON.stringify(appData);
@@ -352,49 +348,44 @@ export default function App() {
           const driveResponse = await fetch(`${BACKEND_URL}/api/drive/read`, { credentials: 'include' });
           if (driveResponse.ok) {
             const driveData = await driveResponse.json();
-            const localLastModified = localStorage.getItem('lastModified');
-            if (localLastModified === driveData.data.lastModified) {
-              console.log("No Changes");
-              return;
-            } else {
-              console.log("Syncing...");
-              setChatSessions(driveData.data.chatSessions || []);
-              setSystemPrompt(driveData.data.systemPrompt || '');
-              setApiKey(driveData.data.apiKey || '');
-              setMemories(driveData.data.memories || []);
-              setTempMemories(driveData.data.tempMemories || []);
-              setThinkingProcesses(driveData.data.thinkingProcesses || {});
-              setUploadedImages(() => {
-                const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
-                const now = Date.now();
 
-                const incoming = driveData.data.uploadedImages || [];
+            setChatSessions(driveData.data.chatSessions || []);
+            setSystemPrompt(driveData.data.systemPrompt || '');
+            setApiKey(driveData.data.apiKey || '');
+            setMemories(driveData.data.memories || []);
+            setTempMemories(driveData.data.tempMemories || []);
+            setThinkingProcesses(driveData.data.thinkingProcesses || {});
+            setUploadedImages(() => {
+              const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+              const now = Date.now();
 
-                return Array.isArray(incoming)
-                  ? incoming.filter(obj => {
-                    if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
-                    const diff = now - new Date(obj.saved).getTime();
-                    return diff < FORTY_EIGHT_HOURS;
-                  })
-                  : [];
-              });
+              const incoming = driveData.data.uploadedImages || [];
 
-              setMessageImageMap(() => {
-                const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
-                const now = Date.now();
+              return Array.isArray(incoming)
+                ? incoming.filter(obj => {
+                  if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
+                  const diff = now - new Date(obj.saved).getTime();
+                  return diff < FORTY_EIGHT_HOURS;
+                })
+                : [];
+            });
 
-                const incoming = driveData.data.messageImageMap || [];
+            setMessageImageMap(() => {
+              const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+              const now = Date.now();
 
-                return Array.isArray(incoming)
-                  ? incoming.filter(obj => {
-                    if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
-                    const diff = now - new Date(obj.saved).getTime();
-                    return diff < FORTY_EIGHT_HOURS;
-                  })
-                  : [];
-              });
-              setUserNickname(driveData.data.userNickname || '');
-            }
+              const incoming = driveData.data.messageImageMap || [];
+
+              return Array.isArray(incoming)
+                ? incoming.filter(obj => {
+                  if (!obj.saved || typeof obj.saved !== "string" || obj.saved.trim() === "") return false;
+                  const diff = now - new Date(obj.saved).getTime();
+                  return diff < FORTY_EIGHT_HOURS;
+                })
+                : [];
+            });
+            setUserNickname(driveData.data.userNickname || '');
+
           }
         }
       } catch (error) {
