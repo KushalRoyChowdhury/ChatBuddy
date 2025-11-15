@@ -2,18 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+*The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)*.
 
-> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete. For long-term reliability, feel free to fork the `v2.2.2-LTS` & above.
+> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete. For long-term reliability, feel free to fork the `v2.2.2` & above.
 
 ## [2.3.2-LTS] - 2025-11-14
 
 ### Fixed
 - Improved List rendering.
 - Improved consistency in Dark Mode.
+- Improved poem formating.
+- Improved LaTeX rendering.
 
-## [2.3.1-LTS] - 2025-11-07
+## [2.3.1] - 2025-11-07
 
 ### Added
 - Advance Rendering toggle to turn off visual transparency and improve performance.
@@ -24,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI Enhancements.
 - Improved and fast login flow. 
 
-## [2.3.0-LTS] - 2025-11-06
+## [2.3.0] - 2025-11-06
 
 ### Added
 - Auto Dark-Mode.
@@ -34,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tuned Glassmorphism.
 - Table Rendering on Small Screens.
 
-## [2.2.5-LTS] - 2025-11-04
+## [2.2.5] - 2025-11-04
 
 ### Fixed
 - Enhanced Rendering of LaTeX Equations (Physics, Chemistry).
@@ -45,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Tuned Model's Generation Parameters.
 
-## [2.2.4-LTS] - 2025-11-02
+## [2.2.4] - 2025-11-02
 
 ### Fixed
 - Improved Model Responses.
@@ -60,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Blured Elements.
 
-## [2.2.3-LTS] - 2025-10-31
+## [2.2.3] - 2025-10-31
 
 ### Fixed
 - UI Stability.
@@ -73,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clears localStorage on token expiration & authentication failure.
 - Deleting `chatbuddy_data.bin` from Google Drive may result in data loss.
 
-## [2.2.2-LTS] - 2025-10-30
+## [2.2.2] - 2025-10-30
 
 ### Fixed
 - Sidepanel Animation.
@@ -86,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-Time local time awareness on models.
 - Clears localStorage on logout. 
 
-## [2.2.1-LTS] - 2025-10-29
+## [2.2.1] - 2025-10-29
 
 ### Fixed
 - App Data Import.
@@ -94,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - UI Improvements.
 
-## [2.2-LTS] - 2025-10-28
+## [2.2] - 2025-10-28
 **Major Patch Update**
 
 ### Added
