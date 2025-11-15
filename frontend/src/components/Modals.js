@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Modals = React.memo(({
@@ -474,9 +474,9 @@ const Modals = React.memo(({
                   Get your Gemini key for free: Google AI Studio {'>'} API Keys {'>'} Generate
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-300 mt-2 p-2 bg-yellow-50 dark:bg-yellow-950 border-l-4 border-yellow-400">
-                  NOTE: Use your own API key to use the app with Higher Limits and
-                  greater Context Window. Default Access has stricter Rate Limits and
-                  Context Window. Changing API KEY does not change model behavior.
+                  NOTE: Use your PERSONAL API key to use the app with Higher Limits and
+                  greater Context Window. PUBLIC ACCESS has stricter Rate Limits and
+                  Context Window. Changing API KEY does not change model behavior/personality.
                 </p>
               </div>
 
@@ -495,27 +495,27 @@ const Modals = React.memo(({
               </div>
 
               <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
-                Used Today
+                Today's Usage <span className='text-xs text-gray-500 dark:text-gray-400 italic'>(EXPERIMENTAL)</span>
                 <div className='text-sm font-normal text-gray-500 dark:text-gray-400 ml-2'>
                   <div className='flex items-center w-full'>
-                    <div className='w-[118px] text-nowrap'>Basic Model: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14350 : 500) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                    <div className='w-[105px] text-nowrap'>Basic Model: </div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
-                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
-                      ( {usage.basic}{apiKey.trim().length > 32 ? ' / 14350' : ' / 500'} )
+                    <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
+                      ({apiKey.trim().length > 32 ? '14,400' : '1,000'})
                     </div>
                   </div>
 
                   <div className='flex w-full items-center'>
-                    <div className='w-[118px] text-nowrap'>Advance Model: </div>
+                    <div className='w-[105px] text-nowrap'>Advance Model: </div>
                     <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
                       <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
                       <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
-                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
-                      ( {usage.advance}{apiKey.trim().length > 32 ? ' / 1000' : ' / 100'} )
+                    <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
+                      ({apiKey.trim().length > 32 ? '1,000' : '100'})
                     </div>
                   </div>
 
@@ -876,29 +876,22 @@ const Modals = React.memo(({
                   <br />
                   <br />
                   Advanced model:{' '}
-                  <span className="font-semibold">Gemini 2.5 Flash.</span> Best for Coding Math & Reasoning Tasks.
+                  <span className="font-semibold">Gemini 2.5 Flash.</span> Best for Coding, Math, Reasoning & Web Tasks.
                   <br />
                   <br />
                   <span className="font-semibold">NOTE</span>: Advance Reasoning Mode can take significatly longer time to respond on complex tasks.
                   <br />
                   <br />
-                  You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto 128k).
+                  You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto ~128k).
                   <br />
                   <br />
-                  Basic Model Supports 6k Context Window. Advance Model Supports 64k Context Window (Default Key).
+                  Basic Model Supports ~8k Context Window. Advance Model Supports ~64k Context Window (GENERAL ACCESS).
                   <br />
                   <br />
-                  With the Without Personal Key the RateLimits are: Basic Model (7RPM / 500 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
+                  Rate Limits in PUBLIC ACCESS are: Basic Model (5RPM / 1000 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
                   <br />
                   <br />
-                  With your own API Key the RateLimits are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD){imageGenAvailable && ', Image Generation (10RPM, 100RPD)'}.
-                  {imageGenAvailable &&
-                    <>
-                      <br />
-                      <br />
-                      <span className="font-semibold">NOTE</span>: Image Generation is only available till 2025-NOV-12.
-                    </>
-                  }
+                  Rate Limits in PERSONAL KEY ACCESS are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD){imageGenAvailable && ', Image Generation (10RPM, 100RPD)'}.
                   <br />
                   <br />
                   Aditionally the app Source Code is available on 👉
@@ -921,7 +914,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.3.2-LTS (release 251115)
+                v2.3.2 (release 251115)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

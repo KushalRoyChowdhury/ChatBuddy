@@ -29,8 +29,8 @@ const decompress = (base64String) => {
 
 
 // --- Application Constants ---
-const MEMORY_LIMIT_CHARS = 2000 * 4;
-const TEMP_MEMORY_LIMIT_CHARS = 1500 * 4;
+const MEMORY_LIMIT_CHARS = 1000 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const getTextToRender = (msg) => {
@@ -656,14 +656,13 @@ export default function App() {
       setChatSessions(prevSessions => [...prevSessions, newChatSession]);
       setActiveChatId(newChatId);
       setSystemPrompt(importedData.systemPrompt || '');
-      setThinkingProcesses(prev => ({ ...prev, [newChatId]: [] }));// Clear old thinking processes on import
+      setThinkingProcesses(prev => ({ ...prev, [newChatId]: [] }));
       setShowImportConfirm(false);
       setFileToImport(null);
     } catch (error) {
       console.error("Import Error:", error);
       alert(`File integrity invalid. Import failed.\n\nDetails: ${error.message}`);
       setSystemPrompt(backupPrompt);
-      // No need to restore messages, as it's derived from chatSessions
       setShowImportConfirm(false);
       setFileToImport(null);
     }
@@ -1170,6 +1169,7 @@ export default function App() {
     const validDocTypes = [
       'application/pdf',
       'text/plain',
+      'text/markdown',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'video/mp4',
@@ -1180,7 +1180,7 @@ export default function App() {
     setShowAddFiles(false);
 
     if (!validDocTypes.includes(file.type)) {
-      alert("Please select a valid document (PDF, TXT, DOC, DOCX, MP4, MP3, WAV).");
+      alert("Please select a valid document (PDF, TXT, MD, DOC, DOCX, MP4, MP3, WAV).");
       return;
     }
 

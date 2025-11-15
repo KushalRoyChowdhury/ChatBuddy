@@ -272,7 +272,7 @@ const MODELS = [
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-3-12b-it'     // Memory & Format Handler
 ];
-const GEMMA_HISTORY_LIMIT_CHARS = 6000 * 4;
+const GEMMA_HISTORY_LIMIT_CHARS = 8000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
@@ -352,10 +352,10 @@ function getIp(req) {
 }
 
 const limitConfigs = {
-    basic: { maxM: 5, maxD: 700 },
+    basic: { maxM: 5, maxD: 1000 },
     advanced: { maxM: 3, maxD: 100 },
     image: { maxM: 3, maxD: 25 },
-    basicUser: { maxM: 30, maxD: 14350 },
+    basicUser: { maxM: 30, maxD: 14400 },
     advancedUser: { maxM: 15, maxD: 1000 },
     imageUser: { maxM: 10, maxD: 100 },
 };

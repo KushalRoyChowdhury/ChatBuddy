@@ -214,7 +214,7 @@ const MessageInput = React.memo(({
           />
           <input
             type="file"
-            accept={model === 'gemini-2.5-flash-lite' ? '.pdf,.mp4,.mp3,.wav,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/mp4,video/mpeg,audio/mpeg,audio/wav' : '.txt'}
+            accept={model === 'gemini-2.5-flash-lite' ? '.pdf,.mp4,.mp3,.wav,.txt,.md,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/mp4,video/mpeg,audio/mpeg,audio/wav' : '.txt,.md'}
             className="hidden"
             ref={fileDocInputRef}
             onChange={handleDocFileChange}
@@ -238,7 +238,7 @@ const MessageInput = React.memo(({
           <motion.button
             ref={addFilesButtonRef}
             type="button"
-            title="Upload Images/Files (Experimental)"
+            title="Upload Images/Files"
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
