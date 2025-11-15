@@ -5,15 +5,17 @@ All notable changes to this project will be documented in this file.
 *The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)*.
 
-> **Note on Future Updates**: With the release of `ChatBuddy v2.2.2`, this project is now considered feature-complete. For long-term reliability, feel free to fork the `v2.2.2` & above.
-
-## [2.3.2-LTS] - 2025-11-14
+## [2.3.2] - 2025-11-14
 
 ### Fixed
 - Improved List rendering.
 - Improved consistency in Dark Mode.
 - Improved poem formating.
 - Improved LaTeX rendering.
+
+### Changed
+- Increased Basic model limit on hosted version's PUBLIC ACCESS *(500 → 1000)*.
+- Imcresed Basic model context window *(~6k → ~8k)*.
 
 ## [2.3.1] - 2025-11-07
 
@@ -39,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2.5] - 2025-11-04
 
 ### Fixed
-- Enhanced Rendering of LaTeX Equations (Physics, Chemistry).
+- Enhanced Rendering of LaTeX Equations *(Physics, Chemistry)*.
 - UI Fixes.
 - Issue where File UI disappears after uploading a file.
 - UI Stability.
@@ -84,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved general experience.
 
 ### Changed
-- Improved Data Compression (Backward Compatible & Auto-Migration).
+- Improved Data Compression *(Backward Compatible & Auto-Migration)*.
 - Real-Time local time awareness on models.
 - Clears localStorage on logout. 
 
@@ -105,7 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Improved Token Efficiency. Now experience longer conversations with same context windows.
 - UI Improvements.
-- Memory Improvements & Stability (Now handled by separate model).
+- Memory Improvements & Stability *(Now handled by separate model)*.
 - Improved Image Handling for performance.
 - Improved Data Security.
 - Optimized Network Bandwidth.
@@ -129,7 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.0] - 2025-10-21
 
 ### Added
-- Cloud Sync Support (via USER Google Drive).
+- Cloud Sync Support *(via USER Google Drive)*.
 
 ### Changed
 - UI Enhancements & customization.
@@ -154,7 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6] - 2025-10-11
 
 ### Added
-- Video & Audio Sharing Support upto 20MB (Advance Model Only).
+- Video & Audio Sharing Support upto 20MB *(Advance Model Only)*.
 
 ### Fixed
 - Improved Context Handling with Files.
@@ -173,8 +175,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5] - 2025-09-18
 
 ### Added
-- Image Generation (1024x1024).
-- File Sharing Support 'PDF, TXT, DOCX etc' (Advance Model Only).
+- Image Generation *(1024x1024)*.
+- File Sharing Support 'PDF, TXT, DOCX etc' *(Advance Model Only)*.
 
 ### Fixed
 - Performance Improvement especially on low end hardware.
@@ -184,7 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - 2025-09-17
 
 ### Fixed
-- Improved stability on image sharing (now support upto 20MB).
+- Improved stability on image sharing *(now support upto 20MB)*.
 - Minor bug fixes.
 - ReTuned Censorship to maintain expressiveness.
 
@@ -192,7 +194,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4] - 2025-09-16
 
 ### Added
-- Added Image Sharing Feature (All Models). 
+- Added Image Sharing Feature *(All Models)*. 
 
 ### Fixed
 - All issues happened with v1.3 are now resolved and tested.
@@ -200,10 +202,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   
 ## [1.3] - 2025-09-15
-> **NOTICE: [SEP 15 Update]** *Due to major instability in recent release (v1.3) the updates on Public server were reverted temporarily to older version (v1.2.2).*
 
-
-> *This is a huge upgrade architechtural upgrade than previous one, if you face any bugs or issues kindly mention in GitHub.*
+> *This is a huge upgrade architechtural upgrade, if you face any bugs or issues kindly mention in GitHub.*
 
 ### Fixed
 - Major changes in server side to make responses consistent.
@@ -214,9 +214,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2] - 2025-09-14
 
 ### Added
-- Transparency in Model Thinking (Advance Reasoning).
-- Added Google Search Functionality (Advance Model Only).
-- Added a 'Creative Response' mode (Basic Model Only).
+- Transparency in Model Thinking *(Advance Reasoning)*.
+- Added Google Search Functionality *(Advance Model Only)*.
+- Added a 'Creative Response' mode *(Basic Model Only)*.
 
 ### Fixed
 - UI Scroll Bug Fixes on mobile devices.
