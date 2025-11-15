@@ -129,21 +129,19 @@ The hosted version's public access has strict rate limits. It is **highly recomm
 
 | FEATURE               | PUBLIC ACCESS                       | PERSONAL KEY ACCESS               |
 | --------------------- | ----------------------------------- | --------------------------------- |
-| **Context Window**    | Basic: 6k / Advanced: 64k           | Basic: 6k / Advanced: 128k        |
+| **Context Window**    | Basic: 8k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3              | Basic: 30 / Advanced: 15          |
-| **Rate Limits (RPD)** | Basic: 500 / Advanced: 100          | Basic: 14,350 / Advanced: 1000    |
+| **Rate Limits (RPD)** | Basic: 1000 / Advanced: 100         | Basic: 14,400 / Advanced: 1000    |
 
-*Context Sizes mentioned here uses server-side truncation to avoid **TPM** limit hits*.
+*Context Sizes mentioned here uses server-side truncation to avoid **API TPM** limit hits*.
 
 > **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. However uploaded files are stored for 48 hours on Google Cloud (according to [Gemini Files API Policy](https://ai.google.dev/gemini-api/docs/files)). Google login credentials are stored locally in httpOnly cookies.
 
 > To avoid file save in external project consider using your own API Key.
 
-> Your own API key limits are shown safely under Google’s free quota.
-
 ---
 
-Official API RateLimits for free tier of model used *(Updated as of: September 2025, limits may change in future)*:
+Official API RateLimits for free tier of model used in this project *(Updated as of: September 2025)*:
 
 | MODEL (Free Tier)          | RPM    | RPD      | TPM      |
 | -------------------------- | ------ | -------- | -------- |
@@ -151,7 +149,7 @@ Official API RateLimits for free tier of model used *(Updated as of: September 2
 | **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
 | **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
 
-### How to get your key
+### How to get your Gemini API Key:
 
 1.  Go to [Google AI Studio](https://aistudio.google.com).
 2.  Click "Create API key".
@@ -228,4 +226,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.3.2-LTS - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.3.2 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
