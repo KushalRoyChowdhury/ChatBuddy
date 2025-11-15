@@ -212,12 +212,6 @@ The application source code is available on GitHub. If you find it useful, pleas
 
 ---
 
-## 📝 Future Updates
-
-With the release of `ChatBuddy v2.2.2-LTS`, this project is now considered feature-complete and no further feature enhancements are planned. However, it will continue to receive stability and security updates as needed. For forking, version `2.2.2` & above is recommended. 
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
