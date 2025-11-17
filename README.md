@@ -125,15 +125,15 @@ Powered by the official Google AI SDK (`@google/genai`).
 
 ### Public Version and Privacy Policy
 
-The hosted version's public access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
-
-| FEATURE               | PUBLIC ACCESS                       | PERSONAL KEY ACCESS               |
+The hosted version's demo access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
+ 
+| FEATURE               | DEMO ACCESS                         | PERSONAL API KEY                  |
 | --------------------- | ----------------------------------- | --------------------------------- |
-| **Context Window**    | Basic: 8k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
+| **Context Window**    | Basic: 4k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
 | **Rate Limits (RPM)** | Basic: 7 / Advanced: 3              | Basic: 30 / Advanced: 15          |
 | **Rate Limits (RPD)** | Basic: 1000 / Advanced: 100         | Basic: 14,400 / Advanced: 1000    |
 
-*Context Sizes mentioned here uses server-side truncation to avoid **API TPM** limit hits*.
+*Context Sizes mentioned here uses server-side truncation*.
 
 > **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. However uploaded files are stored for 48 hours on Google Cloud (according to [Gemini Files API Policy](https://ai.google.dev/gemini-api/docs/files)). Google login credentials are stored locally in httpOnly cookies.
 
