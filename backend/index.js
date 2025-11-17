@@ -272,7 +272,8 @@ const MODELS = [
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-3-12b-it'     // Memory & Format Handler
 ];
-const GEMMA_HISTORY_LIMIT_CHARS = 8000 * 4;
+const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
+const GEMMA_PRO_HISTORY_LIMIT_CHARS = 8000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
@@ -610,7 +611,7 @@ app.post('/model', async (req, res) => {
     }
 
     try {
-        const finalApiKey = apiKey || SERVER_API_KEY;
+        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY;
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'API Key not valid.' } });
         }
@@ -627,7 +628,7 @@ app.post('/model', async (req, res) => {
         const mainModels = async () => {
 
             let contextLimit = modelIndex === 0
-                ? GEMMA_HISTORY_LIMIT_CHARS
+                ? (apiKey ? GEMMA_PRO_HISTORY_LIMIT_CHARS : GEMMA_HISTORY_LIMIT_CHARS)
                 : (apiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
 
             const truncatedHistory = getTruncatedHistory(history, contextLimit);
@@ -660,11 +661,11 @@ app.post('/model', async (req, res) => {
 
             let INTERNAL_SYSTEM_PROMPT = '';
 
-            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles, zoneInfo);
-            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles, zoneInfo);
-            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles, zoneInfo);
-            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles, zoneInfo);
-            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles, zoneInfo);
+            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles, zoneInfo, apiKey);
 
             const selectedModel = MODELS[modelIndex];
 

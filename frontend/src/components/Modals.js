@@ -351,9 +351,6 @@ const Modals = React.memo(({
                     style={{ width: `${memoryUsagePercent}%` }}
                   ></div>
                 </div>
-                <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {memories.join('\n').length} / {MEMORY_LIMIT_CHARS} characters
-                </div>
               </div>
 
               {/* Memories List or Empty State */}
@@ -499,34 +496,34 @@ const Modals = React.memo(({
                 <div className='text-sm font-normal text-gray-500 dark:text-gray-400 ml-2'>
                   <div className='flex items-center w-full'>
                     <div className='w-[105px] text-nowrap'>Basic Model: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length > 32 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
-                      ({apiKey.trim().length > 32 ? '14,400' : '1,000'})
+                      ({apiKey.trim().length === 39 ? '14,400' : '1,000'})
                     </div>
                   </div>
 
                   <div className='flex w-full items-center'>
                     <div className='w-[105px] text-nowrap'>Advance Model: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100)}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length > 32 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100)}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
-                      ({apiKey.trim().length > 32 ? '1,000' : '100'})
+                      ({apiKey.trim().length === 39 ? '1,000' : '100'})
                     </div>
                   </div>
 
                   {imageGenAvailable && <div className='flex w-full items-center'>
                     <div className='w-[118px] text-nowrap'>Image Generation: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length > 32 ? 100 : 25)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length > 32 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
+                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length === 39 ? 100 : 25)) * 100}%` }} ></div>
+                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
                     </div>
                     <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
-                      ( {usage.image}{apiKey.trim().length > 32 ? ' / 100' : ' / 25'} )
+                      ( {usage.image}{apiKey.trim().length === 39 ? ' / 100' : ' / 25'} )
                     </div>
                   </div>}
                 </div>
@@ -885,10 +882,10 @@ const Modals = React.memo(({
                   You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto ~128k).
                   <br />
                   <br />
-                  Basic Model Supports ~8k Context Window. Advance Model Supports ~64k Context Window (GENERAL ACCESS).
+                  Basic Model Supports ~4k Context Window. Advance Model Supports ~64k Context Window (DEMO ACCESS).
                   <br />
                   <br />
-                  Rate Limits in PUBLIC ACCESS are: Basic Model (5RPM / 1000 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
+                  Rate Limits in DEMO ACCESS are: Basic Model (5RPM / 1000 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
                   <br />
                   <br />
                   Rate Limits in PERSONAL KEY ACCESS are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD){imageGenAvailable && ', Image Generation (10RPM, 100RPD)'}.
@@ -914,7 +911,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.3.2 (release 251115)
+                v2.3.2 (release 251118)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

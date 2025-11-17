@@ -29,7 +29,7 @@ const decompress = (base64String) => {
 
 
 // --- Application Constants ---
-const MEMORY_LIMIT_CHARS = 1000 * 4;
+const MEMORY_LIMIT_CHARS = 1200 * 4;
 const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
@@ -419,7 +419,7 @@ export default function App() {
       saveDataToDrive();
     }, 3000);
     return () => clearTimeout(debounce);
-  }, [systemPrompt, userNickname, saveDataToDrive]);
+  }, [systemPrompt, userNickname]);
 
   useEffect(() => {
     if (previousActiveChatIdRef.current) {
@@ -432,7 +432,7 @@ export default function App() {
       }
     }
     previousActiveChatIdRef.current = activeChatId;
-  }, [activeChatId, chatSessions, saveDataToDrive]);
+  }, [activeChatId, chatSessions]);
 
 
   // --- Event Handlers & Logic ---
@@ -484,7 +484,9 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+      const glass = localStorage.getItem('glass');
       localStorage.clear();
+      localStorage.setItem('glass', glass);
       sessionStorage.clear();
       setIsAuthenticated(false);
     } catch (error) {
@@ -739,6 +741,19 @@ export default function App() {
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
+    if (apiKey.trim().length !== 0 && apiKey.trim().length < 39) {
+      const errorJsonString = `{"action":"none", "target":"", "response":"API key not valid."}`;
+      const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
+      setChatSessions(prevSessions =>
+        prevSessions.map(session =>
+          session.chatID === currentChatId
+            ? { ...session, chat: [...session.chat, assistantMessage] }
+            : session
+        )
+      );
+      return;
+    }
+
     let messageID = Date.now();
     const userMessage = {
       role: 'user',
@@ -833,7 +848,7 @@ export default function App() {
         .map(img => ({
           uri: img.uri,
           mimeType: img.mimeType,
-          id: img.id // now includes the new messageID!
+          id: img.id
         }));
 
       let modelIndex = model === 'gemini-2.5-flash-lite' ? 1 : 0;
@@ -903,7 +918,7 @@ export default function App() {
         throw new Error(data.error?.message || `HTTP error! status: ${response.status}`);
       }
       if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts[0].text) {
-        throw new Error("Invalid or empty response from Backend.");
+        throw new Error("Invalid response in LLM server.");
       }
 
       let rawResponseString = data.candidates[0].content.parts[0].text;
@@ -1002,7 +1017,7 @@ export default function App() {
         );
       } else {
         console.error("API Error:", error);
-        const errorJsonString = `{"action":"none", "target":"", "response":"❌ ${error.message}"}`;
+        const errorJsonString = `{"action":"none", "target":"", "response":"❌ ${error.message === 'Failed to fetch' ? 'Network Error. Please check your internet connection.' : error.message}"}`;
         const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
         setChatSessions(prevSessions =>
           prevSessions.map(session =>

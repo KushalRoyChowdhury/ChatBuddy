@@ -2,7 +2,7 @@ const coreInstruction = require('./InstructionAbstraction/CoreInstructions');
 const model = require('./Model_Context_Data/BASIC');
 
 
-const BASIC_MODEL_INSTRUCTION = (hasFiles, zoneInfo) => {
+const BASIC_MODEL_INSTRUCTION = (hasFiles, zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -33,7 +33,7 @@ YOUR RESPONSE SHOULD BE LIKE THIS: ['file'=summary_of_the_file_provided] user_fa
 -- END STRING SNIPPET ADDITION --` : ''.trim()}
 
 -- START MODEL INSTRUCTIONS --
-${model}
+${model(apiKey)}
 -- END MODEL INSTRUCTIONS --    
 
 Current Date: ${now.toLocaleString('en-US', optionsDate)}, ${new Intl.DateTimeFormat('en-US', optionsDay).format(now)}.

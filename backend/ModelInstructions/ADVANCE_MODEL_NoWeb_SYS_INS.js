@@ -2,7 +2,7 @@ const coreInstruction = require('./InstructionAbstraction/CoreInstructions');
 const model = require('./Model_Context_Data/ADVANCE_NoWeb');
 
 
-const ADVANCE_MODEL_NoWeb = (hasFiles, zoneInfo) => {
+const ADVANCE_MODEL_NoWeb = (hasFiles, zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -32,7 +32,7 @@ YOUR RESPONSE SHOULD BE LIKE THIS: ['file': summary_of_the_file_provided] user_f
 -- END STRING SNIPPET ADDITION --`.trim()}
 
 -- START MODEL INSTRUCTIONS --
-${model}
+${model(apiKey)}
 -- END MODEL INSTRUCTIONS --
 
 Current Date: ${now.toLocaleString('en-US', optionsDate)}, ${new Intl.DateTimeFormat('en-US', optionsDay).format(now)}.
