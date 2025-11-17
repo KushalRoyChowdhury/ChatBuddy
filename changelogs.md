@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved LaTeX rendering.
 
 ### Changed
-- Increased Basic model limit on hosted version's PUBLIC ACCESS *(500 → 1000)*.
-- Imcresed Basic model context window *(~6k → ~8k)*.
+- Increased Basic model limit on hosted version's DEMO ACCESS *(500 → 1000)*.
+- Incresed Basic model context window *(~6k → ~8k)*. *NOTE: 8k Token only available with PERSONAL API KEY access*.
+- Reduced Basic model Context Window for DEMO ACCESS (~6k → ~4k).
+
 
 ## [2.3.1] - 2025-11-07
 
