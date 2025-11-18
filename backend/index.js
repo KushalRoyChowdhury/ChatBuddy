@@ -718,7 +718,7 @@ app.post('/model', async (req, res) => {
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingBudget: advanceReasoning ? -1 : 0,
+                            thinkingBudget: advanceReasoning ? -1 : 512,
                             includeThoughts: advanceReasoning ? true : false,
                         },
                         ...(webSearch && {
