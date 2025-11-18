@@ -1006,7 +1006,7 @@ const Modals = React.memo(({
                 This action is not available while the model is responding.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50 dark:bg-[rgb(30,30,30)] flex justify-center gap-4 rounded-b-xl">
               <button
                 onClick={() => setShowNotAvailablePopup(false)}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

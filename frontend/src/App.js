@@ -571,7 +571,7 @@ export default function App() {
 
   // --- Chat Import/Export Functions ---
   const exportChatAsTxt = () => {
-    const header = `Chat Exported on ${new Date().toLocaleString()}\nSystem Prompt: ${systemPrompt || 'None'}\n------------------------------------------\n\n`;
+    const header = `Chat Exported on ${new Date().toLocaleString()}\nCustom Instruction: ${systemPrompt || 'None'}\n------------------------------------------\n\n`;
     const chatContent = messages.map(msg => {
       const prefix = msg.role === 'user'
         ? `[User - ${msg.model === 'gemini-2.5-flash-lite' ? 'Advanced' : 'Basic'}]`
@@ -741,19 +741,6 @@ export default function App() {
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    if (apiKey.trim().length !== 0 && apiKey.trim().length < 39) {
-      const errorJsonString = `{"action":"none", "target":"", "response":"API key not valid."}`;
-      const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
-      setChatSessions(prevSessions =>
-        prevSessions.map(session =>
-          session.chatID === currentChatId
-            ? { ...session, chat: [...session.chat, assistantMessage] }
-            : session
-        )
-      );
-      return;
-    }
-
     let messageID = Date.now();
     const userMessage = {
       role: 'user',
@@ -906,6 +893,19 @@ export default function App() {
         zoneInfo: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
 
+      if (apiKey.trim().length !== 0 && apiKey.trim().length < 39) {
+        const errorJsonString = `{"action":"none", "target":"", "response":"API key not valid."}`;
+        const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: crypto.randomUUID() };
+        setChatSessions(prevSessions =>
+          prevSessions.map(session =>
+            session.chatID === currentChatId
+              ? { ...session, chat: [...session.chat, assistantMessage] }
+              : session
+          )
+        );
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/model`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -918,7 +918,7 @@ export default function App() {
         throw new Error(data.error?.message || `HTTP error! status: ${response.status}`);
       }
       if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts[0].text) {
-        throw new Error("Invalid response in LLM server.");
+        throw new Error("Unknown Error in LLM Response.");
       }
 
       let rawResponseString = data.candidates[0].content.parts[0].text;

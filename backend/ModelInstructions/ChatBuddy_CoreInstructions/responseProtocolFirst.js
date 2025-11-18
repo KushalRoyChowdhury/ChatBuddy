@@ -5,7 +5,7 @@ const responseProtocol =
 {
   "action": "string (memory operation)",
   "target": "array (action data)",
-  "title": "string (3 to 5 word ultra creative small summary of USER PROMPT ONLY)",
+  "title": "string (2 to 4 word ultra creative small summary of USER PROMPT ONLY)",
 }
 FORMAT RULES:
 • "remember": target = ["exact string to save"]

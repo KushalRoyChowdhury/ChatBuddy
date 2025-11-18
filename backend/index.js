@@ -16,7 +16,7 @@ const pako = require('pako');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const SERVER_API_KEY = process.env.GEMINI_API_KEY;
+const SERVER_API_KEY = [process.env.GEMINI_API_KEY_0, process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2];
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'build')));
@@ -122,7 +122,7 @@ app.get('/auth/google', async (req, res) => {
         const url = oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: scopes,
-            prompt: 'consent', 
+            prompt: 'consent',
         });
         res.redirect(url);
     }
@@ -133,23 +133,23 @@ app.get('/auth/google/callback', async (req, res) => {
     try {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
- 
+
         const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
         const { data } = await oauth2.userinfo.get();
- 
+
         const isProduction = process.env.NODE_ENV === 'production';
         const cookieOptions = {
             httpOnly: true,
             sameSite: 'strict',
             secure: isProduction,
         };
- 
+
         res.cookie('access_token', tokens.access_token, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 }); // 1 day
         if (tokens.refresh_token) {
             res.cookie('refresh_token', tokens.refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 }); // 30 days
         }
         res.cookie('user_email', data.email, { ...cookieOptions, httpOnly: false, maxAge: 30 * 24 * 60 * 60 * 1000 });
- 
+
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
         console.error('Error getting tokens:', error);
@@ -604,22 +604,25 @@ app.post('/upload', async (req, res) => {
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
+    let retryCounter = 0;
 
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
     }
 
+    RETRY:
     try {
-        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY;
+
+        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++];
         if (!finalApiKey) {
-            return res.status(500).json({ error: { message: 'API Key not valid.' } });
+            return res.status(500).json({ error: { message: 'Failed to retrive API key.' } });
         }
 
         const genAI = new GoogleGenAI({ apiKey: finalApiKey });
 
         if (modelIndex === undefined || modelIndex < 0 || modelIndex >= MODELS.length) {
-            return res.status(400).json({ error: { message: 'A valid model index (0 or 1) must be provided.' } });
+            return res.status(400).json({ error: { message: 'Invalid model index.' } });
         }
         if (!history || !Array.isArray(history) || history.length === 0) {
             return res.status(400).json({ error: { message: 'A valid chat history must be provided.' } });
@@ -830,7 +833,7 @@ app.post('/model', async (req, res) => {
         let format = await helper(mainModel.mainText);
 
         mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
-        
+
         let text = '';
         try {
             text = JSON.parse(format);
@@ -869,6 +872,10 @@ app.post('/model', async (req, res) => {
         }
 
         if (error.toString().includes('429')) {
+            if (retryCounter < 3) {
+                break RETRY;
+            }
+
             const fallbackObject = {
                 action: 'chat',
                 target: [],
