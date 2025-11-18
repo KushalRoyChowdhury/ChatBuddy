@@ -40,12 +40,27 @@ The `frontend/` directory contains the complete React-based user interface.
 
 The `backend/` directory contains the Node.js and Express server that powers the application's backend.
 
--   `build/`: The production build of the frontend application, served by the backend.
 -   `ModelInstructions/`: This folder contains the system instructions and context data for the different AI models, shaping their behavior and responses.
     -   `ChatBuddy_CoreInstructions/`: Core instructions for the ChatBuddy AI.
+        -   `chatBuddy.js`: Core instructions for the ChatBuddy AI.
+        -   `memoryInstructions.js`: Instructions for the AI's memory.
+        -   `modelBehaviour.js`: Instructions for the AI's behavior.
+        -   `responseProtocol.js`: Instructions for the AI's response protocol (Used for `helper` model).
+        -   `responseProtocolFirst.js`: Instructions for the AI's first response (Used for `helper` model).
     -   `InstructionAbstraction/`: Abstractions for core instructions.
+        -   `CoreInstructionMemory.js`: Abstractions for core instruction memory (Used for `helper` model).
+        -   `CoreInstructions.js`: Abstractions for core instructions.
     -   `Model_Context_Data/`: Context data for the different AI models.
+        -   `ADVANCE_NoWeb.js`: Context data for the advanced model without web access.
+        -   `ADVANCE_THINKING.js`: Context data for the advanced model with thinking.
+        -   `ADVANCE_Web.js`: Context data for the advanced model with web access.
+        -   `BASIC.js`: Context data for the basic model.
+    -   `ADVANCE_MODEL_NoWeb_SYS_INS.js`: System instructions for the advanced model without web access.
+    -   `ADVANCE_MODEL_Web_SYS_INS.js`: System instructions for the advanced model with web access.
+    -   `ADVANCE_THINK_NoWeb_SYS_INS.js`: System instructions for the advanced model with thinking and no web access.
+    -   `ADVANCE_THINK_Web_SYS_INS.js`: System instructions for the advanced model with thinking and web access.
+    -   `BASIC_MODEL_SYS_INS.js`: System instructions for the basic model.
+    -   `README.md`: A README file for the ModelInstructions folder.
 -   `.env.dev`: Environment variables for the development environment.
 -   `index.js`: The main entry point for the server, responsible for handling API requests and communicating with the Google AI SDK.
 -   `package.json`: Defines the project's dependencies and scripts.
--   `package-lock.json`: Records the exact version of each dependency.
