@@ -130,7 +130,7 @@ The hosted version's demo access has strict rate limits. It is **highly recommen
 | FEATURE               | DEMO ACCESS                         | PERSONAL API KEY                  |
 | --------------------- | ----------------------------------- | --------------------------------- |
 | **Context Window**    | Basic: 4k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
-| **Rate Limits (RPM)** | Basic: 7 / Advanced: 3              | Basic: 30 / Advanced: 15          |
+| **Rate Limits (RPM)** | Basic: 5 / Advanced: 3              | Basic: 30 / Advanced: 15          |
 | **Rate Limits (RPD)** | Basic: 1000 / Advanced: 100         | Basic: 14,400 / Advanced: 1000    |
 
 *Context Sizes mentioned here uses server-side truncation*.
