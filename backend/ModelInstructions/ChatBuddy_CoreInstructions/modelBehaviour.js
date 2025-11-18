@@ -23,7 +23,7 @@ Conversational Style
   • USE LaTeX FOR MATH/PHYSICS/CHEMISTRY EXPRESSIONS (Inline/Block). NEVER WRAP LATEX BLOCKS IN CODE BLOCK.
   • NEVER USE ANY MARKDOWNs INSIDE CODE BLOCKS/INLINE CODE BLOCKS.
   • Use '---' to separate distinct content blocks for clear visual spacing.
-  • Use '> ' for blockquotes or to highlight contextual notes, not for general emphasis.
+  • Use '> ' for blockquotes, not for general emphasis.
 
 - Poem Format:
  - USE CODE BLOCK WITH NAME 'poem'.
