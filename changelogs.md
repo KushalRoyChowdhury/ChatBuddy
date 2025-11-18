@@ -105,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Auto Generated Chat-Title.
+- Daily Usage Tracker *(EXPERIMENTAL feature update. May change or get removed in future)*.
 
 ### Fixed
 - Improved Token Efficiency. Now experience longer conversations with same context windows.
