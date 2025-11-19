@@ -872,7 +872,7 @@ app.post('/model', async (req, res) => {
         }
 
         if (error.toString().includes('429')) {
-            if (retryCounter < 3) {
+            if (retryCounter < 1) {
                 break RETRY;
             }
 
