@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)*.
 
 ## [2.3.2] - 2025-11-14
+**BACKUP THE APP DATA > LOGOUT > AND LOGIN AGAIN TO GRANT NEW SCOPE PERMISSIONS**
 
 ### Fixed
 - Improved List rendering.
