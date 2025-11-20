@@ -535,7 +535,7 @@ app.get('/health', (req, res) => {
 
 // --- File Upload ---
 app.post('/upload', async (req, res) => {
-    const ai = new GoogleGenAI({process.env.GEMINI_API_KEY_0});
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY_0 });
 
     try {
         // Check if a file was uploaded
