@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Increased Basic model limit on hosted version's DEMO ACCESS *(500 → 1000)*.
 - Incresed Basic model context window *(~6k → ~8k)*. *NOTE: 8k Token only available with PERSONAL API KEY access*.
 - Reduced Basic model Context Window for DEMO ACCESS (~6k → ~4k).
-
+- Moved Application Data to Drive's `AppDataFolder`.
 
 ## [2.3.1] - 2025-11-07
 
@@ -77,7 +77,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dynamic Cloud Sync.
 - Images older than 48hrs will be deleted due to localStorage constraints.
 - Clears localStorage on token expiration & authentication failure.
-- Deleting `chatbuddy_data.bin` from Google Drive may result in data loss.
 
 ## [2.2.2] - 2025-10-30
 
