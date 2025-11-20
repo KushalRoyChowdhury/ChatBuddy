@@ -16,7 +16,7 @@ const pako = require('pako');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const SERVER_API_KEY = [process.env.GEMINI_API_KEY_0, process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2];
+const SERVER_API_KEY = [process.env.GEMINI_API_KEY_0, process.env.GEMINI_API_KEY_1];
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'build')));
@@ -193,7 +193,7 @@ app.get('/api/drive/read', setOAuthCredentials, async (req, res) => {
         const response = await drive.files.list({
             auth: oauth2Client,
             q: "name='chatbuddy_data.bin'",
-            spaces: 'drive',
+            spaces: 'appDataFolder',
             fields: 'files(id, name, modifiedTime)',
         });
 
@@ -228,12 +228,13 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
         const listResponse = await drive.files.list({
             auth: oauth2Client,
             q: "name='chatbuddy_data.bin'",
-            spaces: 'drive',
+            spaces: 'appDataFolder',
             fields: 'files(id)',
         });
 
         const fileMetadata = {
             name: 'chatbuddy_data.bin',
+            parents: ['appDataFolder'],
         };
 
         const media = {
@@ -604,7 +605,7 @@ app.post('/upload', async (req, res) => {
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
-    let retryCounter = 0;
+    let retryCounter = 1;
 
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
@@ -614,7 +615,7 @@ app.post('/model', async (req, res) => {
     RETRY:
     try {
 
-        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++];
+        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++ - 1];
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'Failed to retrive API key.' } });
         }
@@ -832,6 +833,7 @@ app.post('/model', async (req, res) => {
         let mainModel = await mainModels();
         let format = await helper(mainModel.mainText);
 
+        mainModel.mainText = mainModel.mainText.replace(/\[['"]?bio['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
         mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
 
         let text = '';
@@ -872,7 +874,7 @@ app.post('/model', async (req, res) => {
         }
 
         if (error.toString().includes('429')) {
-            if (retryCounter < 1) {
+            if (retryCounter <= 2) {
                 break RETRY;
             }
 
