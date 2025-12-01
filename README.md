@@ -123,7 +123,7 @@ For a detailed explanation of the project structure, please see the [Project Str
 
 Powered by the official Google AI SDK (`@google/genai`).
 
-### Public Version and Privacy Policy
+### Public Version Limits
 
 The hosted version's demo access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
  
@@ -135,9 +135,7 @@ The hosted version's demo access has strict rate limits. It is **highly recommen
 
 *Context Sizes mentioned here uses server-side truncation*.
 
-> **Privacy Policy**: Your chats, memories, and API keys are not logged or stored on the server. However uploaded files are stored for 48 hours on Google Cloud (according to [Gemini Files API Policy](https://ai.google.dev/gemini-api/docs/files)). Google login credentials are stored locally in httpOnly cookies.
-
-> To avoid file save in external project consider using your own API Key.
+For details on data handling, please refer to the [Privacy Policy](PrivacyPolicy.md).
 
 ---
 
@@ -226,4 +224,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.3.2 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.4.0 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
