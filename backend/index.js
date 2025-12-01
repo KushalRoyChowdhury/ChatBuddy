@@ -1,4 +1,4 @@
-// Update 2.3.2
+// Update 2.4.0
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,13 @@ const SERVER_API_KEY = [process.env.GEMINI_API_KEY_0, process.env.GEMINI_API_KEY
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'build')));
-app.use(compression({ level: 9 }));
+app.use(compression({
+    level: 9,
+    filter: (req, res) => {
+        if (req.path === '/model') return false;
+        return compression.filter(req, res);
+    }
+}));
 app.use(cors({
     origin: [process.env.FRONTEND_URL, '::1'],
     credentials: true,
@@ -599,12 +605,11 @@ app.post('/upload', async (req, res) => {
         console.error('Upload error:', error);
         res.status(500).json({ error: 'Internal server error during upload.' });
     }
-
 });
-
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
+
     let retryCounter = 1;
 
     const limitResult = await checkRateLimit(req);
@@ -614,7 +619,6 @@ app.post('/model', async (req, res) => {
 
     RETRY:
     try {
-
         const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++ - 1];
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'Failed to retrive API key.' } });
@@ -629,8 +633,13 @@ app.post('/model', async (req, res) => {
             return res.status(400).json({ error: { message: 'A valid chat history must be provided.' } });
         }
 
-        const mainModels = async () => {
+        // Set SSE headers immediately
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
 
+        const mainModels = async () => {
             let contextLimit = modelIndex === 0
                 ? (apiKey ? GEMMA_PRO_HISTORY_LIMIT_CHARS : GEMMA_HISTORY_LIMIT_CHARS)
                 : (apiKey ? GEMINI_PRO_HISTORY_LIMIT_CHARS : GEMINI_HISTORY_LIMIT_CHARS);
@@ -657,16 +666,10 @@ app.post('/model', async (req, res) => {
                 return { role, parts };
             });
 
-            let hasFiles;
-            try {
-                hasFiles = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts.length === 2;
-            }
-            catch (err) { hasFiles = false; }
-
             let INTERNAL_SYSTEM_PROMPT = '';
 
-            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles, zoneInfo, apiKey);
-            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles, zoneInfo, apiKey);
+            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(zoneInfo, apiKey);
+            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(zoneInfo, apiKey);
             else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles, zoneInfo, apiKey);
             else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles, zoneInfo, apiKey);
             else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles, zoneInfo, apiKey);
@@ -678,9 +681,7 @@ app.post('/model', async (req, res) => {
             if (memory && memory.length > 0) finalSystemPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
             if (temp && temp.length > 0) finalSystemPrompt += `\n\n--- START RECENT CHATS ---\n- ${temp.join('\n- ')}\n--- END RECENT CHATS ---`;
 
-            let thought = '';
-            let answer = '';
-            let generatedImage = null;
+            let result;
 
             if (modelIndex === 0) { // Gemma logic
                 const latestUserTurn = historyForSDK_NEW.pop();
@@ -693,8 +694,7 @@ app.post('/model', async (req, res) => {
 
                 const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
 
-
-                result = await genAI.models.generateContent({
+                result = await genAI.models.generateContentStream({
                     model: selectedModel,
                     contents: gemmaContents,
                     config: {
@@ -704,9 +704,10 @@ app.post('/model', async (req, res) => {
                         safetySettings: safetySettings,
                     }
                 });
-            } else if (modelIndex === 1) { // Gemini logic
+                return { isStream: true, result };
 
-                result = await genAI.models.generateContent({
+            } else if (modelIndex === 1) { // Gemini logic
+                result = await genAI.models.generateContentStream({
                     model: selectedModel,
                     contents: historyForSDK_NEW,
                     config: {
@@ -730,6 +731,8 @@ app.post('/model', async (req, res) => {
                         }),
                     }
                 });
+                return { isStream: true, result };
+
             } else {
                 let prompt = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts;
 
@@ -741,161 +744,168 @@ app.post('/model', async (req, res) => {
                         safetySettings: safetySettings,
                     },
                 });
+                return { isStream: false, result };
             }
+        }
 
+        const helper = async () => {
             try {
-                for (const part of result.candidates[0].content.parts) {
-                    if (part.inlineData) {
-                        const base64Image = part.inlineData.data;
-                        const mimeType = part.inlineData.mimeType || 'image/png';
-                        generatedImage = {
-                            base64Data: base64Image,
-                            mimeType: mimeType
-                        };
+                let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
+                if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
+
+                contextLimit = 2000 * 4;
+
+                let shortHistory = getTruncatedHistory(history, contextLimit);
+
+                const historyForMemory = shortHistory.map(msg => {
+                    const role = msg.role === 'assistant' ? 'model' : 'user';
+                    let parts = [];
+
+                    let content;
+                    try {
+                        content = JSON.parse(msg.content).response;
+                    } catch (err) { content = msg.content }
+                    parts.push(createPartFromText(content));
+
+                    return { role, parts };
+                });
+
+                const latestUserTurn = historyForMemory.pop();
+                const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
+                const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+
+                latestUserTurn.parts = latestUserTurn.parts
+                    .filter(p => p.text === undefined)
+                    .concat(createPartFromText(memoryMessageWithSystemPrompt));
+
+                const memoryContents = [...historyForMemory, latestUserTurn];
+
+                const result = await genAI.models.generateContent({
+                    model: MODELS[3],
+                    contents: memoryContents,
+                    config: { safetySettings: safetySettings }
+                });
+
+                if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+                    return JSON.stringify({ action: 'none', target: '', title: '' });
+                }
+
+                let text = result.candidates[0].content.parts[0].text;
+                text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+                return text;
+            } catch (error) {
+                console.error(`[${Date.now()}] Helper failed:`, error);
+                return JSON.stringify({ action: 'none', target: '', title: '' });
+            }
+        }
+
+        try {
+            const helperPromise = helper();
+
+            const { isStream, result } = await mainModels();
+
+            let hitCountIncremented = false;
+            const doIncrement = async () => {
+                if (!hitCountIncremented) {
+                    hitCountIncremented = true;
+                    try { await incrementHitCount(req); } catch (e) { console.error("Hit count error", e); }
+                }
+            };
+
+            if (isStream) {
+                const streamSource = result.stream || result;
+                if (!streamSource) {
+                    throw new Error("Stream source is undefined");
+                }
+                let firstChunk = true;
+                let tokenBuffer = '';
+                let lastFlushTime = Date.now();
+
+                const flushBuffer = () => {
+                    if (tokenBuffer.length > 0) {
+                        res.write(`data: ${JSON.stringify({ type: 'token', content: tokenBuffer })}\n\n`);
+                        tokenBuffer = '';
+                        lastFlushTime = Date.now();
                     }
-                    else if (part.text) {
+                };
+
+                for await (const chunk of streamSource) {
+                    if (firstChunk) {
+                        firstChunk = false;
+                    }
+                    const part = chunk.candidates?.[0]?.content?.parts?.[0];
+                    if (part && part.text) {
                         if (part.thought) {
-                            let thoughtWrapped = `<think>\n\n${part.text}\n\n</think>`;
-                            thought = thoughtWrapped.replace(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/g, "$1");
+                            await doIncrement();
+                            flushBuffer();
+                            res.write(`data: ${JSON.stringify({ type: 'thought', content: part.text })}\n\n`);
                         } else {
+                            await doIncrement();
+                            tokenBuffer += part.text;
+                            if (Date.now() - lastFlushTime >= 50) {
+                                flushBuffer();
+                            }
+                        }
+                    }
+                }
+                flushBuffer();
+            } else {
+                await doIncrement();
+                // Image model
+                let generatedImage = null;
+                let answer = '';
+                if (result.candidates && result.candidates[0] && result.candidates[0].content) {
+                    for (const part of result.candidates[0].content.parts) {
+                        if (part.inlineData) {
+                            const base64Image = part.inlineData.data;
+                            const mimeType = part.inlineData.mimeType || 'image/png';
+                            generatedImage = {
+                                base64Data: base64Image,
+                                mimeType: mimeType
+                            };
+                        } else if (part.text) {
                             answer = part.text;
                         }
                     }
                 }
-            } catch (err) {
 
-                let text = JSON.stringify({
-                    action: 'chat',
-                    target: [],
-                    response: 'PROHIBITED CONTENT'
-                })
-                return res.status(200).json({
-                    candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-                });
-
+                let mainText = '';
+                if (generatedImage) {
+                    mainText = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
+                } else {
+                    mainText = answer;
+                }
+                res.write(`data: ${JSON.stringify({ type: 'token', content: mainText })}\n\n`);
             }
 
+            const helperOutput = await helperPromise;
+            res.write(`data: ${JSON.stringify({ type: 'helper', content: helperOutput })}\n\n`);
+            res.write('data: [DONE]\n\n');
+            res.end();
 
-            let mainText = '';
-            if (generatedImage) {
-                mainText = `${generatedImage.mimeType};base64,${generatedImage.base64Data}`;
-            } else {
+        } catch (error) {
+            console.error("GEMINI API ERROR:: ", error);
+            let errorMessage = "An error occurred.";
+            if (error.toString().includes('503')) errorMessage = "Server Overloaded. Try again later.";
+            else if (error.toString().includes('429')) errorMessage = "Server Busy. Try again later.";
+            else errorMessage = error.message || error.toString();
 
-                mainText = answer.replace(/\\(?![ntr"'\\])/g, '\\');
+            if (!res.headersSent) {
+                res.setHeader('Content-Type', 'text/event-stream');
+                res.flushHeaders();
             }
-            return { mainText, thought }
+            res.write(`data: ${JSON.stringify({ type: 'error', content: errorMessage })}\n\n`);
+            res.end();
         }
-
-        const helper = async (mainModelText) => {
-
-            let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
-            if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
-
-            contextLimit = 2000 * 4;
-
-            let shortHistory = getTruncatedHistory(history, contextLimit);
-
-            const historyForMemory = shortHistory.map(msg => {
-                const role = msg.role === 'assistant' ? 'model' : 'user';
-                let parts = [];
-
-                let content;
-                try {
-                    content = JSON.parse(msg.content).response;
-                } catch (err) { content = msg.content }
-                parts.push(createPartFromText(content));
-
-                return { role, parts };
-            });
-
-            const latestUserTurn = historyForMemory.pop();
-            const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
-            const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}\nMODEL RESPONSE: ${mainModelText.length > (5000 * 4) ? mainModelText.slice(0, (5000 * 4)) + '...' : mainModelText}}`;
-
-            latestUserTurn.parts = latestUserTurn.parts
-                .filter(p => p.text === undefined)
-                .concat(createPartFromText(memoryMessageWithSystemPrompt));
-
-            const memoryContents = [...historyForMemory, latestUserTurn];
-
-            result = await genAI.models.generateContent({
-                model: MODELS[3],
-                contents: memoryContents,
-                config: { safetySettings: safetySettings }
-            });
-
-            let text = result.candidates[0].content.parts[0].text;
-            text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-            return text;
-        }
-
-
-        let mainModel = await mainModels();
-        let format = await helper(mainModel.mainText);
-
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?bio['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
-        mainModel.mainText = mainModel.mainText.replace(/\[['"]?file['"]?(\s*=\s*(?:'[\s\S]*?'|"[\s\S]*?"|[^\]]*?))?\s*\]/g, '');
-
-        let text = '';
-        try {
-            text = JSON.parse(format);
-            text = { ...text, response: `${mainModel.mainText}` };
-            text = JSON.stringify(text);
-        } catch (err) {
-            text = mainModel.mainText + '..';
-        }
-
-
-        if (mainModel.thought.length > 0) {
-            text = mainModel.thought + text;
-        }
-
-        await incrementHitCount(req);
-
-        res.status(200).json({
-            candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-        });
 
     } catch (error) {
-        console.error("GEMINI API ERROR:: ", error);
-        if (error.toString().includes('503')) {
-            const fallbackObject = {
-                action: 'chat',
-                target: [],
-                response: "Server Overloaded. Try again later."
-            };
-
-            text = JSON.stringify(fallbackObject);
-
-            res.status(200).json({
-                candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-            });
-            return;
+        console.error("OUTER API ERROR:: ", error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: { message: error.message } });
+        } else {
+            res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
+            res.end();
         }
-
-        if (error.toString().includes('429')) {
-            if (retryCounter <= 2) {
-                break RETRY;
-            }
-
-            const fallbackObject = {
-                action: 'chat',
-                target: [],
-                response: "Server Busy. Try again later."
-            };
-
-            text = JSON.stringify(fallbackObject);
-
-            res.status(200).json({
-                candidates: [{ content: { parts: [{ text }], role: 'model' } }]
-            });
-            return;
-        }
-
-        let errorMessage = error;
-        res.status(error.status || 500).json({
-            candidates: [{ content: { parts: [{ errorMessage }], role: 'model' } }]
-        });
     }
 
 });

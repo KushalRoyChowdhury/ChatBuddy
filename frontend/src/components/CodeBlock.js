@@ -40,7 +40,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }) =
   }, []);
 
   return !inline && match ? (
-    <div className="relative my-2 rounded-lg select-text overflow-hidden font-serif text-xs lg:text-sm max-w-full">
+    <div className="relative my-2 rounded-lg select-text overflow-hidden font-serif text-sm lg:text-base max-w-full">
       <div className={`px-4 py-2 bg-gray-200 dark:bg-gray-700 flex select-none justify-between items-center ${match[1] === 'poem' ? 'hidden' : ''}`}>
         <span className={`text-xs text-gray-700 dark:text-gray-300`}>{match[1]}</span>
         <button onClick={() => copyToClipboard(codeText)} className={`text-xs font-mono text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:font-bold transition-all ${copyButtonText === 'Copied' ? 'text-gray-700 dark:text-gray-300 font-medium hover:text-gray-700 dark:hover:text-gray-300 cursor-default hover:font-medium' : ''}`}>{copyButtonText}</button>

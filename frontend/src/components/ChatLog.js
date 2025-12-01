@@ -89,16 +89,11 @@ const ChatLog = React.memo(({
         )}
         {loading && (<>
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start">
-            <div className="max-w-3xl rounded-2xl p-4 bg-white dark:bg-transparent border dark:border-gray-600 shadow-sm text-black dark:text-gray-100 flex items-center gap-3">
+            <div className="bg-white dark:bg-transparent text-black dark:text-gray-100">
               <span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span>
-              <div className="flex space-x-1">
-                <motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} />
-                <motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} />
-                <motion.div className="w-2 h-2 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} />
-              </div>
             </div>
           </motion.div>
-          <div className='h-48 w-full bg-transparent'></div>
+          <div className='h-1 w-full bg-transparent'></div>
         </>
         )}
         <div className='w-full bottom-0 bg-transparent h-1' ref={chatEndRefTrigger} />

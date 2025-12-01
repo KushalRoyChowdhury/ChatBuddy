@@ -21,7 +21,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-transparent px-0 w-full text-black dark:text-white'}`}>
-        {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} />}
+        {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} isThinkingComplete={msg.content && msg.content.length > 0} />}
 
         {msg.role === 'user' && (() => {
           const fileData = messageImageMap.find(item => item.id === msg.id);
@@ -71,14 +71,24 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
           );
         })()}
 
-        {msg.role === 'assistant' && (
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 italic border-t border-b dark:border-gray-500 border-gray-300 p-2 font-normal flex justify-between items-center gap-2">
-            <span>Model: {msg.model === 'gemini-2.5-flash-lite' ? ' Advanced' : msg.model === 'image' ? ' ImageGen' : ' Basic'}</span>
-            <div className="flex gap-2">
-              {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span onClick={() => setShowMemories(true)} className="inline-flex cursor-pointer items-center px-2 py-0.5 rounded text-xs font-normal transition-all bg-yellow-100 dark:bg-yellow-900 hover:bg-yellow-200 dark:hover:bg-yellow-900/60 text-yellow-800 dark:text-yellow-200">Memory Updated</span> : null}
+        {msg.role === 'assistant' && (() => {
+          let isHelperArrived = false;
+          try {
+            const parsed = JSON.parse(msg.content);
+            if (parsed && typeof parsed.response === 'string') {
+              isHelperArrived = true;
+            }
+          } catch (e) { }
+
+          return isHelperArrived && (
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 italic border-t border-b dark:border-gray-500 border-gray-300 p-2 font-normal flex justify-between items-center gap-2">
+              <span>Model: {msg.model === 'gemini-2.5-flash-lite' ? ' Advanced' : msg.model === 'image' ? ' ImageGen' : ' Basic'}</span>
+              <div className="flex gap-2">
+                {msg.memoryStatus === 'permanent' || msg.memoryStatus === 'both' ? <span onClick={() => setShowMemories(true)} className="inline-flex cursor-pointer items-center px-2 py-0.5 rounded text-xs font-normal transition-all bg-yellow-100 dark:bg-yellow-900 hover:bg-yellow-200 dark:hover:bg-yellow-900/60 text-yellow-800 dark:text-yellow-200">Memory Updated</span> : null}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </motion.div>
   );

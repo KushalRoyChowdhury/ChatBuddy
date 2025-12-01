@@ -54,7 +54,7 @@ const ChatBubbleMessage = React.memo(({ content }) => {
   const fixedContent = fixKatexEscaping(strippedContent);
 
   return (
-    <div className="prose prose-sm max-w-none select-text prose-p:text-inherit markdown-content text-sm lg:text-base">
+    <div className="prose prose-sm max-w-none select-text selection:bg-purple-500/30 prose-p:text-inherit markdown-content text-sm lg:text-base">
       <ReactMarkdown
         components={{ code: CodeBlock }}
         remarkPlugins={[remarkGfm, remarkMath]}

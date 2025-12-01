@@ -2,7 +2,7 @@ const coreInstruction = require('./InstructionAbstraction/CoreInstructions');
 const model = require('./Model_Context_Data/ADVANCE_Web');
 
 
-const ADVANCE_MODEL_Web = (hasFiles, zoneInfo, apiKey) => {
+const ADVANCE_MODEL_Web = (zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -24,12 +24,6 @@ const ADVANCE_MODEL_Web = (hasFiles, zoneInfo, apiKey) => {
 -- START CORE INSTRUCTIONS --
 ${coreInstruction()}
 -- END CORE INSTRUCTIONS --
-
-${hasFiles &&
-        `-- START STRING SNIPPET ADDITION --
-ADD A SPECIAL STRING SNIPPET IN YOUR RESPONSE: ['file'=summary_of_the_file_provided].
-YOUR RESPONSE SHOULD BE LIKE THIS: ['file': summary_of_the_file_provided] user_facing_response.
--- END STRING SNIPPET ADDITION --`.trim()}
 
 -- START MODEL INSTRUCTIONS --
 ${model(apiKey)}

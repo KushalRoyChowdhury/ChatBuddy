@@ -1,34 +1,159 @@
-import React from 'react';
-import logo from '../assets/icon-512x512.png'
-import { useState } from 'react';
+import React, { useState } from 'react';
+import logo from '../assets/icon-512x512.png';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const PrivacyModal = ({ onClose }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+    onClick={onClose}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: 20 }}
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white/90 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-white/20 dark:border-white/10 relative overflow-hidden"
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-blue-500" />
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Privacy Policy</h2>
+      <div className="prose prose-sm dark:prose-invert text-gray-600 dark:text-gray-300 leading-relaxed">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 mb-4">
+          <p className="mb-2">
+            <span className="font-semibold text-gray-900 dark:text-white">Data Privacy:</span> Your chats, memories, and API keys are <span className="font-bold text-red-500">not</span> logged or stored on the server.
+          </p>
+          <p className="mb-0">
+            Google login credentials are stored locally in secure httpOnly cookies.
+          </p>
+        </div>
+        <p className="mb-4 text-xs text-gray-500">
+          *Uploaded files are stored for 48 hours on Google Cloud (according to <a href="https://ai.google.dev/gemini-api/docs/files" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Gemini Files API Policy</a>).
+        </p>
+        <p className="text-xs italic text-gray-400">
+          To avoid file save in external project consider using your own API Key.
+        </p>
+      </div>
+      <button
+        onClick={onClose}
+        className="mt-6 w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-90 rounded-xl font-medium transition-all active:scale-[0.98]"
+      >
+        Understood
+      </button>
+    </motion.div>
+  </motion.div>
+);
 
 export default function Login({ handleLogin }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const isProd = window.location.hostname === 'chatbuddy2026.onrender.com';
+
   return (
-    <div className="flex flex-col select-none items-center justify-center min-h-screen bg-gray-100 dark:bg-black">
-      <div className="p-5 bg-white dark:bg-[rgb(30,30,30)] flex items-center justify-center gap-5 rounded-2xl shadow-md dark:shadow-lg dark:shadow-[rgb(50,50,50)]">
+    <div className="min-h-screen w-full flex bg-gray-50 dark:bg-black overflow-hidden relative font-sans select-none selection:bg-purple-500/30">
 
-        <div className={`w-52 h-52 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-950 dark:brightness-[0.85] hidden md:block`}>
-          <img onLoad={() => setIsImageLoaded(true)} src={logo} alt="ChatBuddy Logo" className={`w-full h-full object-contain transition-all duration-500 ease-in-out ${isImageLoaded ? 'opacity-100 blur-none scale-[1.2]' : 'opacity-0 blur-md scale-150'}`} />
-        </div>
+      <AnimatePresence>
+        {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
+      </AnimatePresence>
 
-        <div className='h-52 flex flex-col justify-center items-center'>
-          <h1 className="text-2xl font-bold mb-4">Welcome to ChatBuddy</h1>
-          <p className="mb-6">Please log in to continue.</p>
-          <button
-            onClick={handleLogin}
-            className="bg-white dark:bg-[rgb(40,40,40)] dark:text-gray-50 border active:scale-[0.98] transition-all border-gray-300 flex gap-2 justify-center items-center w-full hover:bg-gray-50 dark:hover:bg-[rgb(50,50,50)] text-gray-800 font-medium py-2 px-4 rounded-full shadow-sm duration-200"
+      {/* Background Gradient/Shape - Visible on both, acts as main background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-400/30 dark:bg-purple-600/30 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-blue-400/30 dark:bg-blue-600/30 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '1s' }} />
+        <div className="absolute top-[40%] left-[40%] w-[40%] h-[40%] bg-indigo-300/20 dark:bg-indigo-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+      </div>
+
+      {/* Desktop: Split Layout Container */}
+      <div className="relative z-10 w-full flex flex-col md:flex-row h-screen">
+
+        {/* Left Side (Desktop) / Top Side (Mobile) */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full md:w-1/2 h-[45%] md:h-full flex flex-col items-center justify-end md:justify-center relative p-8 pb-0 md:pb-8"
+        >
+          {/* Logo Container */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
+            className="relative w-40 h-40 md:w-80 md:h-80 mb-4 md:mb-0"
           >
-            <svg width="25" height="25" viewBox="-0.5 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.83 24c0-1.52.25-2.99.7-4.36L2.62 13.6C1.08 16.73.21 20.26.21 24s.87 7.26 2.41 10.39l7.9-6.05c-.45-1.36-.7-2.82-.7-4.34" fill="#FBBC05" />
-              <path d="M23.71 10.13c3.31 0 6.3 1.17 8.65 3.09l6.84-6.4C35.04 2.77 29.7.53 23.71.53c-9.29 0-17.27 5.31-21.09 13.07l7.91 6.04c1.82-5.53 7.02-9.51 13.18-9.51" fill="#EB4335" />
-              <path d="M23.71 37.87c-6.16 0-11.36-3.98-13.18-9.51l-7.91 6.04C6.45 42.16 14.43 47.47 23.71 47.47c5.73 0 11.2-2.03 15.31-5.85l-7.51-5.8c-2.12 1.33-4.79 2.05-7.81 2.05" fill="#34A853" />
-              <path d="M46.15 24c0-1.39-.21-2.88-.53-4.27H23.71v9.07h12.6c-.63 3.09-2.35 5.47-4.8 7l7.51 5.81c4.31-4 7.11-9.97 7.11-17.61" fill="#4285F4" />
-            </svg>
-            Sign in with Google
-          </button>
-        </div>
+            {/* Glowing effect behind logo */}
+            <div className="absolute inset-0 bg-purple-500/10 dark:bg-white/10 rounded-full blur-3xl transform scale-75" />
 
+            <motion.img
+              src={logo}
+              alt="ChatBuddy Logo"
+              onLoad={() => setIsImageLoaded(true)}
+              animate={{ y: [0, -15, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className={`w-full h-full object-contain drop-shadow-2xl relative z-10 transition-opacity duration-700 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+          </motion.div>
+
+          {/* Text visible mostly on Desktop, hidden/smaller on mobile if needed */}
+          <div className="text-center md:text-left hidden md:block">
+            <h2 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-white/60 tracking-tight mb-4">
+              ChatBuddy
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-md mx-auto md:mx-0 font-light">
+              Your intelligent companion for seamless conversations.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Right Side (Desktop) / Bottom Side (Mobile) */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="w-full md:w-1/2 h-[55%] md:h-full flex flex-col items-center justify-start md:justify-center p-6 md:p-12 relative"
+        >
+          {/* Glass Card - Centered on Mobile, Right side on Desktop */}
+          <div className="pointer-events-auto w-full max-w-md p-8 rounded-3xl bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-2xl flex flex-col items-center text-center">
+
+            {/* Mobile-only Header inside card */}
+            <div className="md:hidden mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">ChatBuddy</h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Welcome back, Legend.</p>
+            </div>
+
+            <div className="hidden md:block mb-10">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Get Started</h3>
+              <p className="text-gray-600 dark:text-gray-400">Sign in to continue your journey</p>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleLogin}
+              className="group w-full bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-medium py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EB4335" />
+              </svg>
+              <span className="text-lg tracking-wide">Sign in with Google</span>
+            </motion.button>
+
+            {isProd && (
+              <div className="mt-8 text-xs text-gray-500 dark:text-gray-500">
+                By continuing, you agree to our{' '}
+                <button
+                  onClick={() => setShowPrivacy(true)}
+                  className="underline hover:text-gray-800 dark:hover:text-gray-300 transition-colors"
+                >
+                  Privacy Policy
+                </button>.
+              </div>
+            )}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

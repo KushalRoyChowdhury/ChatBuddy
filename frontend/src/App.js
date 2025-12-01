@@ -87,6 +87,7 @@ export default function App() {
     }
   });
   const [loading, setLoading] = useState(false);
+  const [showRespondingIndicator, setShowRespondingIndicator] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isViewingBottom, setIsViewingBottom] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
@@ -414,25 +415,22 @@ export default function App() {
 
   }, []);
 
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      saveDataToDrive();
-    }, 3000);
-    return () => clearTimeout(debounce);
-  }, [systemPrompt, userNickname]);
+  // --- Data Sync Interval ---
+  const saveDataToDriveRef = useRef(saveDataToDrive);
 
   useEffect(() => {
-    if (previousActiveChatIdRef.current) {
-      const previousChat = chatSessions.find(session => session.chatID === previousActiveChatIdRef.current);
-      if (previousChat && previousChat.chat.length > 0) {
-        const lastMessage = previousChat.chat[previousChat.chat.length - 1];
-        if (lastMessage.role === 'assistant') {
-          saveDataToDrive();
-        }
+    saveDataToDriveRef.current = saveDataToDrive;
+  }, [saveDataToDrive]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (saveDataToDriveRef.current) {
+        saveDataToDriveRef.current();
       }
-    }
-    previousActiveChatIdRef.current = activeChatId;
-  }, [activeChatId, chatSessions]);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
 
   // --- Event Handlers & Logic ---
@@ -738,6 +736,9 @@ export default function App() {
   const sendMessage = async () => {
     if ((!input.trim()) || loading) return;
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
@@ -823,7 +824,10 @@ export default function App() {
     setFileImg(null);
     setFileDoc(null);
     setLoading(true);
+    setShowRespondingIndicator(true);
     setFileName(false);
+
+
 
     try {
       const memoriesForModel = tempMemories
@@ -855,14 +859,14 @@ export default function App() {
 
       const getSystemPrompt = () => {
         if (userNickname && systemPrompt) {
-          return `-- NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" -- Instruction: ${systemPrompt}`;
+          return `-- USER NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" -- Instruction: ${systemPrompt}`;
         } else if (userNickname) {
-          return `-- NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" --`;
+          return `-- USER NAME "${userProfile.name.split(' ')[0]}" -- USER NICKNAME "${userNickname}" --`;
         }
         else if (!userNickname && systemPrompt) {
-          return `-- NAME "${userProfile.name.split(' ')[0]}" -- ${systemPrompt}`;
+          return `-- USER NAME "${userProfile.name.split(' ')[0]}" -- ${systemPrompt}`;
         }
-        return `-- NAME "${userProfile.name.split(' ')[0]}" --`;
+        return `-- USER NAME "${userProfile.name.split(' ')[0]}" --`;
       };
 
       const payload = {
@@ -906,6 +910,7 @@ export default function App() {
         return;
       }
 
+
       const response = await fetch(`${BACKEND_URL}/model`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -913,96 +918,158 @@ export default function App() {
         body: JSON.stringify(payload),
         signal
       });
-      const data = await response.json();
+
+
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error?.message || `HTTP error! status: ${response.status}`);
       }
-      if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts[0].text) {
-        throw new Error("Unknown Error in LLM Response.");
-      }
 
-      let rawResponseString = data.candidates[0].content.parts[0].text;
-      const thinkRegex = /<think>(.*?)<\/think>/gs;
-      const thinkMatches = [...rawResponseString.matchAll(thinkRegex)].map(m => m[1].trim());
-      const thoughtContent = thinkMatches.length > 0 ? thinkMatches.join('\n\n \n\n') : null;
-      const cleanJsonString = rawResponseString.replace(thinkRegex, '').trim();
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
       const assistantMessageId = Date.now();
 
-      if (thoughtContent) {
-        setThinkingProcesses(prev => ({
-          ...prev,
-          [currentChatId]: [...(prev[currentChatId] || []), { id: assistantMessageId, content: thoughtContent }]
-        }));
-      }
-
-      let permanentMemoryChanged = false;
-      let tempMemoryChanged = false;
-      try {
-        const parsedResponse = JSON.parse(cleanJsonString);
-        const { action, target, title } = parsedResponse;
-
-        if (isFirstMessage) {
-          const newTitle = title || userMessage.content.split(' ').slice(0, 5).join(' ');
-          setChatSessions(prevSessions => prevSessions.map(session =>
-            session.chatID === currentChatId
-              ? { ...session, title: newTitle }
-              : session
-          ));
-        }
-
-        if (action === 'remember' && target[0] && !memories.includes(target[0])) {
-          permanentMemoryChanged = true;
-          setMemories(prev => [...prev, target[0]]);
-        } else if (action === 'forget' && target[0]) {
-          permanentMemoryChanged = memories.includes(target[0]);
-          setMemories(prev => prev.filter(m => m !== target[0]));
-        } else if (action === 'update' && Array.isArray(target) && target.length === 2) {
-          const [oldMem, newMem] = target;
-          if (memories.includes(oldMem)) {
-            permanentMemoryChanged = true;
-            setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
-          }
-        } else if (action === 'temp' && target[0]) {
-          const newTempMemory = { memory: target[0], id: activeChatId };
-          const alreadyExists = tempMemories.some(m => m.memory === target[0] && m.id === activeChatId);
-          if (!alreadyExists) {
-            tempMemoryChanged = true;
-            setTempMemories(prev => {
-              const updatedTempMemories = [...prev, newTempMemory];
-              let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
-              while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
-                const removedItem = updatedTempMemories.shift();
-                totalChars -= (removedItem.memory.length + 1);
-              }
-              return updatedTempMemories;
-            });
-          }
-        }
-      } catch (e) {
-        if (isFirstMessage) {
-          setChatSessions(prevSessions => prevSessions.map(session =>
-            session.chatID === currentChatId
-              ? { ...session, title: userMessage.content.split(' ').slice(0, 5).join(' ') }
-              : session
-          ));
-        }
-        console.log("JSON Parse Error: ", e);
-      }
-
-      const assistantMessage = {
+      const initialAssistantMessage = {
         role: 'assistant',
-        content: cleanJsonString,
+        content: '',
         model: imageGen ? 'image' : model,
-        id: assistantMessageId,
-        memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
+        id: assistantMessageId
       };
+
       setChatSessions(prevSessions =>
         prevSessions.map(session =>
           session.chatID === currentChatId
-            ? { ...session, chat: [...session.chat, assistantMessage] }
+            ? { ...session, chat: [...session.chat, initialAssistantMessage] }
             : session
         )
       );
+
+      let currentResponse = '';
+      let currentThought = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            if (dataStr === '[DONE]') continue;
+
+            try {
+              const event = JSON.parse(dataStr);
+
+              if (event.type === 'token') {
+                setShowRespondingIndicator(false); // Hide responding indicator on first token
+                currentResponse += event.content;
+                // eslint-disable-next-line no-loop-func
+                setChatSessions(prevSessions =>
+                  prevSessions.map(session => {
+                    if (session.chatID !== currentChatId) return session;
+                    const newChat = [...session.chat];
+                    const lastMsg = newChat[newChat.length - 1];
+                    if (lastMsg.id === assistantMessageId) {
+                      newChat[newChat.length - 1] = { ...lastMsg, content: currentResponse };
+                    }
+                    return { ...session, chat: newChat };
+                  })
+                );
+              } else if (event.type === 'thought') {
+                setShowRespondingIndicator(false); // Hide responding indicator on first thought
+                currentThought += event.content;
+                // eslint-disable-next-line no-loop-func
+                setThinkingProcesses(prev => ({
+                  ...prev,
+                  [currentChatId]: prev[currentChatId]?.some(t => t.id === assistantMessageId)
+                    ? prev[currentChatId].map(t => t.id === assistantMessageId ? { ...t, content: currentThought } : t)
+                    : [...(prev[currentChatId] || []), { id: assistantMessageId, content: currentThought }]
+                }));
+              } else if (event.type === 'helper') {
+                let parsedHelper;
+                try {
+                  parsedHelper = JSON.parse(event.content);
+                } catch (e) {
+                  console.error("Failed to parse helper content:", event.content);
+                  continue;
+                }
+
+                const { action, target, title } = parsedHelper;
+                let permanentMemoryChanged = false;
+                let tempMemoryChanged = false;
+
+                if (isFirstMessage && title) {
+                  setChatSessions(prevSessions => prevSessions.map(session =>
+                    session.chatID === currentChatId
+                      ? { ...session, title: title }
+                      : session
+                  ));
+                }
+
+                if (action === 'remember' && target[0] && !memories.includes(target[0])) {
+                  permanentMemoryChanged = true;
+                  setMemories(prev => [...prev, target[0]]);
+                } else if (action === 'forget' && target[0]) {
+                  permanentMemoryChanged = memories.includes(target[0]);
+                  setMemories(prev => prev.filter(m => m !== target[0]));
+                } else if (action === 'update' && Array.isArray(target) && target.length === 2) {
+                  const [oldMem, newMem] = target;
+                  if (memories.includes(oldMem)) {
+                    permanentMemoryChanged = true;
+                    setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
+                  }
+                } else if (action === 'temp' && target[0]) {
+                  const newTempMemory = { memory: target[0], id: activeChatId };
+                  const alreadyExists = tempMemories.some(m => m.memory === target[0] && m.id === activeChatId);
+                  if (!alreadyExists) {
+                    tempMemoryChanged = true;
+                    setTempMemories(prev => {
+                      const updatedTempMemories = [...prev, newTempMemory];
+                      let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
+                      while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
+                        const removedItem = updatedTempMemories.shift();
+                        totalChars -= (removedItem.memory.length + 1);
+                      }
+                      return updatedTempMemories;
+                    });
+                  }
+                }
+
+                const finalContentObj = {
+                  ...parsedHelper,
+                  response: currentResponse
+                };
+
+                setChatSessions(prevSessions =>
+                  prevSessions.map(session => {
+                    if (session.chatID !== currentChatId) return session;
+                    const newChat = [...session.chat];
+                    const lastMsg = newChat[newChat.length - 1];
+                    if (lastMsg.id === assistantMessageId) {
+                      newChat[newChat.length - 1] = {
+                        ...lastMsg,
+                        content: JSON.stringify(finalContentObj),
+                        memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
+                      };
+                    }
+                    return { ...session, chat: newChat };
+                  })
+                );
+
+              } else if (event.type === 'error') {
+                throw new Error(event.content);
+              }
+
+            } catch (e) {
+              console.error("Error parsing SSE event:", e);
+            }
+          }
+        }
+      }
 
     } catch (error) {
       if (error.name === 'AbortError') {
@@ -1029,6 +1096,7 @@ export default function App() {
       }
     } finally {
       setLoading(false);
+      setShowRespondingIndicator(false);
       abortControllerRef.current = null;
       try {
         const usageResponse = await fetch(`${BACKEND_URL}/checkLimit`, {
@@ -1077,8 +1145,8 @@ export default function App() {
   };
 
   const scrollToBottom = () => {
-    if (isAtBottom()) {
-      if (loading || tapBottom) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (loading || tapBottom) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -1088,7 +1156,7 @@ export default function App() {
       setTapBottom(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, [loading, tapBottom, messages]);
+  }, [loading, tapBottom]);
 
   useEffect(() => {
     setTapBottom(true);
@@ -1409,7 +1477,7 @@ export default function App() {
           thinkingProcesses={thinkingProcesses[activeChatId] || []}
           messageImageMap={messageImageMap}
           getTextToRender={getTextToRender}
-          loading={loading}
+          loading={showRespondingIndicator}
           modelUsed={modelUsed}
           chatEndRef={chatEndRef}
           noChatGreet={noChatGreet}

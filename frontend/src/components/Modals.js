@@ -355,7 +355,7 @@ const Modals = React.memo(({
 
               {/* Memories List or Empty State */}
               {memories.length > 0 ? (
-                <ul className="space-y-3 select-text text-sm text-gray-700 dark:text-gray-200">
+                <ul className="space-y-3 select-text selection:bg-purple-500/30 text-sm text-gray-700 dark:text-gray-200">
                   {[...memories].reverse().map((mem) => (
                     <li
                       key={mem}
@@ -464,7 +464,7 @@ const Modals = React.memo(({
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 select-text py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 select-text selection:bg-purple-500/30 py-2 border border-gray-300 rounded-lg"
                   placeholder="Optional: Use your own key"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -773,7 +773,7 @@ const Modals = React.memo(({
                     maxLength="20"
                     value={userNickname}
                     onChange={(e) => setUserNickname(e.target.value)}
-                    className="w-full select-text px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full select-text selection:bg-purple-500/30 px-3 py-2 border border-gray-300 rounded-lg"
                     placeholder="Enter your nickname"
                   />
                   <div className="absolute bottom-1 right-2 text-xs text-gray-400">
@@ -792,7 +792,7 @@ const Modals = React.memo(({
                     value={systemPrompt}
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     maxLength="400"
-                    className="w-full h-40 select-text p-4 pr-16 border rounded-lg font-mono text-sm"
+                    className="w-full h-40 select-text selection:bg-purple-500/30 p-4 pr-16 border rounded-lg font-mono text-sm"
                     placeholder="Enter custom instructions..."
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-gray-400">
@@ -911,7 +911,7 @@ const Modals = React.memo(({
               <div className="text-center text-gray-600 dark:text-gray-300">
                 AI can make mistakes.
                 <br />
-                v2.3.2 (release 251118)
+                v2.4.0 (release 251201)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>

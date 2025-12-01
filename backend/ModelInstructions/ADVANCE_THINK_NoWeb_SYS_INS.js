@@ -3,7 +3,7 @@ const model = require('./Model_Context_Data/ADVANCE_NoWeb');
 const thinking = require('./Model_Context_Data/ADVANCE_THINKING');
 
 
-const ADVANCE_THINK_NoWeb = (hasFiles, zoneInfo, apiKey) => {
+const ADVANCE_THINK_NoWeb = (zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -29,12 +29,6 @@ ${coreInstruction()}
 -- START THINKING INSTRUCTIONS --
 ${thinking}
 -- END THINKING INSTRUCTIONS --
-
-${hasFiles &&
-        `-- START STRING SNIPPET ADDITION --
-ADD A SPECIAL STRING SNIPPET IN YOUR RESPONSE: ['file'=summary_of_the_file_provided].
-YOUR RESPONSE SHOULD BE LIKE THIS: ['file': summary_of_the_file_provided] user_facing_response.
--- END STRING SNIPPET ADDITION --`.trim()}
 
 -- START MODEL INSTRUCTIONS --
 ${model(apiKey)}
