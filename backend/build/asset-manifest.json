@@ -63,7 +63,9 @@
     "static/media/KaTeX_Size4-Regular.woff2": "/static/media/KaTeX_Size4-Regular.e418bf257af1052628d8.woff2",
     "static/media/KaTeX_Size3-Regular.woff": "/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
-    "index.html": "/index.html"
+    "index.html": "/index.html",
+    "main.bb6b0a57.css.map": "/static/css/main.bb6b0a57.css.map",
+    "main.95cc9196.js.map": "/static/js/main.95cc9196.js.map"
   },
   "entrypoints": [
     "static/css/main.bb6b0a57.css",
