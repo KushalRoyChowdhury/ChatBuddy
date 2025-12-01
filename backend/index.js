@@ -716,7 +716,7 @@ app.post('/model', async (req, res) => {
                             parts: [{ text: finalSystemPrompt }]
                         },
                         temperature: advanceReasoning ? 1 : 1.8,
-                        topP: advanceReasoning ? 0.95 : 0.9,
+                        topP: advanceReasoning ? 0.95 : 1,
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
@@ -842,7 +842,7 @@ app.post('/model', async (req, res) => {
                         } else {
                             await doIncrement();
                             tokenBuffer += part.text;
-                            if (Date.now() - lastFlushTime >= 50) {
+                            if (Date.now() - lastFlushTime >= 10) {
                                 flushBuffer();
                             }
                         }
