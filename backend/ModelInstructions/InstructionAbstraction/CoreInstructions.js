@@ -4,7 +4,7 @@ const modelBehaviour = require('../ChatBuddy_CoreInstructions/modelBehaviour');
 
 
 
-const coreInstructions = (isFirst) => {
+const coreInstructions = () => {
 return `${mainContext}
 
 -- START MEMORY BEHAVIOUR --
