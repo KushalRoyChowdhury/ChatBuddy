@@ -29,8 +29,8 @@ const decompress = (base64String) => {
 
 
 // --- Application Constants ---
-const MEMORY_LIMIT_CHARS = 1200 * 4;
-const TEMP_MEMORY_LIMIT_CHARS = 1000 * 4;
+const MEMORY_LIMIT_CHARS = 1500 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 800 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const getTextToRender = (msg) => {
@@ -1136,14 +1136,6 @@ export default function App() {
     setNoChatGreet(greetings);
   }, [greetings]);
 
-  const chatContainerRef = useRef(); // the scrollable container
-
-  const isAtBottom = () => {
-    const container = chatContainerRef.current;
-    if (!container) return true;
-    return container.scrollHeight - container.scrollTop <= container.clientHeight + 1;
-  };
-
   const scrollToBottom = () => {
     if (loading || tapBottom) {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1156,7 +1148,8 @@ export default function App() {
       setTapBottom(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, [loading, tapBottom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tapBottom]);
 
   useEffect(() => {
     setTapBottom(true);

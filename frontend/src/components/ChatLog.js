@@ -35,6 +35,17 @@ const ChatLog = React.memo(({
     };
   }, [activeChatId]);
 
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        chatEndRefTrigger.current.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [loading]);
+
 
   return (
     <main className="flex-grow overflow-y-auto p-4 max-w-4xl mx-auto w-full">
@@ -82,22 +93,16 @@ const ChatLog = React.memo(({
                   getTextToRender={getTextToRender}
                   getUserBubbleClass={getUserBubbleClass}
                   setShowMemories={setShowMemories}
+                  loading={loading}
+                  modelUsed={modelUsed}
                 />
               );
             })}
           </AnimatePresence>
         )}
-        {loading && (<>
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start">
-            <div className="bg-white dark:bg-transparent text-black dark:text-gray-100">
-              <span className="text-sm">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span>
-            </div>
-          </motion.div>
-          <div className='h-1 w-full bg-transparent'></div>
-        </>
-        )}
-        <div className='w-full bottom-0 bg-transparent h-1' ref={chatEndRefTrigger} />
-        <div className='w-full bottom-0 bg-transparent h-1' ref={chatEndRef} />
+        
+        <div className='w-full bottom-0 bg-transparent h-10' ref={chatEndRef} />
+        <div className='w-full bottom-0 bg-transparent h-10' ref={chatEndRefTrigger} />
       </div>
     </main>
   );

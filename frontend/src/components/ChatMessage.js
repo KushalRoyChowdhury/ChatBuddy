@@ -5,7 +5,7 @@ import CollapsibleThought from './CollapsibleThought';
 import ChatBubbleMessage from './ChatBubbleMessage';
 import AiImage from './AiImage';
 
-const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, setShowMemories }) => {
+const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender, setShowMemories, loading, modelUsed }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(true);
 
   const getUserBubbleClass = (msgModel) => {
@@ -20,7 +20,15 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
       animate={{ opacity: 1 }}
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'bg-transparent px-0 w-full text-black dark:text-white'}`}>
+      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : 'min-h-20 px-0 w-full text-black dark:text-white'}`}>
+          {loading && msg.role !== 'user' && msg.content.length === 0 && (<>
+            <motion.div initial={{ y: 0, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start">
+              <div className="bg-white dark:bg-transparent text-black dark:text-gray-100">
+                <span className="text-base font-bold">{modelUsed === 'basic' ? 'Responding...' : modelUsed === 'advance+' ? 'Thinking Deeply...' : modelUsed === 'image' ? 'Generating...' : 'Thinking...'}</span>
+              </div>
+            </motion.div>
+          </>
+          )}
         {msg.role === 'assistant' && <CollapsibleThought thoughtContent={thought?.content} isThinkingComplete={msg.content && msg.content.length > 0} />}
 
         {msg.role === 'user' && (() => {
@@ -72,6 +80,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
         })()}
 
         {msg.role === 'assistant' && (() => {
+
           let isHelperArrived = false;
           try {
             const parsed = JSON.parse(msg.content);
