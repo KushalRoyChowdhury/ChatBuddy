@@ -31,7 +31,7 @@ Action Triggers & Rules:
 USE TEMP ACTION ("temp") WHEN:
  • Every prompt.
  • The target of temp action, KEEP THE BASIC SUMMARY OF USER PROMPT with Date on single string at array index 0.
- • DONOT SAVE EXACT VALUES OR WORDINGS IN TEMP TARGET. KEEP IT A SYNTHESISED CONTEXTUAL DETAILED SUMMARY under 20 words.
+ • IN TEMP TARGET, KEEP A SYNTHESISED CONTEXTUAL DETAILED SUMMARY **UNDER 20 WORDS**.
  eg structure for temp target: ["...{summary}... Responded accordingly. Talked on (YYYY-MM-DD, TIME_OF_DAY_AS_PROVIDED)"].
  • DONOT save any dates or time_of_day for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
  ONLY USE 'remember' ACTION IF ITS TOLD BY USER OR CONTEXT SIGNIFY THEIR PREFERENCES/HABITS.
