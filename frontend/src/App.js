@@ -1133,6 +1133,15 @@ export default function App() {
 
             } catch (e) {
               console.error("Error parsing SSE event:", e);
+              const errorJsonString = `{"action":"none", "target":"", "response":"Error in LLM Stream: ${e}"}`;
+              const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
+              setChatSessions(prevSessions =>
+                prevSessions.map(session =>
+                  session.chatID === currentChatId
+                    ? { ...session, chat: [...session.chat, assistantMessage] }
+                    : session
+                )
+              );
             }
           }
         }
@@ -1418,6 +1427,14 @@ export default function App() {
 
   const imageGenAvailable = new Date() < new Date('2025-11-12');
 
+  const lastBubble = () => {
+    const activeChat = chatSessions.find(session => session.chatID === activeChatId);
+    if (activeChat && activeChat.chat.length > 0) {
+      return activeChat.chat[activeChat.chat.length - 1].id;
+    }
+    return null;
+  };
+
   // --- JSX Rendering ---
 
   if (isCheckingLogin) {
@@ -1538,6 +1555,7 @@ export default function App() {
           messageImageMap={messageImageMap}
           getTextToRender={getTextToRender}
           loading={showRespondingIndicator}
+          loadingFinished={loading}
           modelUsed={modelUsed}
           chatEndRef={chatEndRef}
           noChatGreet={noChatGreet}
@@ -1548,6 +1566,7 @@ export default function App() {
           activeChatId={activeChatId}
           setShowMemories={setShowMemories}
           fileImg={fileImg}
+          lastBubble={lastBubble}
         />
 
         <MessageInput

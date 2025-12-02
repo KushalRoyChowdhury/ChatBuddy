@@ -18,7 +18,9 @@ const ChatLog = React.memo(({
   setTapBottom,
   activeChatId,
   setShowMemories,
-  fileImg
+  fileImg,
+  loadingFinished,
+  lastBubble
 }) => {
 
   const chatEndRefTrigger = React.useRef(null);
@@ -94,15 +96,17 @@ const ChatLog = React.memo(({
                   getUserBubbleClass={getUserBubbleClass}
                   setShowMemories={setShowMemories}
                   loading={loading}
+                  loadingFinished={loadingFinished}
                   modelUsed={modelUsed}
+                  lastBubble={lastBubble}
                 />
               );
             })}
           </AnimatePresence>
         )}
         
-        <div className='w-full bottom-0 bg-transparent h-10' ref={chatEndRef} />
-        <div className='w-full bottom-0 bg-transparent h-10' ref={chatEndRefTrigger} />
+        <div className='w-full m-0 p-0 bg-transparent h-[1px]' ref={chatEndRef} />
+        <div className='w-full m-0 p-0 bg-transparent h-[1px]' ref={chatEndRefTrigger} />
       </div>
     </main>
   );
