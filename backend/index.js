@@ -721,7 +721,7 @@ app.post('/model', async (req, res) => {
                             role: "system",
                             parts: [{ text: finalSystemPrompt }]
                         },
-                        temperature: advanceReasoning ? 1 : 1.8,
+                        temperature: advanceReasoning ? 1 : 1.4,
                         topP: advanceReasoning ? 0.95 : 1,
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
