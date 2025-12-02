@@ -666,13 +666,19 @@ app.post('/model', async (req, res) => {
                 return { role, parts };
             });
 
+            let hasFiles;
+            try {
+                hasFiles = historyForSDK_NEW[historyForSDK_NEW.length - 1].parts.length > 1;
+            }
+            catch (err) { hasFiles = false; }
+
             let INTERNAL_SYSTEM_PROMPT = '';
 
-            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(zoneInfo, apiKey);
-            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(zoneInfo, apiKey);
-            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(zoneInfo, apiKey);
-            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(zoneInfo, apiKey);
-            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(zoneInfo, apiKey);
+            if (modelIndex === 0) INTERNAL_SYSTEM_PROMPT = basic(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && !advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && webSearch && !advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_web(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && advanceReasoning && !webSearch) INTERNAL_SYSTEM_PROMPT = advance_thinking(hasFiles, zoneInfo, apiKey);
+            else if (modelIndex === 1 && webSearch && advanceReasoning) INTERNAL_SYSTEM_PROMPT = advance_thinking_web(hasFiles, zoneInfo, apiKey);
 
             const selectedModel = MODELS[modelIndex];
 

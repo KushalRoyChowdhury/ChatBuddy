@@ -3,7 +3,7 @@ const model = require('./Model_Context_Data/ADVANCE_NoWeb');
 const thinking = require('./Model_Context_Data/ADVANCE_THINKING');
 
 
-const ADVANCE_THINK_NoWeb = (zoneInfo, apiKey) => {
+const ADVANCE_THINK_NoWeb = (hasFiles, zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -23,7 +23,7 @@ const ADVANCE_THINK_NoWeb = (zoneInfo, apiKey) => {
     return `--- START INTERNAL SYSTEM INSTRUCTION ---
 
 -- START CORE INSTRUCTIONS --
-${coreInstruction()}
+${coreInstruction(hasFiles)}
 -- END CORE INSTRUCTIONS --
 
 -- START THINKING INSTRUCTIONS --

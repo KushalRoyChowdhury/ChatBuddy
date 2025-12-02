@@ -2,7 +2,7 @@ const coreInstruction = require('./InstructionAbstraction/CoreInstructions');
 const model = require('./Model_Context_Data/ADVANCE_NoWeb');
 
 
-const ADVANCE_MODEL_NoWeb = (zoneInfo, apiKey) => {
+const ADVANCE_MODEL_NoWeb = (hasFiles, zoneInfo, apiKey) => {
 
     let now = new Date();
     const optionsDate = {
@@ -22,7 +22,7 @@ const ADVANCE_MODEL_NoWeb = (zoneInfo, apiKey) => {
     return `--- START INTERNAL SYSTEM INSTRUCTION ---
 
 -- START CORE INSTRUCTIONS --
-${coreInstruction()}
+${coreInstruction(hasFiles)}
 -- END CORE INSTRUCTIONS --
 
 -- START MODEL INSTRUCTIONS --

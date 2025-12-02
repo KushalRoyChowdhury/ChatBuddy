@@ -947,6 +947,9 @@ export default function App() {
 
       let currentResponse = '';
       let currentThought = '';
+      let streamBuffer = '';
+      let capturedFileContent = null;
+      let isCollectingFile = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -966,7 +969,63 @@ export default function App() {
 
               if (event.type === 'token') {
                 setShowRespondingIndicator(false); // Hide responding indicator on first token
-                currentResponse += event.content;
+
+                // --- File Snippet Handling Start ---
+                const token = event.content;
+                streamBuffer += token;
+
+                // Check for start of file block
+                if (!isCollectingFile && streamBuffer.includes("['file'='")) {
+                  isCollectingFile = true;
+                }
+
+                if (isCollectingFile) {
+                  // If we are collecting, check for the end of the block
+                  const endIndex = streamBuffer.indexOf("']");
+                  if (endIndex !== -1) {
+                    // Block complete
+                    const fullBlock = streamBuffer.substring(streamBuffer.indexOf("['file'='"), endIndex + 2);
+
+                    // Extract content: ['file'='CONTENT']
+                    // Length of "['file'='" is 9.
+                    capturedFileContent = fullBlock.substring(9, fullBlock.length - 2);
+
+                    // Remove the block from buffer and append rest to currentResponse
+                    // But wait, we need to be careful about what was BEFORE the block in the buffer
+                    // The buffer might contain: "Some text ['file'='...'] some more text"
+
+                    const parts = streamBuffer.split(fullBlock);
+                    // parts[0] is text before, parts[1] is text after (if any, usually token by token so maybe empty)
+
+                    currentResponse += parts[0] + (parts[1] || '');
+
+                    // Reset buffer and flag
+                    streamBuffer = '';
+                    isCollectingFile = false;
+                  }
+                  // If not complete, we do nothing (don't update currentResponse yet)
+                } else {
+                  // Not collecting file. 
+                  // But we need to be careful not to flush partial triggers like "['" or "['file"
+                  // Simple heuristic: if buffer ends with partial trigger, keep it in buffer.
+                  // Otherwise flush to currentResponse.
+
+                  const partials = ["['", "['f", "['fi", "['fil", "['file", "['file'", "['file'="];
+                  let potentialMatch = false;
+                  for (const p of partials) {
+                    if (streamBuffer.endsWith(p)) {
+                      potentialMatch = true;
+                      break;
+                    }
+                  }
+
+                  if (!potentialMatch) {
+                    currentResponse += streamBuffer;
+                    streamBuffer = '';
+                  }
+                }
+                // --- File Snippet Handling End ---
+
                 // eslint-disable-next-line no-loop-func
                 setChatSessions(prevSessions =>
                   prevSessions.map(session => {
@@ -1022,26 +1081,34 @@ export default function App() {
                     permanentMemoryChanged = true;
                     setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
                   }
-                } else if (action === 'temp' && target[0]) {
-                  const newTempMemory = { memory: target[0], id: activeChatId };
-                  const alreadyExists = tempMemories.some(m => m.memory === target[0] && m.id === activeChatId);
-                  if (!alreadyExists) {
-                    tempMemoryChanged = true;
-                    setTempMemories(prev => {
-                      const updatedTempMemories = [...prev, newTempMemory];
-                      let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
-                      while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
-                        const removedItem = updatedTempMemories.shift();
-                        totalChars -= (removedItem.memory.length + 1);
-                      }
-                      return updatedTempMemories;
-                    });
+                } else if (action === 'temp') {
+                  // Append capturedFileContent to target[0] if available
+                  let contentToSave = target[0] || '';
+                  if (capturedFileContent) {
+                    contentToSave = contentToSave ? `[${capturedFileContent}] ${contentToSave}` : `[${capturedFileContent}]`;
+                  }
+
+                  if (contentToSave) {
+                    const newTempMemory = { memory: contentToSave, id: activeChatId };
+                    const alreadyExists = tempMemories.some(m => m.memory === contentToSave && m.id === activeChatId);
+                    if (!alreadyExists) {
+                      tempMemoryChanged = true;
+                      setTempMemories(prev => {
+                        const updatedTempMemories = [...prev, newTempMemory];
+                        let totalChars = updatedTempMemories.reduce((acc, curr) => acc + curr.memory.length + 1, 0);
+                        while (totalChars > TEMP_MEMORY_LIMIT_CHARS && updatedTempMemories.length > 0) {
+                          const removedItem = updatedTempMemories.shift();
+                          totalChars -= (removedItem.memory.length + 1);
+                        }
+                        return updatedTempMemories;
+                      });
+                    }
                   }
                 }
 
                 const finalContentObj = {
                   ...parsedHelper,
-                  response: currentResponse
+                  response: currentResponse // This currentResponse already has the block removed
                 };
 
                 setChatSessions(prevSessions =>
