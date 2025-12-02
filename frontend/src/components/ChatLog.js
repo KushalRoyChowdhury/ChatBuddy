@@ -38,15 +38,15 @@ const ChatLog = React.memo(({
   }, [activeChatId]);
 
   useEffect(() => {
-    if (loading) {
+    if (loading || loadingFinished) {
       const timer = setTimeout(() => {
         chatEndRefTrigger.current.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
+      }, 100);
       return () => {
         clearTimeout(timer);
       };
     }
-  }, [loading]);
+  }, [loading, loadingFinished]);
 
 
   return (

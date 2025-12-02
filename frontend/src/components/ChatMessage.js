@@ -20,7 +20,7 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
       animate={{ opacity: 1 }}
       className={`w-full flex font-normal ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden transition-all ${msg.role === 'user' ? getUserBubbleClass(msg.model) : `${loadingFinished ? 'min-h-[54dvh] ' : ''} ${msg.id === lastBubble() ? 'min-h-[54dvh] ' : ''} bg-transparent px-0 w-full text-black dark:text-white`}`}>
+      <div className={`max-w-3xl rounded-2xl p-4 overflow-hidden ${msg.role === 'user' ? getUserBubbleClass(msg.model) : `${loadingFinished && msg.content.length === 0 ? 'min-h-[54dvh] ' : ''} ${msg.id === lastBubble() ? 'min-h-[54dvh] ' : ''} h-max bg-red-500 px-0 w-full text-black dark:text-white`}`}>
           {loading && msg.role !== 'user' && msg.content.length === 0 && (<>
             <motion.div initial={{ y: 0, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-start">
               <div className="bg-white dark:bg-transparent text-black dark:text-gray-100">
