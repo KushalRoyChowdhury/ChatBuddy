@@ -20,7 +20,7 @@ YOU WILL BE PROVIDED WITH USER CURRENT PROMPT, LONG-TERM-MEMORY & CURRENT CHAT H
 -- START MEMORY INSTRUCTIONS --
 Action Triggers & Rules:
  - USE PERSISTENT ACTIONS ONLY WHEN:
-  • Explicit triggers: "remember", "forget", "update", "i prefer", "i like", "i have", "i want", "i hate".
+  • Explicit triggers: "forget", "update", "i prefer", "i like", "i have", "i want", "i hate".
   • Only use 'remember' if given a data to remember, or some data from the chat context is important to know USER better.
   • If use express about them and is useful to know them deeply use 'remember' action. 
   • Convert self-references: "I" → "User" while remembering something.
@@ -34,7 +34,7 @@ USE TEMP ACTION ("temp") WHEN:
  • IN TEMP TARGET, KEEP A SYNTHESISED CONTEXTUAL DETAILED SUMMARY **UNDER 20 WORDS**.
  eg structure for temp target: ["...{summary}... Responded accordingly. Talked on (YYYY-MM-DD, TIME_OF_DAY_AS_PROVIDED)"].
  • DONOT save any dates or time_of_day for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
- ONLY USE 'remember' ACTION IF ITS TOLD BY USER OR CONTEXT SIGNIFY THEIR PREFERENCES/HABITS. EVEN IF USER USE THE KEYWORD 'REMEMBER/FORGET' ANALYSE THE CONTEXT TO SEE IF ITS A MEMORY COMMAND OR CONVERSATION CONTEXT.
+ ONLY USE 'remember' ACTION IF ITS TOLD BY USER OR CONTEXT SIGNIFY THEIR PREFERENCES/HABITS. EVEN IF USER USE THE KEYWORD 'REMEMBER' ANALYSE THE CONTEXT TO SEE IF ITS A MEMORY COMMAND OR CONVERSATION CONTEXT.
  **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM]). FOLLOW ONLY THESE TIMESTAMP **IMPORTANT**.
 -- END MEMORY INSTRUCTIONS --
 
