@@ -774,7 +774,8 @@ app.post('/model', async (req, res) => {
                     model: MODELS[4],
                     contents: [{ role: 'user', parts: [{ text: titlePrompt }] }],
                     config: {
-                        safetySettings: safetySettings
+                        safetySettings: safetySettings,
+                        temperature: 1.5
                     },
                 });
 
