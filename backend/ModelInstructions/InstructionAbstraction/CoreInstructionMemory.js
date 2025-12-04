@@ -1,8 +1,6 @@
 const responseProtocol = require('../ChatBuddy_CoreInstructions/responseProtocol');
-const responseProtocolFirst = require('../ChatBuddy_CoreInstructions/responseProtocolFirst');
 
-
-const coreInstructions = (isFirst, zoneInfo) => {
+const coreInstructions = (zoneInfo) => {
 
   let now = new Date();
   const optionsDate = {
@@ -17,6 +15,8 @@ const coreInstructions = (isFirst, zoneInfo) => {
   return `--- START INTERNAL SYSTEM INSTRUCTION ---
 You are a helper model in ChatBuddy for memory management you dont respond to user query. Your ONLY JOB is to analyze the history of the chat and output a SINGLE JSON STRING. FOLLOW THE INSTRUCTIONS STRICTLY. YOUR RESPONSE STRUCTURE WILL BE PROVIDED IN RESPONSE PROTOCOL BLOCK. YOUR RESPONSE MUST NOT INCLUDE ANY CHARACTER OUTSIDE THE JSON CODE BLOCK.
 YOU WILL BE PROVIDED WITH USER CURRENT PROMPT, LONG-TERM-MEMORY & CURRENT CHAT HISTORY.
+GENERATE YOUR RESPONSES AS QUICKLY AS POSSIBLE.
+
 -- START MEMORY INSTRUCTIONS --
 Action Triggers & Rules:
  - USE PERSISTENT ACTIONS ONLY WHEN:
@@ -39,7 +39,7 @@ USE TEMP ACTION ("temp") WHEN:
 -- END MEMORY INSTRUCTIONS --
 
 -- START RESPONSE PROTOCOL --
-${isFirst ? responseProtocolFirst : responseProtocol}
+${responseProtocol}
 -- END RESPONSE PROTOCOL --
 
 Current Date: ${now.toLocaleString('en-US', optionsDate)}.

@@ -277,7 +277,8 @@ const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
-    'gemma-3-12b-it'     // Memory & Format Handler
+    'gemma-3-4b-it',     // Memory & Format Handler
+    'gemma-3-1b-it',     // Chat Title Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
 const GEMMA_PRO_HISTORY_LIMIT_CHARS = 8000 * 4;
@@ -331,8 +332,6 @@ const safetySettings = [
 ];
 
 // Rate Limiter
-
-
 const RATE_LIMIT_DB_FILE = path.join(__dirname, 'rate-limiter-db.json');
 let rateLimitDB = {};
 
@@ -606,9 +605,19 @@ app.post('/upload', async (req, res) => {
         res.status(500).json({ error: 'Internal server error during upload.' });
     }
 });
+
+
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
+
+    // Check for [new title] keyword in the last user message
+    if (history && history.length > 0) {
+        const lastMsg = history[history.length - 1];
+        if (lastMsg.role === 'user' && lastMsg.content.includes('[new title]')) {
+            isFirst = true;
+        }
+    }
 
     let retryCounter = 1;
 
@@ -616,8 +625,6 @@ app.post('/model', async (req, res) => {
     if (!limitResult.allowed) {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
     }
-
-    RETRY:
     try {
         const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++ - 1];
         if (!finalApiKey) {
@@ -721,7 +728,7 @@ app.post('/model', async (req, res) => {
                             role: "system",
                             parts: [{ text: finalSystemPrompt }]
                         },
-                        temperature: advanceReasoning ? 1 : 1.4,
+                        temperature: advanceReasoning ? 1 : 1.5,
                         topP: advanceReasoning ? 0.95 : 0.99,
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
@@ -754,12 +761,53 @@ app.post('/model', async (req, res) => {
             }
         }
 
+        const titleGenerator = async () => {
+            try {
+                if (!isFirst) return;
+
+                const titleInstruction = require('./ModelInstructions/InstructionAbstraction/CoreInstructionTitle');
+
+                const titleContextLimit = 2000 * 4; // ~2k tokens
+                const shortHistory = getTruncatedHistory(history, titleContextLimit);
+
+                const historyForTitle = shortHistory.map(msg => {
+                    const role = msg.role === 'assistant' ? 'model' : 'user';
+                    let content;
+                    try {
+                        content = JSON.parse(msg.content).response;
+                    } catch (err) { content = msg.content }
+                    return { role, parts: [{ text: content }] };
+                });
+
+                const titlePrompt = `${titleInstruction} Current Chat Title: "${req.body.currentTitle || 'New Chat'}"`;
+                const result = await genAI.models.generateContent({
+                    model: MODELS[4],
+                    contents: [...historyForTitle, { role: 'user', parts: [{ text: titlePrompt }] }],
+                    config: {
+                        temperature: 0.8,
+                        safetySettings: safetySettings,
+                    },
+                });
+
+                if (result.candidates[0].content.parts[0].text) {
+                    let text = result.candidates[0].content.parts[0].text;
+                    // Clean up any potential markdown or quotes
+                    text = text.replace(/^["']|["']$/g, '').trim();
+                    text = text.replace(/\*\*/g, '').trim();
+                    // Send immediately
+                    res.write(`data: ${JSON.stringify({ type: 'title', content: text })}\n\n`);
+                }
+            } catch (error) {
+                console.error("Title generation failed:", error);
+            }
+        };
+
         const helper = async () => {
             try {
-                let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
+                let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(zoneInfo);
                 if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
 
-                contextLimit = 2000 * 4;
+                contextLimit = 4000 * 4;
 
                 let shortHistory = getTruncatedHistory(history, contextLimit);
 
@@ -785,11 +833,13 @@ app.post('/model', async (req, res) => {
                     .concat(createPartFromText(memoryMessageWithSystemPrompt));
 
                 const memoryContents = [...historyForMemory, latestUserTurn];
-
                 const result = await genAI.models.generateContent({
                     model: MODELS[3],
                     contents: memoryContents,
-                    config: { safetySettings: safetySettings }
+                    config: {
+                        temperature: 0.9,
+                        safetySettings: safetySettings,
+                    },
                 });
 
                 if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
@@ -806,6 +856,8 @@ app.post('/model', async (req, res) => {
         }
 
         try {
+            // Start title generation in parallel
+            const titlePromise = titleGenerator();
             const helperPromise = helper();
 
             const { isStream, result } = await mainModels();
@@ -848,7 +900,7 @@ app.post('/model', async (req, res) => {
                         } else {
                             await doIncrement();
                             tokenBuffer += part.text;
-                            if (Date.now() - lastFlushTime >= 10) {
+                            if (Date.now() - lastFlushTime >= 1) {
                                 flushBuffer();
                             }
                         }
@@ -884,7 +936,13 @@ app.post('/model', async (req, res) => {
                 res.write(`data: ${JSON.stringify({ type: 'token', content: mainText })}\n\n`);
             }
 
+            // Signal that the main stream is done
+            res.write('data: [STREAM DONE]\n\n');
+
+            // Wait for parallel tasks
+            await titlePromise;
             const helperOutput = await helperPromise;
+
             res.write(`data: ${JSON.stringify({ type: 'helper', content: helperOutput })}\n\n`);
             res.write('data: [DONE]\n\n');
             res.end();

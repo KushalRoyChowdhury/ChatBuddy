@@ -736,7 +736,7 @@ export default function App() {
   const sendMessage = async () => {
     if ((!input.trim()) || loading) return;
 
-    if (abortControllerRef.current) {
+    if (loading && abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
@@ -894,6 +894,7 @@ export default function App() {
         webSearch: webSearch,
         images: currentChatImageUris,
         isFirst: isFirstMessage,
+        currentTitle: chatSessions.find(s => s.chatID === currentChatId)?.title || 'New Chat',
         zoneInfo: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
 
@@ -964,6 +965,12 @@ export default function App() {
             const dataStr = line.slice(6);
             if (dataStr === '[DONE]') continue;
 
+            // Handle [STREAM DONE] signal
+            if (dataStr === '[STREAM DONE]') {
+              setLoading(false); // Stop loading indicator, enable SEND button
+              continue;
+            }
+
             try {
               const event = JSON.parse(dataStr);
 
@@ -991,11 +998,8 @@ export default function App() {
                     capturedFileContent = fullBlock.substring(9, fullBlock.length - 2);
 
                     // Remove the block from buffer and append rest to currentResponse
-                    // But wait, we need to be careful about what was BEFORE the block in the buffer
-                    // The buffer might contain: "Some text ['file'='...'] some more text"
 
                     const parts = streamBuffer.split(fullBlock);
-                    // parts[0] is text before, parts[1] is text after (if any, usually token by token so maybe empty)
 
                     currentResponse += parts[0] + (parts[1] || '');
 
@@ -1003,13 +1007,8 @@ export default function App() {
                     streamBuffer = '';
                     isCollectingFile = false;
                   }
-                  // If not complete, we do nothing (don't update currentResponse yet)
                 } else {
                   // Not collecting file. 
-                  // But we need to be careful not to flush partial triggers like "['" or "['file"
-                  // Simple heuristic: if buffer ends with partial trigger, keep it in buffer.
-                  // Otherwise flush to currentResponse.
-
                   const partials = ["['", "['f", "['fi", "['fil", "['file", "['file'", "['file'="];
                   let potentialMatch = false;
                   for (const p of partials) {
@@ -1038,6 +1037,14 @@ export default function App() {
                     return { ...session, chat: newChat };
                   })
                 );
+              } else if (event.type === 'title') {
+                // Handle title update immediately
+                const newTitle = event.content;
+                setChatSessions(prevSessions => prevSessions.map(session =>
+                  session.chatID === currentChatId
+                    ? { ...session, title: newTitle }
+                    : session
+                ));
               } else if (event.type === 'thought') {
                 setShowRespondingIndicator(false); // Hide responding indicator on first thought
                 currentThought += event.content;
@@ -1085,7 +1092,7 @@ export default function App() {
                   // Append capturedFileContent to target[0] if available
                   let contentToSave = target[0] || '';
                   if (capturedFileContent) {
-                    contentToSave = contentToSave ? `[${capturedFileContent}] ${contentToSave}` : `[${capturedFileContent}]`;
+                    contentToSave = contentToSave ? `${contentToSave} [${capturedFileContent}]` : `[${capturedFileContent}]`;
                   }
 
                   if (contentToSave) {
@@ -1115,10 +1122,10 @@ export default function App() {
                   prevSessions.map(session => {
                     if (session.chatID !== currentChatId) return session;
                     const newChat = [...session.chat];
-                    const lastMsg = newChat[newChat.length - 1];
-                    if (lastMsg.id === assistantMessageId) {
-                      newChat[newChat.length - 1] = {
-                        ...lastMsg,
+                    const msgIndex = newChat.findIndex(msg => msg.id === assistantMessageId);
+                    if (msgIndex !== -1) {
+                      newChat[msgIndex] = {
+                        ...newChat[msgIndex],
                         content: JSON.stringify(finalContentObj),
                         memoryStatus: permanentMemoryChanged && tempMemoryChanged ? 'both' : permanentMemoryChanged ? 'permanent' : tempMemoryChanged ? 'temporary' : null
                       };
