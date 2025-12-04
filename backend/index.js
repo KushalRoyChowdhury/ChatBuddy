@@ -784,8 +784,8 @@ app.post('/model', async (req, res) => {
                     model: MODELS[4],
                     contents: [...historyForTitle, { role: 'user', parts: [{ text: titlePrompt }] }],
                     config: {
-                        temperature: 0.8,
                         safetySettings: safetySettings,
+                        temperature: 1.5
                     },
                 });
 
@@ -838,7 +838,6 @@ app.post('/model', async (req, res) => {
                     model: MODELS[3],
                     contents: memoryContents,
                     config: {
-                        temperature: 0.9,
                         safetySettings: safetySettings,
                     },
                 });
