@@ -1,7 +1,7 @@
 # 💬 ChatBuddy - Your Intelligent Conversational AI
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-2.3.2-blue)](changelogs.md)
+[![Version](https://img.shields.io/badge/version-2.5-blue)](changelogs.md)
 
 Welcome to ChatBuddy, a feature-rich web application that brings the power of advanced AI models to your browser, powered by the Gemini API.
 
@@ -225,4 +225,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.4.0 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.5.0 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
