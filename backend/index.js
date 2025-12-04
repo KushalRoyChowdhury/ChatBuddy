@@ -277,8 +277,7 @@ const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
-    'gemma-3-27b-it',     // Memory & Format Handler
-    'gemma-3-4b-it',     // Chat Title Handler
+    'gemma-3-27b-it'     // Memory & Format Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
 const GEMMA_PRO_HISTORY_LIMIT_CHARS = 8000 * 4;
@@ -619,8 +618,6 @@ app.post('/model', async (req, res) => {
         }
     }
 
-    let retryCounter = 1;
-
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
@@ -761,41 +758,10 @@ app.post('/model', async (req, res) => {
             }
         }
 
-        const titleGenerator = async () => {
-            try {
-                if (!isFirst) return;
-
-                const titleInstruction = require('./ModelInstructions/InstructionAbstraction/CoreInstructionTitle');
-
-                const lastUserMsg = history[history.length - 1].content;
-                const titlePrompt = `${titleInstruction}. Sentence: ${lastUserMsg}`;
-
-                const result = await genAI.models.generateContent({
-                    model: MODELS[4],
-                    contents: [{ role: 'user', parts: [{ text: titlePrompt }] }],
-                    config: {
-                        safetySettings: safetySettings,
-                        temperature: 1.5
-                    },
-                });
-
-                if (result.candidates[0].content.parts[0].text) {
-                    let text = result.candidates[0].content.parts[0].text;
-                    // Clean up any potential markdown or quotes
-                    text = text.replace(/^["']|["']$/g, '').trim();
-                    text = text.replace(/\*\*/g, '').trim();
-                    // Send immediately
-                    res.write(`data: ${JSON.stringify({ type: 'title', content: text })}\n\n`);
-                }
-            } catch (error) {
-                console.error("Title generation failed:", error);
-            }
-        };
-
         const helper = async () => {
             const genAI = new GoogleGenAI({ apiKey: SERVER_API_KEY[1] });
             try {
-                let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(zoneInfo);
+                let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
                 if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
 
                 contextLimit = 4000 * 4;
@@ -846,8 +812,6 @@ app.post('/model', async (req, res) => {
         }
 
         try {
-            // Start title generation in parallel
-            const titlePromise = titleGenerator();
             const helperPromise = helper();
 
             const { isStream, result } = await mainModels();
@@ -929,8 +893,6 @@ app.post('/model', async (req, res) => {
             // Signal that the main stream is done
             res.write('data: [STREAM DONE]\n\n');
 
-            // Wait for parallel tasks
-            await titlePromise;
             const helperOutput = await helperPromise;
 
             res.write(`data: ${JSON.stringify({ type: 'helper', content: helperOutput })}\n\n`);

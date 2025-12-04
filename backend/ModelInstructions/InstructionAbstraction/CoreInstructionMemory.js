@@ -1,6 +1,7 @@
 const responseProtocol = require('../ChatBuddy_CoreInstructions/responseProtocol');
+const responseProtocolFirst = require('../ChatBuddy_CoreInstructions/responseProtocolFirst');
 
-const coreInstructions = (zoneInfo) => {
+const coreInstructions = (isFirst, zoneInfo) => {
 
   let now = new Date();
   const optionsDate = {
@@ -39,7 +40,7 @@ USE TEMP ACTION ("temp") WHEN:
 -- END MEMORY INSTRUCTIONS --
 
 -- START RESPONSE PROTOCOL --
-${responseProtocol}
+${isFirst ? responseProtocolFirst : responseProtocol}
 -- END RESPONSE PROTOCOL --
 
 Current Date: ${now.toLocaleString('en-US', optionsDate)}.
