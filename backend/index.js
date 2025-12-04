@@ -277,8 +277,8 @@ const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
-    'gemma-3-4b-it',     // Memory & Format Handler
-    'gemma-3-1b-it',     // Chat Title Handler
+    'gemma-2-27b-it',     // Memory & Format Handler
+    'gemma-3-4b-it',     // Chat Title Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
 const GEMMA_PRO_HISTORY_LIMIT_CHARS = 8000 * 4;
