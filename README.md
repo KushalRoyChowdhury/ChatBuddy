@@ -143,6 +143,7 @@ Official API RateLimits for free tier of model used in this project *(Updated as
 
 | MODEL (Free Tier)          | RPM    | RPD      | TPM      |
 | -------------------------- | ------ | -------- | -------- |
+| **gemma-3-1b-it**          | 30     | 14,400   | 15,000   |
 | **gemma-3-12b-it**         | 30     | 14,400   | 15,000   |
 | **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
 | **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
@@ -174,7 +175,11 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 
 You can view and manage permanent memories from the `Saved Memories` modal.
 
-> Memory is managed by model `gemma-3-12b-it`.
+> Memory is managed by model `gemma-3-4b-it`.
+
+---
+
+> Chat Title is managed by model `gemma-3-1b-it`.
 
 ---
 
