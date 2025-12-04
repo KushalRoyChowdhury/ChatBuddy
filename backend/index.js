@@ -277,7 +277,7 @@ const MODELS = [
     'gemma-3-27b-it',   // Basic Model
     'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
-    'gemma-3-12b-it',     // Memory & Format Handler
+    'gemma-3-27b-it',     // Memory & Format Handler
     'gemma-3-4b-it',     // Chat Title Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
@@ -626,7 +626,7 @@ app.post('/model', async (req, res) => {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
     }
     try {
-        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[retryCounter++ - 1];
+        const finalApiKey = apiKey?.trim().length === 39 && apiKey || SERVER_API_KEY[0];
         if (!finalApiKey) {
             return res.status(500).json({ error: { message: 'Failed to retrive API key.' } });
         }
@@ -803,6 +803,7 @@ app.post('/model', async (req, res) => {
         };
 
         const helper = async () => {
+            const genAI = new GoogleGenAI({ apiKey: SERVER_API_KEY[1] });
             try {
                 let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(zoneInfo);
                 if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
