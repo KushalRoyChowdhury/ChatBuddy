@@ -768,14 +768,13 @@ app.post('/model', async (req, res) => {
                 const titleInstruction = require('./ModelInstructions/InstructionAbstraction/CoreInstructionTitle');
 
                 const lastUserMsg = history[history.length - 1].content;
-                const titlePrompt = `${titleInstruction}. Summarize this sentence according to instruction (${lastUserMsg})`;
+                const titlePrompt = `${titleInstruction}. Sentence: ${lastUserMsg}`;
 
                 const result = await genAI.models.generateContent({
                     model: MODELS[4],
                     contents: [{ role: 'user', parts: [{ text: titlePrompt }] }],
                     config: {
-                        safetySettings: safetySettings,
-                        temperature: 1.5
+                        safetySettings: safetySettings
                     },
                 });
 
