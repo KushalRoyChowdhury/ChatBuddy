@@ -767,22 +767,12 @@ app.post('/model', async (req, res) => {
 
                 const titleInstruction = require('./ModelInstructions/InstructionAbstraction/CoreInstructionTitle');
 
-                const titleContextLimit = 2000 * 4; // ~2k tokens
-                const shortHistory = getTruncatedHistory(history, titleContextLimit);
+                const lastUserMsg = history[history.length - 1].content;
+                const titlePrompt = `${titleInstruction} Current Chat Title: "${req.body.currentTitle || 'New Chat'}", summarize this sentence according to instruction (${lastUserMsg})`;
 
-                const historyForTitle = shortHistory.map(msg => {
-                    const role = msg.role === 'assistant' ? 'model' : 'user';
-                    let content;
-                    try {
-                        content = JSON.parse(msg.content).response;
-                    } catch (err) { content = msg.content }
-                    return { role, parts: [{ text: content }] };
-                });
-
-                const titlePrompt = `${titleInstruction} Current Chat Title: "${req.body.currentTitle || 'New Chat'}"`;
                 const result = await genAI.models.generateContent({
                     model: MODELS[4],
-                    contents: [...historyForTitle, { role: 'user', parts: [{ text: titlePrompt }] }],
+                    contents: [{ role: 'user', parts: [{ text: titlePrompt }] }],
                     config: {
                         safetySettings: safetySettings,
                         temperature: 1.5
