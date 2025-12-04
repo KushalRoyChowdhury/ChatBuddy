@@ -143,8 +143,6 @@ Official API RateLimits for free tier of model used in this project *(Updated as
 
 | MODEL (Free Tier)          | RPM    | RPD      | TPM      |
 | -------------------------- | ------ | -------- | -------- |
-| **gemma-3-1b-it**          | 30     | 14,400   | 15,000   |
-| **gemma-3-4b-it**          | 30     | 14,400   | 15,000   |
 | **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
 | **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
 
@@ -178,10 +176,6 @@ You can view and manage permanent memories from the `Saved Memories` modal.
 *Memory is managed by model `gemma-3-12b-it`*.
 
 > ***NOTICE:*** *`GEMMA 3 12B` IS EXPERIENCING MASSIVE LATENCY ISSUES DUE TO COLD STARTS IN `GENAI API`. TEMORARILY `GEMMA 3 27B` IS USED FOR MEMORY MANAGEMENT. THE FIX IS NOT POSSIBLE BY me UNTIL GOOGLE FIXES THE ISSUE. DEMO VERSION WILL BE ADJUSTED AUTOMATICALLY FOR THIS CHANGE. **IF YOU USE PERSONAL KEY IN DEMO VERSION YOU WILL GET FULL API LIMITS WITH NO RESTRICTIONS.*** IF YOU WANT TO USE THE APP LOCALLY, TEMPORARILY YOU WILL NEED **2 DIFFERENT GOOGLE CLOUD PROJECTS WITH DIFFERENT API KEYS**. THANK YOU FOR YOUR UNDERSTANDING.
-
----
-
-*Chat Title is managed by model `gemma-3-4b-it`*.
 
 ---
 
