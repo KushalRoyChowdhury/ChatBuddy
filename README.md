@@ -144,7 +144,7 @@ Official API RateLimits for free tier of model used in this project *(Updated as
 | MODEL (Free Tier)          | RPM    | RPD      | TPM      |
 | -------------------------- | ------ | -------- | -------- |
 | **gemma-3-1b-it**          | 30     | 14,400   | 15,000   |
-| **gemma-3-12b-it**         | 30     | 14,400   | 15,000   |
+| **gemma-3-4b-it**          | 30     | 14,400   | 15,000   |
 | **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
 | **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
 
