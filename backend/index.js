@@ -1,4 +1,4 @@
-// Update 2.4.0
+// Update 2.5.0
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -547,61 +547,65 @@ app.post('/upload', async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded or file field is not named "image".' });
         }
 
-        const uploadedFile = req.files.image;
-
-        const fileBuffer = uploadedFile.data;
-        const fileName = uploadedFile.name;
-        const fileType = uploadedFile.mimetype;
-
-        const fileForUpload = new File([fileBuffer], fileName, {
-            type: fileType,
-            lastModified: Date.now(),
-        });
-
-        const fileSize = uploadedFile.size;
-
-        const SIZE_LIMITS = {
-            'image/': 20 * 1024 * 1024,    // 20MB for images
-            'application/pdf': 50 * 1024 * 1024, // 50MB for PDF
-            'text/plain': 1 * 1024 * 1024   // 1MB for TXT
-        };
-
-        // Determine applicable limit
-        let maxFileSize = 50 * 1024 * 1024; // Fallback to global limit
-
-        if (fileType.startsWith('image/')) {
-            maxFileSize = SIZE_LIMITS['image/'];
-        } else if (fileType === 'application/pdf') {
-            maxFileSize = SIZE_LIMITS['application/pdf'];
-        } else if (fileType === 'text/plain') {
-            maxFileSize = SIZE_LIMITS['text/plain'];
+        let uploadedFiles = req.files.image;
+        if (!Array.isArray(uploadedFiles)) {
+            uploadedFiles = [uploadedFiles];
         }
 
-        // Validate file size
-        if (fileSize > maxFileSize) {
-            const maxSizeMB = maxFileSize / (1024 * 1024);
-            return res.status(400).json({
-                error: `File too large. Maximum size for ${fileType} is ${maxSizeMB}MB.`
+        const uploadPromises = uploadedFiles.map(async (uploadedFile) => {
+            const fileBuffer = uploadedFile.data;
+            const fileName = uploadedFile.name;
+            const fileType = uploadedFile.mimetype;
+
+            const fileForUpload = new File([fileBuffer], fileName, {
+                type: fileType,
+                lastModified: Date.now(),
             });
-        }
 
-        const modelFile = await ai.files.upload({
-            file: fileForUpload,
-            config: { mimeType: fileType }
+            const fileSize = uploadedFile.size;
+
+            const SIZE_LIMITS = {
+                'image/': 20 * 1024 * 1024,    // 20MB for images
+                'application/pdf': 50 * 1024 * 1024, // 50MB for PDF
+                'text/plain': 1 * 1024 * 1024   // 1MB for TXT
+            };
+
+            // Determine applicable limit
+            let maxFileSize = 50 * 1024 * 1024; // Fallback to global limit
+
+            if (fileType.startsWith('image/')) {
+                maxFileSize = SIZE_LIMITS['image/'];
+            } else if (fileType === 'application/pdf') {
+                maxFileSize = SIZE_LIMITS['application/pdf'];
+            } else if (fileType === 'text/plain') {
+                maxFileSize = SIZE_LIMITS['text/plain'];
+            }
+
+            // Validate file size
+            if (fileSize > maxFileSize) {
+                const maxSizeMB = maxFileSize / (1024 * 1024);
+                throw new Error(`File ${fileName} too large. Maximum size for ${fileType} is ${maxSizeMB}MB.`);
+            }
+
+            const modelFile = await ai.files.upload({
+                file: fileForUpload,
+                config: { mimeType: fileType }
+            });
+
+            if (modelFile.source === 'UPLOADED') {
+                return { uri: modelFile.uri, mimeType: fileType };
+            } else {
+                throw new Error(`Failed to upload ${fileName}`);
+            }
         });
 
-        if (modelFile.source === 'UPLOADED') {
-            res.status(200).json({ uri: modelFile.uri, mimeType: fileType });
-        }
-        else {
-            res.status(500).send();
-        }
-
+        const results = await Promise.all(uploadPromises);
+        res.status(200).json(results);
 
     }
     catch (error) {
         console.error('Upload error:', error);
-        res.status(500).json({ error: 'Internal server error during upload.' });
+        res.status(500).json({ error: error.message || 'Internal server error during upload.' });
     }
 });
 

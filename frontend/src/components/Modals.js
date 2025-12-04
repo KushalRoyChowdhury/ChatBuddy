@@ -22,7 +22,6 @@ const Modals = React.memo(({
   setShowMemories,
   memories,
   memoryUsagePercent,
-  MEMORY_LIMIT_CHARS,
   deleteMemory,
   showOptions,
   setShowOptions,
@@ -53,7 +52,6 @@ const Modals = React.memo(({
   isAuthenticated,
   handleLogout,
   showMergeConflict,
-  setShowMergeConflict,
   handleOverwriteLocal,
   handleOverwriteRemote,
   usage,
@@ -61,6 +59,20 @@ const Modals = React.memo(({
   glassMode,
   setGlassMode
 }) => {
+
+  const backdropOverlayClass = `absolute inset-0 bg-black/40 ${glassMode ? 'backdrop-blur-sm' : ''}`;
+
+  const getModalClass = (maxWidth = 'max-w-md') => `relative w-full ${maxWidth} rounded-2xl shadow-2xl overflow-hidden transform transition-all ${glassMode
+      ? 'bg-white/90 backdrop-blur-xl border border-white/40 dark:bg-[rgb(50,50,50)]/90 dark:border-white/10'
+      : 'bg-white dark:bg-[rgb(50,50,50)] border border-gray-200 dark:border-gray-700'
+    }`;
+
+  const buttonBaseClass = "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95";
+  const buttonPrimaryClass = `${buttonBaseClass} bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30`;
+  const buttonSecondaryClass = `${buttonBaseClass} bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20`;
+  const buttonDangerClass = `${buttonBaseClass} bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30`;
+  const inputClass = "w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-black/20 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400";
+
   return (
     <AnimatePresence>
       {showMergeConflict && (
@@ -69,30 +81,35 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6 text-center">
-              <h3 className="text-lg font-bold">Merge Conflict</h3>
-              <p className="text-sm text-gray-500 mt-2">
+              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Merge Conflict</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                 You have local changes that are not on Google Drive. How would you like to resolve this?
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3">
               <button
                 onClick={handleOverwriteLocal}
-                className="px-6 py-2 border rounded-lg"
+                className={buttonSecondaryClass}
               >
-                Use Google Drive Data
+                Use Google Drive
               </button>
               <button
                 onClick={handleOverwriteRemote}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 Use Local Data
               </button>
@@ -107,25 +124,25 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowImportExportOptions(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800">Manage Chat</h3>
-              <p className="text-sm text-gray-600 mt-2 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Manage Chat</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 Import a previous chat session or export the current one.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
               <button
                 onClick={() => setShowImportExportOptions(false)}
-                className="px-4 py-2 border rounded-lg text-sm font-medium"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
@@ -134,7 +151,7 @@ const Modals = React.memo(({
                   setShowImportExportOptions(false);
                   handleImportClick();
                 }}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+                className={buttonSecondaryClass}
               >
                 Import Chat
               </button>
@@ -143,7 +160,7 @@ const Modals = React.memo(({
                   setShowImportExportOptions(false);
                   setShowExportOptions(true);
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 Export Chat
               </button>
@@ -158,47 +175,43 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowExportOptions(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white/95 dark:bg-[rgb(50,50,50)] rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 Choose Export Format
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
-                <b>Export as JSON</b> for a complete, lossless backup that can be
-                imported later. (
-                <span className="italic">
-                  If the chat has images / files that will not be exported
-                </span>
-                ).
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                <b>Export as JSON</b> for a complete, lossless backup. <br />
+                <span className="text-xs opacity-70">(Images/files are not included in JSON export)</span>
                 <br />
                 <br />
-                <b>Export as TXT</b> for a simple, human-readable version.
+                <b>Export as TXT</b> for a human-readable version.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
               <button
                 onClick={() => setShowExportOptions(false)}
-                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
               <button
                 onClick={exportChatAsTxt}
-                className="px-4 py-2 bg-gray-600 transition-colors text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+                className={buttonSecondaryClass}
               >
                 Export as TXT
               </button>
               <button
                 onClick={exportChatAsJson}
-                className="px-4 py-2 transition-colors bg-blue-600 dark:bg-blue-800 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-900"
+                className={buttonPrimaryClass}
               >
                 Export as JSON
               </button>
@@ -206,51 +219,43 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
       {showImportConfirm && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowImportConfirm(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6 text-center">
-              <svg
-                className="mx-auto mb-4 text-orange-400 w-12 h-12"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                />
-              </svg>
-              <h3 className="text-lg font-bold">Import Chat?</h3>
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Import Chat?</h3>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3">
               <button
                 onClick={() => {
                   setShowImportConfirm(false);
                   setFileToImport(null);
                 }}
-                className="px-6 py-2 border dark:border-gray-400 rounded-lg"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmImport}
-                className="px-6 py-2 bg-blue-600 dark:bg-blue-800 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-900"
+                className={buttonPrimaryClass}
               >
                 Yes, Import
               </button>
@@ -265,40 +270,40 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowMemoriesImportExport(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(50,50,50)]/95 rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 Manage Memories
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 Import a list of memories to append them to your current list,
                 or export your current list to a JSON file.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(50,50,50)] flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
               <button
                 onClick={() => setShowMemoriesImportExport(false)}
-                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
               <button
                 onClick={handleImportMemoriesClick}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+                className={buttonSecondaryClass}
               >
                 Import Memories
               </button>
               <button
                 onClick={exportMemoriesAsJson}
-                className="px-4 py-2 bg-blue-600 dark:bg-blue-800 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-900"
+                className={buttonPrimaryClass}
               >
                 Export Memories
               </button>
@@ -306,80 +311,74 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
       {showMemories && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowMemories(false)}
           />
-
-          {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90dvh] flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass('max-w-2xl max-h-[90dvh] flex flex-col')}
           >
-            {/* Header */}
-            <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Saved Memories
               </h2>
               <button
                 onClick={() => setShowMemories(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               >
                 &times;
               </button>
             </div>
 
-            {/* Body */}
-            <div className="p-5 overflow-y-auto flex-grow">
-              {/* Memory Usage Indicator */}
-              <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-transparent dark:text-gray-200 dark:border-gray-400">
-                <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-200 mb-1">
+            <div className="p-5 overflow-y-auto flex-grow custom-scrollbar">
+              <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-black/20">
+                <div className="flex justify-between items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <span>Memory Usage</span>
                   <span>{memoryUsagePercent.toFixed(1)}%</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
                   <div
-                    className="bg-yellow-500 h-2.5 rounded-full"
+                    className={`h-full rounded-full transition-all duration-500 ${memoryUsagePercent > 90 ? 'bg-red-500' : memoryUsagePercent > 70 ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}
                     style={{ width: `${memoryUsagePercent}%` }}
                   ></div>
                 </div>
               </div>
 
-              {/* Memories List or Empty State */}
               {memories.length > 0 ? (
                 <ul className="space-y-3 select-text selection:bg-purple-500/30 text-sm text-gray-700 dark:text-gray-200">
                   {[...memories].reverse().map((mem) => (
                     <li
                       key={mem}
-                      className="flex items-center justify-between gap-4 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-[rgb(30,30,30)]"
+                      className="flex items-start justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                     >
-                      <span className="flex-1 prose prose-sm max-w-none m-0 font-normal text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
+                      <span className="flex-1 prose prose-sm max-w-none m-0 font-normal text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                         {mem}
                       </span>
                       <button
                         onClick={() => deleteMemory(mem)}
-                        className="text-gray-400 hover:text-red-500 p-2 rounded-full flex-shrink-0 focus:outline-none transition-colors"
+                        className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                         aria-label="Delete memory"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
+                          width="18"
+                          height="18"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="align-middle"
                         >
                           <polyline points="3 6 5 6 21 6"></polyline>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -391,23 +390,28 @@ const Modals = React.memo(({
                   ))}
                 </ul>
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-200">
-                  No saved memories yet.
-                </p>
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No saved memories yet</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Important details from your chats will appear here</p>
+                </div>
               )}
             </div>
 
-            {/* Footer */}
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(30,30,30)] flex justify-end gap-3 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => { setShowMemoriesImportExport(true); setShowMemories(false); }}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+                className={buttonSecondaryClass}
               >
                 Manage Memories
               </button>
               <button
                 onClick={() => setShowMemories(false)}
-                className="px-4 py-2 border dark:border-gray-400 rounded-lg text-sm font-medium"
+                className={buttonPrimaryClass}
               >
                 Close
               </button>
@@ -415,130 +419,135 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
       {showOptions && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowOptions(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass('max-w-2xl max-h-[90vh] flex flex-col')}
           >
-            {/* Modal Header */}
-            <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Options</h2>
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Options</h2>
               <button
                 onClick={() => setShowOptions(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-5 overflow-y-auto flex-grow space-y-6">
+            <div className="p-6 overflow-y-auto flex-grow space-y-6 custom-scrollbar">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Gemini API Key
                 </label>
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 select-text selection:bg-purple-500/30 py-2 border border-gray-300 rounded-lg"
+                  className={inputClass}
                   placeholder="Optional: Use your own key"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   Get your Gemini key for free: Google AI Studio {'>'} API Keys {'>'} Generate
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-300 mt-2 p-2 bg-yellow-50 dark:bg-yellow-950 border-l-4 border-yellow-400">
+                <p className="text-xs text-amber-800 dark:text-amber-200 mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">
                   NOTE: Use your PERSONAL API key to use the app with Higher Limits and
                   greater Context Window. PUBLIC ACCESS has stricter Rate Limits and
                   Context Window. Changing API KEY does not change model behavior/personality.
                 </p>
               </div>
 
-              <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
-                <button onClick={() => setGlassMode(!glassMode)} className="w-full p-2 active:scale-[0.99] transition-all duration-75 rounded-md text-start text-gray-600 dark:text-gray-200">
-                  <div className='flex items-center justify-between'>
-                    <div>Advance Rendering</div>
-                    <div className='w-10 h-5 bg-gray-200 rounded-full flex items-center'>
-                      <div className={`rounded-full border shadow-md transition-all duration-150 ${glassMode ? 'translate-x-full bg-blue-500 w-5 h-5' : 'translate-x-1 bg-green-400 w-4 h-4'}`}></div>
+              <div className='border border-gray-200 dark:border-gray-700 p-3 rounded-xl bg-gray-50/50 dark:bg-black/20'>
+                <button onClick={() => setGlassMode(!glassMode)} className="w-full flex items-center justify-between group">
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">Advanced Rendering</div>
+                    <div className='text-gray-500 dark:text-gray-400 text-xs mt-1 max-w-md'>
+                      Enables glassmorphism effects. May increase GPU load. Disable if experiencing lag.
                     </div>
                   </div>
-                  <div className='text-gray-500 dark:text-gray-400 text-xs italic mt-1 mr-12'>
-                    Enabling Advanced Rendering enhances visual fidelity with effects like glassmorphism, but it may increase GPU load, potentially impacting performance on less powerful hardware. If you experience noticeable lag or increased power consumption, it is recommended to disable this setting for a smoother experience.
+                  <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out relative ${glassMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${glassMode ? 'translate-x-6' : 'translate-x-0'}`} />
                   </div>
                 </button>
               </div>
 
-              <div className='border dark:border-gray-400 p-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 select-none'>
-                Today's Usage <span className='text-xs text-gray-500 dark:text-gray-400 italic'>(EXPERIMENTAL)</span>
-                <div className='text-sm font-normal text-gray-500 dark:text-gray-400 ml-2'>
-                  <div className='flex items-center w-full'>
-                    <div className='w-[105px] text-nowrap'>Basic Model: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 40 ? 'bg-green-400' : (usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+              <div className='border border-gray-200 dark:border-gray-700 p-3 rounded-xl bg-gray-50/50 dark:bg-black/20'>
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  Today's Usage <span className='text-xs text-gray-500 font-normal dark:text-gray-400 italic'>(EXPERIMENTAL)</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className='flex items-center gap-3'>
+                    <div className='w-24 text-sm text-gray-600 dark:text-gray-300'>Basic Model</div>
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 40 ? 'bg-green-500' :
+                            (usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000) * 100) < 80 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                        style={{ width: `${(usage.basic / (apiKey.trim().length === 39 ? 14400 : 1000)) * 100}%` }}
+                      />
                     </div>
-                    <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
-                      ({apiKey.trim().length === 39 ? '14,400' : '1,000'})
+                    <div className='w-16 text-xs text-right text-gray-500'>
+                      {apiKey.trim().length === 39 ? '14,400' : '1,000'}
                     </div>
                   </div>
 
-                  <div className='flex w-full items-center'>
-                    <div className='w-[105px] text-nowrap'>Advance Model: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100)}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 40 ? 'bg-green-400' : (usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-24 text-sm text-gray-600 dark:text-gray-300'>Adv. Model</div>
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 40 ? 'bg-green-500' :
+                            (usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100) < 80 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                        style={{ width: `${(usage.advance / (apiKey.trim().length === 39 ? 1000 : 100) * 100)}%` }}
+                      />
                     </div>
-                    <div className='px-0 w-14 text-end overflow-hidden text-nowrap'>
-                      ({apiKey.trim().length === 39 ? '1,000' : '100'})
+                    <div className='w-16 text-xs text-right text-gray-500'>
+                      {apiKey.trim().length === 39 ? '1,000' : '100'}
                     </div>
                   </div>
 
-                  {imageGenAvailable && <div className='flex w-full items-center'>
-                    <div className='w-[118px] text-nowrap'>Image Generation: </div>
-                    <div className={`ml-1 h-2 flex-grow flex items-center ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) === 0 ? 'gap-0' : 'gap-[2px]'}`}>
-                      <div className={`h-full transition-all overflow-hidden rounded-md ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`} style={{ width: `${(usage.image / (apiKey.trim().length === 39 ? 100 : 25)) * 100}%` }} ></div>
-                      <div className={`h-full overflow-hidden transition-transform rounded-md border dark:border-gray-400 p-0 m-0 flex-grow min-h-2 min-w-2 relative flex items-center`} ><div className={`h-1 w-1 absolute rounded-full right-[2px] ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 40 ? 'bg-green-400' : (usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 80 ? 'bg-yellow-400' : 'bg-red-600'}`}></div></div>
+                  {imageGenAvailable && (
+                    <div className='flex items-center gap-3'>
+                      <div className='w-24 text-sm text-gray-600 dark:text-gray-300'>Image Gen</div>
+                      <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${(usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 40 ? 'bg-green-500' :
+                              (usage.image / (apiKey.trim().length === 39 ? 100 : 25) * 100) < 80 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                          style={{ width: `${(usage.image / (apiKey.trim().length === 39 ? 100 : 25)) * 100}%` }}
+                        />
+                      </div>
+                      <div className='w-16 text-xs text-right text-gray-500'>
+                        {usage.image}/{apiKey.trim().length === 39 ? '100' : '25'}
+                      </div>
                     </div>
-                    <div className='px-2 w-20 text-end overflow-hidden text-nowrap'>
-                      ( {usage.image}{apiKey.trim().length === 39 ? ' / 100' : ' / 25'} )
-                    </div>
-                  </div>}
+                  )}
                 </div>
               </div>
 
-              <div className="pt-4 flex gap-2 items-center justify-center flex-col-reverse md:flex-row-reverse border-t">
+              <div className="pt-4 flex flex-col md:flex-row gap-3 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={exportAppData}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all dark:hover:bg-blue-900 duration-300 ease-in-out hover:border-blue-100 dark:hover:border-blue-900 dark:hover:text-blue-200 text-sm font-medium"
+                  className={`${buttonSecondaryClass} flex-1 flex items-center justify-center gap-2`}
                 >
                   Export App Data
                 </button>
                 <button
                   onClick={handleImportAppDataClick}
-                  className="w-full justify-center flex items-center gap-2 px-3 py-2 border border-gray-300 text-blue-500 rounded-lg hover:bg-blue-100 transition-all dark:hover:bg-blue-900 duration-300 ease-in-out hover:border-blue-100 dark:hover:border-blue-900 dark:hover:text-blue-200 text-sm font-medium"
+                  className={`${buttonSecondaryClass} flex-1 flex items-center justify-center gap-2`}
                 >
                   Import App Data
                 </button>
@@ -547,18 +556,17 @@ const Modals = React.memo(({
                     setShowResetConfirm(true);
                     setShowOptions(false);
                   }}
-                  className="w-full justify-center items-center gap-2 hidden px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                  className={`${buttonDangerClass} flex-1 flex items-center justify-center gap-2`}
                 >
                   Reset App
                 </button>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-5 border-t flex justify-end">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setShowOptions(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 Close
               </button>
@@ -566,54 +574,43 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
       {showResetConfirm && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowResetConfirm(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6 text-center">
-              <svg
-                className="mx-auto mb-4 text-red-400 w-12 h-12"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                />
-              </svg>
-              <h3 className="mb-2 text-lg font-bold text-gray-800">
-                Reset App?
-              </h3>
-              <p className="text-sm text-gray-500">
-                This will delete all chats, memories, and settings. This action
-                is irreversible.
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reset App?</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
+                This will delete all chats, memories, and settings. This action is irreversible.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetApp}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                className={buttonDangerClass}
               >
                 Yes, Reset
               </button>
@@ -622,59 +619,42 @@ const Modals = React.memo(({
         </motion.div>
       )}
 
-
       {showSettings && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowSettings(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-xs"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass('max-w-xs')}
           >
             <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Settings
               </h3>
               {isAuthenticated && userProfile && (
-                <div className="flex items-center p-2 mb-3 border rounded-lg">
-                  <img src={userProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
+                <div className="flex items-center p-3 mb-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-black/20">
+                  <img src={userProfile.picture} alt="Profile" className="w-10 h-10 rounded-full ring-2 ring-white dark:ring-gray-700" />
                   <div className="ml-3 flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{userProfile.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userProfile.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userProfile.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
                     title="Sign Out"
-                    className="ml-2 flex-shrink-0 text-gray-500 dark:text-gray-200 hover:text-red-600 p-1 rounded-full"
+                    className="ml-2 text-gray-400 hover:text-red-500 transition-colors p-1"
                   >
-                    <svg
-                      width="25"
-                      height="25"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M13 2C10.2386 2 8 4.23858 8 7C8 7.55228 8.44772 8 9 8C9.55228 8 10 7.55228 10 7C10 5.34315 11.3431 4 13 4H17C18.6569 4 20 5.34315 20 7V17C20 18.6569 18.6569 20 17 20H13C11.3431 20 10 18.6569 10 17C10 16.4477 9.55228 16 9 16C8.44772 16 8 16.4477 8 17C8 19.7614 10.2386 22 13 22H17C19.7614 22 22 19.7614 22 17V7C22 4.23858 19.7614 2 17 2H13Z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M14 11C14.5523 11 15 11.4477 15 12C15 12.5523 14.5523 13 14 13V11Z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M5.71783 11C5.80685 10.8902 5.89214 10.7837 5.97282 10.682C6.21831 10.3723 6.42615 10.1004 6.57291 9.90549C6.64636 9.80795 6.70468 9.72946 6.74495 9.67492L6.79152 9.61162L6.804 9.59454L6.80842 9.58848C6.80846 9.58842 6.80892 9.58778 6 9L6.80842 9.58848C7.13304 9.14167 7.0345 8.51561 6.58769 8.19098C6.14091 7.86637 5.51558 7.9654 5.19094 8.41215L5.18812 8.41602L5.17788 8.43002L5.13612 8.48679C5.09918 8.53682 5.04456 8.61033 4.97516 8.7025C4.83623 8.88702 4.63874 9.14542 4.40567 9.43937C3.93443 10.0337 3.33759 10.7481 2.7928 11.2929L2.08569 12L2.7928 12.7071C3.33759 13.2519 3.93443 13.9663 4.40567 14.5606C4.63874 14.8546 4.83623 15.113 4.97516 15.2975C5.04456 15.3897 5.09918 15.4632 5.13612 15.5132L5.17788 15.57L5.18812 15.584L5.19045 15.5872C5.51509 16.0339 6.14091 16.1336 6.58769 15.809C7.0345 15.4844 7.13355 14.859 6.80892 14.4122L6 15C6.80892 14.4122 6.80897 14.4123 6.80892 14.4122L6.804 14.4055L6.79152 14.3884L6.74495 14.3251C6.70468 14.2705 6.64636 14.1921 6.57291 14.0945C6.42615 13.8996 6.21831 13.6277 5.97282 13.318C5.89214 13.2163 5.80685 13.1098 5.71783 13H14V11H5.71783Z"
-                        fill="currentColor"
-                      />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-
                   </button>
                 </div>
               )}
@@ -684,36 +664,36 @@ const Modals = React.memo(({
                     setShowPersonalization(true);
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-green-100 dark:bg-green-600/60 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-950"
+                  className="w-full p-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-left flex items-center gap-3"
                 >
-                  Personalization
+                  <span className="text-lg">🎨</span> Personalization
                 </button>
                 <button
                   onClick={() => {
                     handleMemoriesClick();
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-yellow-50 dark:bg-yellow-600/60 text-yellow-800 dark:text-yellow-100 hover:bg-yellow-100 dark:hover:bg-yellow-950"
+                  className="w-full p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors text-left flex items-center gap-3"
                 >
-                  Saved Memories
+                  <span className="text-lg">🧠</span> Saved Memories
                 </button>
                 <button
                   onClick={() => {
                     handleOptionsClick();
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-indigo-100 dark:bg-indigo-600/60 text-indigo-800 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-950"
+                  className="w-full p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors text-left flex items-center gap-3"
                 >
-                  Options
+                  <span className="text-lg">⚙️</span> Options
                 </button>
                 <button
                   onClick={() => {
                     setShowAbout(true);
                     setShowSettings(false);
                   }}
-                  className="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-600/60 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-950"
+                  className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left flex items-center gap-3"
                 >
-                  About
+                  <span className="text-lg">ℹ️</span> About
                 </button>
               </div>
             </div>
@@ -721,50 +701,36 @@ const Modals = React.memo(({
         </motion.div>
       )}
 
-
       {showPersonalization && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowPersonalization(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass('max-w-2xl max-h-[90vh] flex flex-col')}
           >
-            {/* Modal Header */}
-            <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Personalization</h2>
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Personalization</h2>
               <button
                 onClick={() => setShowPersonalization(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-5 overflow-y-auto flex-grow space-y-6">
+            <div className="p-6 overflow-y-auto flex-grow space-y-6 custom-scrollbar">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   User Nickname
                 </label>
                 <div className='relative'>
@@ -773,27 +739,26 @@ const Modals = React.memo(({
                     maxLength="20"
                     value={userNickname}
                     onChange={(e) => setUserNickname(e.target.value)}
-                    className="w-full select-text selection:bg-purple-500/30 px-3 py-2 border border-gray-300 rounded-lg"
+                    className={inputClass}
                     placeholder="Enter your nickname"
                   />
-                  <div className="absolute bottom-1 right-2 text-xs text-gray-400">
+                  <div className="absolute bottom-2 right-3 text-xs text-gray-400">
                     {userNickname.length} / 20
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Custom Instructions
                 </label>
-
                 <div className='relative'>
                   <textarea
                     value={systemPrompt}
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     maxLength="400"
-                    className="w-full h-40 select-text selection:bg-purple-500/30 p-4 pr-16 border rounded-lg font-mono text-sm"
-                    placeholder="Enter custom instructions..."
+                    className={`${inputClass} h-40 font-mono text-sm resize-none py-3`}
+                    placeholder="Enter custom instructions for the AI..."
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-gray-400">
                     {systemPrompt.length} / 400
@@ -801,21 +766,22 @@ const Modals = React.memo(({
                   {systemPrompt && (
                     <button
                       onClick={() => setSystemPrompt('')}
-                      className="absolute top-2 right-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md"
+                      className="absolute top-3 right-3 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md transition-colors"
                     >
                       Clear
                     </button>
                   )}
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  These instructions will be added to the system prompt to customize the AI's behavior.
+                </p>
               </div>
-
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-5 border-t flex justify-end">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setShowPersonalization(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 Close
               </button>
@@ -823,103 +789,81 @@ const Modals = React.memo(({
           </motion.div>
         </motion.div>
       )}
+
       {showAbout && (
         <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowAbout(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90%] flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass('max-w-2xl max-h-[90%] flex flex-col')}
           >
-            <div className="p-5 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 About ChatBuddy
               </h2>
               <button
                 onClick={() => setShowAbout(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-5 overflow-y-auto font-normal flex-grow space-y-6">
-              <div className="p-4 bg-gray-50 dark:bg-[rgb(40,40,40)]/95 rounded-lg mt-4">
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="p-6 overflow-y-auto font-normal flex-grow space-y-6 custom-scrollbar">
+              <div className="p-5 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                   ChatBuddy is a Free for All AI Chatapp. Available with 2 AI models (Basic and Advanced).
-                  <br />
-                  <br />
-                  Basic model:{' '}
-                  <span className="font-semibold">Gemma3 27b.</span> Best for Conversation & Role-Plays.
-                  <br />
-                  <br />
-                  Advanced model:{' '}
-                  <span className="font-semibold">Gemini 2.5 Flash.</span> Best for Coding, Math, Reasoning & Web Tasks.
-                  <br />
-                  <br />
-                  <span className="font-semibold">NOTE</span>: Advance Reasoning Mode can take significatly longer time to respond on complex tasks.
-                  <br />
-                  <br />
+                  <br /><br />
+                  Basic model: <span className="font-semibold text-gray-900 dark:text-white">Gemma3 27b.</span> Best for Conversation & Role-Plays.
+                  <br /><br />
+                  Advanced model: <span className="font-semibold text-gray-900 dark:text-white">Gemini 2.5 Flash.</span> Best for Coding, Math, Reasoning & Web Tasks.
+                  <br /><br />
+                  <span className="font-semibold text-amber-600 dark:text-amber-400">NOTE:</span> Advance Reasoning Mode can take significantly longer time to respond on complex tasks.
+                  <br /><br />
                   You can add your Gemini API key for Higher Rate Limits and Context Window (offering upto ~128k).
-                  <br />
-                  <br />
+                  <br /><br />
                   Basic Model Supports ~4k Context Window. Advance Model Supports ~64k Context Window (DEMO ACCESS).
-                  <br />
-                  <br />
+                  <br /><br />
                   Rate Limits in DEMO ACCESS are: Basic Model (5RPM / 1000 RPD), Advance Model (3 RPM / 100 RPD){imageGenAvailable && ', Image Generation (1RPM, 25RPD)'}.
-                  <br />
-                  <br />
+                  <br /><br />
                   Rate Limits in PERSONAL KEY ACCESS are: Basic (30 RPM / 14,350 RPD), Advance (15 RPM / 1000 RPD){imageGenAvailable && ', Image Generation (10RPM, 100RPD)'}.
-                  <br />
-                  <br />
-                  Aditionally the app Source Code is available on 👉
-                  <span className="font-bold">
-                    <a
-                      href="https://github.com/KushalRoyChowdhury/ChatBuddy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      GitHub
-                    </a>
-                  </span>
-                  👈.
-                  <br />
-                  <br />
+                  <br /><br />
+                  Additionally the app Source Code is available on 👉{' '}
+                  <a
+                    href="https://github.com/KushalRoyChowdhury/ChatBuddy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    GitHub
+                  </a>
+                  {' '}👈.
+                  <br /><br />
                   Thank You for using ChatBuddy.
                 </p>
               </div>
 
-              <div className="text-center text-gray-600 dark:text-gray-300">
+              <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
                 AI can make mistakes.
                 <br />
-                v2.4.0 (release 251202)
+                v2.5.0 (release 251205)
                 <br />
                 By: Kushal Roy Chowdhury
               </div>
             </div>
-            <div className="p-5 border-t flex justify-end">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-end border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setShowAbout(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 Close
               </button>
@@ -934,47 +878,36 @@ const Modals = React.memo(({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[2px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowImportAppDataConfirm(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6 text-center">
-              <svg
-                className="mx-auto mb-4 text-red-400 w-12 h-12"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                />
-              </svg>
-              <h3 className="mb-2 text-lg font-bold text-gray-800 dark:text-gray-200">
-                Import App Data?
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Import App Data?</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                 This will replace all current application data, including chats, memories, and settings. This action is not revertable.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(40,40,40)] flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3">
               <button
                 onClick={() => setShowImportAppDataConfirm(false)}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-400 rounded-lg text-gray-700 dark:text-gray-100 hover:bg-gray-100 font-medium"
+                className={buttonSecondaryClass}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmImportAppData}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                className={buttonDangerClass}
               >
                 Yes, Import
               </button>
@@ -984,32 +917,30 @@ const Modals = React.memo(({
       )}
 
       {showNotAvailablePopup && (
-        <motion.div
-          className="fixed inset-0 z-50 max-h-dvh flex items-center justify-center p-4"
-        >
+        <motion.div className="fixed inset-0 max-h-dvh z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`absolute ${glassMode ? 'backdrop-blur-[1px]' : 'backdrop-blur-none'} inset-0 bg-black bg-opacity-50`}
+            className={backdropOverlayClass}
             onClick={() => setShowNotAvailablePopup(false)}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white dark:bg-[rgb(30,30,30)] rounded-xl shadow-xl w-full max-w-md"
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
+            className={getModalClass()}
           >
             <div className="p-6 text-center">
-              <h3 className="text-lg font-bold dark:text-[rgb(255,255,255)] text-gray-800">Action Not Available</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Action Not Available</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                 This action is not available while the model is responding.
               </p>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-[rgb(30,30,30)] flex justify-center gap-4 rounded-b-xl">
+            <div className="p-4 bg-gray-50/50 dark:bg-black/20 flex justify-center">
               <button
                 onClick={() => setShowNotAvailablePopup(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className={buttonPrimaryClass}
               >
                 OK
               </button>

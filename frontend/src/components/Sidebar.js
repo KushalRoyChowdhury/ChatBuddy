@@ -21,7 +21,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   useEffect(() => {
     const sidebar = mobileSidebarRef.current;
     if (!sidebar) return;
-  
+
     if (isSidebarOpen) {
       sidebar.classList.remove('hide', '-translate-x-full');
       sidebar.classList.add('show', 'block');
@@ -30,11 +30,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       if (sidebar.classList.contains('-translate-x-full')) {
         return;
       }
-  
+
       const style = window.getComputedStyle(sidebar);
       const matrix = new DOMMatrixReadOnly(style.transform);
       const currentX = matrix.m41;
-  
+
       const animationName = `slideOutDynamic-${Date.now()}`;
       const keyframes = `
         @keyframes ${animationName} {
@@ -46,14 +46,14 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           }
         }
       `;
-  
+
       const styleSheet = document.createElement('style');
       styleSheet.id = animationName;
       styleSheet.innerText = keyframes;
       document.head.appendChild(styleSheet);
-  
+
       sidebar.style.animation = `${animationName} 250ms cubic-bezier(.32,.88,.7,1.05)`;
-  
+
       const handleAnimationEnd = () => {
         sidebar.style.animation = '';
         sidebar.classList.remove('show', 'block');
@@ -63,7 +63,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           document.head.removeChild(styleElement);
         }
       };
-  
+
       sidebar.addEventListener('animationend', handleAnimationEnd, { once: true });
     }
   }, [isSidebarOpen]);
@@ -158,13 +158,13 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   const desktopSidebar = (
     <AnimatePresence>
       <motion.div
-        className="bg-gray-50 dark:bg-[rgb(10,10,10)] pl-8 border-r dark:border-gray-600 shadow flex flex-col fixed top-0 left-0 z-50 h-dvh w-[22.2rem]"
+        className={`pl-8 border-r shadow flex flex-col fixed top-0 left-0 z-50 h-dvh w-[22.2rem] transition-colors duration-300 ${glassMode ? 'bg-white/80 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/80 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}
         animate={{ x: isSidebarOpen ? '-10%' : '-110%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
         <div className="flex min-w-80 justify-between items-center mb-4 flex-shrink-0 p-4">
-          <h1 className="text-xl font-bold">Chats</h1>
-          <button onClick={createNewChat} className="p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Chats</h1>
+          <button onClick={createNewChat} className="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95">New Chat</button>
         </div>
         <div className="mb-4 min-w-80 flex-shrink-0 px-4">
           <input
@@ -173,14 +173,14 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
             value={searchTerm}
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-black/20 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400"
           />
         </div>
         <div className="flex-1 min-w-80 overflow-y-auto px-4">
           {filteredChatSessions.map(session => (
             <div
               key={session.chatID}
-              className={`p-2 h-10 mb-2 rounded-md cursor-pointer group flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200 dark:bg-blue-950' : 'hover:bg-gray-200 dark:hover:bg-gray-900'}`}
+              className={`p-3 h-12 mb-2 rounded-xl w-full cursor-pointer group flex items-center transition-all ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-200/50 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300'}`}
               onClick={() => {
                 if (loading) {
                   setShowNotAvailablePopup(true);
@@ -223,19 +223,19 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
         </div>
         <div className="p-4 min-w-80">
           {activeChat && activeChat.chat.length > 0 ? (
-            <button onClick={() => setShowExportOptions(true)} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Export Chat</button>
+            <button onClick={() => setShowExportOptions(true)} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Export Chat</button>
           ) : (
-            <button onClick={handleImportClick} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Import Chat</button>
+            <button onClick={handleImportClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Import Chat</button>
           )}
-          <button onClick={handleSettingsClick} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700">Settings</button>
+          <button onClick={handleSettingsClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all">Settings</button>
         </div>
         {userData && (
-          <div className="p-4 min-w-80 border-t border-gray-300">
+          <div className="p-4 min-w-80 border-t border-gray-200 dark:border-gray-700/50">
             <div className="flex items-center">
               <img src={userData.picture} alt="User Avatar" className="w-10 h-10 rounded-full mr-3" />
               <div className="flex-1">
-                <p className="font-semibold truncate">{userData.name}</p>
-                <p className="text-sm text-gray-500 truncate">{userData.email}</p>
+                <p className="font-semibold truncate text-gray-900 dark:text-white">{userData.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
               </div>
               <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 h-6 w-6">
@@ -254,7 +254,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       <AnimatePresence>
         {isSidebarOpen &&
           <motion.div
-            className={`fixed inset-0 top-0 left-0 bottom-0 overflow-hidden transition-all bg-black bg-opacity-50 z-50 ${glassMode ? 'backdrop-blur-[1px]' : ''}`}
+            className={`fixed inset-0 top-0 left-0 bottom-0 overflow-hidden transition-all bg-black bg-opacity-50 z-50 ${glassMode ? 'backdrop-blur-sm' : ''}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -264,10 +264,10 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       </AnimatePresence>
       <div ref={mobileSidebarRef} className={`fixed top-0 left-0 h-full z-50 sidebar hide -translate-x-full`} >
 
-        <div className="w-96 max-w-[80vw] h-full bg-gray-50 dark:bg-[rgb(10,10,10)] border-r dark:border-r-gray-600 shadow rounded-r-xl flex flex-col">
+        <div className={`w-96 max-w-[80vw] h-full border-r shadow-2xl rounded-r-2xl flex flex-col transition-colors duration-300 ${glassMode ? 'bg-white/90 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/90 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}>
           <div className="flex justify-between items-center mb-4 flex-shrink-0 p-4">
-            <h1 className="text-xl font-bold">Chats</h1>
-            <button onClick={createNewChat} className="p-2 rounded-md text-nowrap bg-blue-500 text-white hover:bg-blue-600">New Chat</button>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Chats</h1>
+            <button onClick={createNewChat} className="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30 transition-all active:scale-95">New Chat</button>
           </div>
           <div className="mb-4 flex-shrink-0 px-4">
             <input
@@ -276,14 +276,14 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
               value={searchTerm}
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-black/20 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400"
             />
           </div>
           <div className="flex-1 overflow-y-auto px-4">
             {filteredChatSessions.map(session => (
               <div
                 key={session.chatID}
-                className={`p-2 h-10 mb-2 rounded-md cursor-pointer flex items-center ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-200 dark:bg-blue-950' : 'hover:bg-gray-200 dark:hover:bg-gray-900'}`}
+                className={`p-3 mb-2 rounded-xl cursor-pointer flex items-center transition-all ${session.chat.length === 0 && 'hidden'} ${activeChatId === session.chatID ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-200/50 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300'}`}
                 onClick={() => {
                   if (loading) {
                     setShowNotAvailablePopup(true);
@@ -327,19 +327,19 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           </div>
           <div className="p-4">
             {activeChat && activeChat.chat.length > 0 ? (
-              <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Export Chat</button>
+              <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Export Chat</button>
             ) : (
-              <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 mb-2">Import Chat</button>
+              <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Import Chat</button>
             )}
-            <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700">Settings</button>
+            <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all">Settings</button>
           </div>
           {userData && (
-            <div className="p-4 border-t border-gray-300">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700/50">
               <div className="flex items-center">
                 <img src={userData.picture} alt="User Avatar" className="w-10 h-10 rounded-full mr-3" />
                 <div className="flex-1">
-                  <p className="font-semibold truncate">{userData.name}</p>
-                  <p className="text-sm text-gray-500 truncate">{userData.email}</p>
+                  <p className="font-semibold truncate text-gray-900 dark:text-white">{userData.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
                 </div>
                 <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-gray-700">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 h-6 w-6">
