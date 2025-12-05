@@ -264,7 +264,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       </AnimatePresence>
       <div ref={mobileSidebarRef} className={`fixed top-0 left-0 h-full z-50 sidebar hide -translate-x-full`} >
 
-        <div className={`w-96 max-w-[80vw] h-full border-r shadow-2xl rounded-r-2xl flex flex-col transition-colors duration-300 ${glassMode ? 'bg-white/90 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/20 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}>
+        <div className={`w-96 max-w-[80vw] h-full border-r shadow-2xl rounded-r-2xl flex flex-col transition-colors duration-300 ${glassMode ? 'bg-white/90 border-white/20 dark:bg-[rgb(50,50,50)]/20 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}>
           <div className="flex justify-between items-center mb-4 flex-shrink-0 p-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Chats</h1>
             <button onClick={createNewChat} className="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30 transition-all active:scale-95">New Chat</button>

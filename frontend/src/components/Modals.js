@@ -473,7 +473,7 @@ const Modals = React.memo(({
                 <button onClick={() => setGlassMode(!glassMode)} className="w-full active:scale-[0.98] transition-all flex items-center justify-between group">
                   <div className="text-left">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Advanced Rendering</div>
-                    <div className='text-gray-500 dark:text-gray-400 text-xs mt-1 max-w-[calc(100%-20px)]'>
+                    <div className='text-gray-500 dark:text-gray-400 text-xs mt-1'>
                       Enables glassmorphism effects. Disable if experiencing lag.
                     </div>
                   </div>
