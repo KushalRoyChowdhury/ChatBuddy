@@ -158,9 +158,9 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
   const desktopSidebar = (
     <AnimatePresence>
       <motion.div
-        className={`pl-8 border-r shadow flex flex-col fixed top-0 left-0 z-50 h-dvh w-[22.2rem] transition-colors duration-300 ${glassMode ? 'bg-white/80 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/80 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}
+        className={`pl-8 border-r rounded-br-3xl shadow flex flex-col fixed top-0 left-0 z-50 h-dvh w-[22.2rem] transition-colors duration-300 ${glassMode ? 'bg-white/80 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/80 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}
         animate={{ x: isSidebarOpen ? '-10%' : '-110%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 27 }}
       >
         <div className="flex min-w-80 justify-between items-center mb-4 flex-shrink-0 p-4">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Chats</h1>
@@ -223,11 +223,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
         </div>
         <div className="p-4 min-w-80">
           {activeChat && activeChat.chat.length > 0 ? (
-            <button onClick={() => setShowExportOptions(true)} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Export Chat</button>
+            <button onClick={() => setShowExportOptions(true)} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97] mb-2">Export Chat</button>
           ) : (
-            <button onClick={handleImportClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Import Chat</button>
+            <button onClick={handleImportClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97] mb-2">Import Chat</button>
           )}
-          <button onClick={handleSettingsClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all">Settings</button>
+          <button onClick={handleSettingsClick} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97]">Settings</button>
         </div>
         {userData && (
           <div className="p-4 min-w-80 border-t border-gray-200 dark:border-gray-700/50">
@@ -264,7 +264,7 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
       </AnimatePresence>
       <div ref={mobileSidebarRef} className={`fixed top-0 left-0 h-full z-50 sidebar hide -translate-x-full`} >
 
-        <div className={`w-96 max-w-[80vw] h-full border-r shadow-2xl rounded-r-2xl flex flex-col transition-colors duration-300 ${glassMode ? 'bg-white/90 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/90 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}>
+        <div className={`w-96 max-w-[80vw] h-full border-r shadow-2xl rounded-r-2xl flex flex-col transition-colors duration-300 ${glassMode ? 'bg-white/90 backdrop-blur-xl border-white/20 dark:bg-[rgb(50,50,50)]/20 dark:border-white/10' : 'bg-gray-50 dark:bg-[rgb(50,50,50)] border-gray-200 dark:border-gray-700'}`}>
           <div className="flex justify-between items-center mb-4 flex-shrink-0 p-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Chats</h1>
             <button onClick={createNewChat} className="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30 transition-all active:scale-95">New Chat</button>
@@ -327,11 +327,11 @@ const Sidebar = ({ chatSessions, activeChatId, setActiveChatId, setChatSessions,
           </div>
           <div className="p-4">
             {activeChat && activeChat.chat.length > 0 ? (
-              <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Export Chat</button>
+              <button onClick={() => { setShowExportOptions(true); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97] mb-2">Export Chat</button>
             ) : (
-              <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all mb-2">Import Chat</button>
+              <button onClick={() => { handleImportClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97] mb-2">Import Chat</button>
             )}
-            <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all">Settings</button>
+            <button onClick={() => { handleSettingsClick(); setIsSidebarOpen(false); }} className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20 transition-all active:scale-[0.97]">Settings</button>
           </div>
           {userData && (
             <div className="p-4 border-t border-gray-200 dark:border-gray-700/50">

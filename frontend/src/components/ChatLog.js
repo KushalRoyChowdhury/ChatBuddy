@@ -67,13 +67,13 @@ const ChatLog = React.memo(({
       }
       <div className="space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-200 bg-white/50 dark:bg-[rgb(50,50,50)]/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm max-w-2xl mx-auto">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-200 bg-white/50 dark:bg-[rgb(50,50,50)]/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-3xl shadow-sm max-w-2xl mx-auto">
             <p className="text-lg mb-3">{noChatGreet}</p>
             <div className="flex justify-center gap-4 mt-4">
-              <div onClick={() => setModel('gemma-3-27b-it')} className="p-4 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 active:scale-95 transition-all rounded-xl cursor-pointer">
+              <div onClick={() => setModel('gemma-3-27b-it')} className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 active:scale-95 transition-all rounded-2xl cursor-pointer">
                 <div className="font-medium w-24 text-green-600 dark:text-green-400">Basic</div>
               </div>
-              <div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all active:scale-95 rounded-xl cursor-pointer">
+              <div onClick={() => setModel('gemini-2.5-flash-lite')} className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 active:scale-95 transition-all rounded-2xl cursor-pointer">
                 <div className="font-medium w-24 text-blue-600 dark:text-blue-400">Advanced</div>
               </div>
             </div>

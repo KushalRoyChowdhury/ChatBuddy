@@ -893,7 +893,10 @@ export default function App() {
               content: '[image omitted]'
             };
           }
-          return msg;
+          return {
+            ...msg,
+            content: `'${msg.content}'`
+          };
         }),
         memory: memories,
         temp: memoriesForModel,
@@ -1104,7 +1107,7 @@ export default function App() {
                   // Append capturedFileContent to target[0] if available
                   let contentToSave = target[0] || '';
                   if (capturedFileContent) {
-                    contentToSave = contentToSave ? `${contentToSave} [${capturedFileContent}]` : `[${capturedFileContent}]`;
+                    contentToSave = contentToSave ? `['file'=${capturedFileContent}] ${contentToSave}` : `['file'=${capturedFileContent}]`;
                   }
 
                   if (contentToSave) {
@@ -1152,8 +1155,8 @@ export default function App() {
 
             } catch (e) {
               console.error("Error parsing SSE event:", e);
-              const errorJsonString = `{"action":"none", "target":"", "response":"Error in LLM Stream: ${e}"}`;
-              const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
+              const errorJson = { "action": "none", "target": "", "response": "Error in LLM Stream: " + e };
+              const assistantMessage = { role: 'assistant', content: JSON.stringify(errorJson), model: model, id: Date.now() };
               setChatSessions(prevSessions =>
                 prevSessions.map(session =>
                   session.chatID === currentChatId
@@ -1168,7 +1171,7 @@ export default function App() {
 
     } catch (error) {
       if (error.name === 'AbortError') {
-        const errorJsonString = `{"action":"none", "target":"", "response":"User cancelled the response."}`;
+        const errorJsonString = JSON.stringify({ "action": "none", "target": "", "response": "User cancelled the response." });
         const assistantMessage = { role: 'assistant', content: errorJsonString, model: model, id: Date.now() };
         setChatSessions(prevSessions =>
           prevSessions.map(session =>
@@ -1554,6 +1557,7 @@ export default function App() {
           setIsMenuOpen={setIsMenuOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           glassMode={glassMode}
+          isSidebarOpen={isSidebarOpen}
         />
         <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept="application/json" className="hidden" />
         <input type="file" ref={memoryFileInputRef} onChange={handleMemoryFileSelected} accept="application/json" className="hidden" />

@@ -62,7 +62,7 @@ const Modals = React.memo(({
 
   const backdropOverlayClass = `absolute inset-0 bg-black/40 ${glassMode ? 'backdrop-blur-sm' : ''}`;
 
-  const getModalClass = (maxWidth = 'max-w-md') => `relative w-full ${maxWidth} rounded-2xl shadow-2xl overflow-hidden transform transition-all ${glassMode
+  const getModalClass = (maxWidth = 'max-w-md') => `relative w-full ${maxWidth} rounded-2xl shadow-2xl overflow-hidden transition-all transform ${glassMode
       ? 'bg-white/90 backdrop-blur-xl border border-white/40 dark:bg-[rgb(50,50,50)]/90 dark:border-white/10'
       : 'bg-white dark:bg-[rgb(50,50,50)] border border-gray-200 dark:border-gray-700'
     }`;
@@ -359,7 +359,7 @@ const Modals = React.memo(({
                   {[...memories].reverse().map((mem) => (
                     <li
                       key={mem}
-                      className="flex items-start justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                      className="flex items-center justify-between gap-4 p-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                     >
                       <span className="flex-1 prose prose-sm max-w-none m-0 font-normal text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                         {mem}
@@ -470,15 +470,15 @@ const Modals = React.memo(({
               </div>
 
               <div className='border border-gray-200 dark:border-gray-700 p-3 rounded-xl bg-gray-50/50 dark:bg-black/20'>
-                <button onClick={() => setGlassMode(!glassMode)} className="w-full flex items-center justify-between group">
+                <button onClick={() => setGlassMode(!glassMode)} className="w-full active:scale-[0.98] transition-all flex items-center justify-between group">
                   <div className="text-left">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Advanced Rendering</div>
-                    <div className='text-gray-500 dark:text-gray-400 text-xs mt-1 max-w-md'>
-                      Enables glassmorphism effects. May increase GPU load. Disable if experiencing lag.
+                    <div className='text-gray-500 dark:text-gray-400 text-xs mt-1 max-w-[calc(100%-20px)]'>
+                      Enables glassmorphism effects. Disable if experiencing lag.
                     </div>
                   </div>
                   <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out relative ${glassMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${glassMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${glassMode ? 'translate-x-4 md:translate-x-6' : 'translate-x-0'}`} />
                   </div>
                 </button>
               </div>
@@ -632,7 +632,7 @@ const Modals = React.memo(({
             initial={{ opacity: 0, scale: 0.95, y: 0 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 0 }}
-            className={getModalClass('max-w-xs')}
+            className={`${getModalClass('max-w-sm')} transition-none`}
           >
             <div className="p-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">

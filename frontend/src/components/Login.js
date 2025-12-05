@@ -58,10 +58,34 @@ export default function Login({ handleLogin }) {
       </AnimatePresence>
 
       {/* Background Gradient/Shape - Visible on both, acts as main background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-400/30 dark:bg-purple-600/30 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-blue-400/30 dark:bg-blue-600/30 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '1s' }} />
-        <div className="absolute top-[40%] left-[40%] w-[40%] h-[40%] bg-indigo-300/20 dark:bg-indigo-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <motion.div
+          animate={{
+            x: ["0%", "20%", "0%", "-20%", "0%"],
+            y: ["-20%", "0%", "20%", "0%", "-20%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-[-20%] left-[-10%] aspect-[2/1.5] h-[70%] bg-purple-400/30 dark:bg-purple-600/30 rounded-full blur-[120px] animate-pulse"
+          style={{ animationDuration: '12s' }}
+        />
+        <motion.div
+          animate={{
+            x: ["0%", "-20%", "0%", "20%", "0%"],
+            y: ["20%", "0%", "-20%", "0%", "20%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-[-20%] right-[-10%] aspect-[2/1.5] h-[70%] bg-blue-400/30 dark:bg-blue-600/30 rounded-full blur-[120px] animate-pulse"
+          style={{ animationDuration: '12s', animationDelay: '3s' }}
+        />
+        <motion.div animate={{ x: ["0%", "20%", "0%", "-20%", "0%"], y: ["-20%", "0%", "20%", "0%", "-20%"], }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[40%] left-[40%] aspect-[2/1.5] h-[40%] bg-indigo-300/20 dark:bg-indigo-500/20 rounded-full blur-[72px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '6s' }} />
       </div>
 
       {/* Desktop: Split Layout Container */}
@@ -89,7 +113,7 @@ export default function Login({ handleLogin }) {
               alt="ChatBuddy Logo"
               onLoad={() => setIsImageLoaded(true)}
               animate={{ y: [0, -15, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
               className={`w-full h-full object-contain drop-shadow-2xl relative z-10 transition-opacity duration-700 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
           </motion.div>
@@ -118,7 +142,7 @@ export default function Login({ handleLogin }) {
             {/* Mobile-only Header inside card */}
             <div className="md:hidden mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">ChatBuddy</h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Welcome back, Legend.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Sign in to continue your journey.</p>
             </div>
 
             <div className="hidden md:block mb-10">
@@ -127,10 +151,8 @@ export default function Login({ handleLogin }) {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={handleLogin}
-              className="group w-full bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-medium py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
+              className="group w-full bg-white/50 hover:scale-[1.02] active:scale-[0.97] dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-medium py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
