@@ -8,8 +8,8 @@ const ChatMessage = React.memo(({ msg, thought, messageImageMap, getTextToRender
 
   const getUserBubbleClass = (msgModel) => {
     return msgModel === 'gemini-2.5-flash-lite'
-      ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-full rounded-br-none shadow-sm'
-      : msgModel === 'image' ? 'bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded-full rounded-br-none shadow-sm' : 'bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 rounded-full rounded-br-none shadow-sm';
+      ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-3xl rounded-br-none shadow-sm'
+      : msgModel === 'image' ? 'bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded-3xl rounded-br-none shadow-sm' : 'bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 rounded-3xl rounded-br-none shadow-sm';
   };
 
   return (
