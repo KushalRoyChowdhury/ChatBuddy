@@ -7,6 +7,7 @@ const responseProtocol =
   "target": "array (action data)",
   "title": "string (3 to 5 word ultra creative small summary of USER PROMPT)",
 }
+THESE 3 KEYS ARE VERY IMPORTANT AND MUST BE FOLLOWED STRICTLY.
 FORMAT RULES:
 • "remember": target = ["exact string to save"]
 • "update": target = ["exact memory string to update", "new string"]

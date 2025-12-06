@@ -159,7 +159,7 @@ app.get('/auth/google/callback', async (req, res) => {
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
         console.error('Error getting tokens:', error);
-        res.status(500).send('Authentication failed');
+        res.redirect(process.env.FRONTEND_URL);
     }
 });
 
@@ -613,7 +613,6 @@ app.post('/upload', async (req, res) => {
 // --- Main API Endpoint ---
 app.post('/model', async (req, res) => {
     let { history, memory, temp, sys, modelIndex, creativeRP, advanceReasoning, webSearch, images, apiKey, isFirst, zoneInfo } = req.body;
-
     // Check for [new title] keyword in the last user message
     if (history && history.length > 0) {
         const lastMsg = history[history.length - 1];
@@ -762,13 +761,13 @@ app.post('/model', async (req, res) => {
             }
         }
 
-        const helper = async () => {
-            const genAI = new GoogleGenAI({ apiKey: SERVER_API_KEY[1] });
+        const helper = async (mainModelResponse) => {
+            const genAI = new GoogleGenAI({ apiKey: MODELS[3].includes('27') ? SERVER_API_KEY[1] : SERVER_API_KEY[0] });
             try {
                 let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
                 if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
 
-                contextLimit = 4000 * 4;
+                contextLimit = 2000 * 4;
 
                 let shortHistory = getTruncatedHistory(history, contextLimit);
 
@@ -787,7 +786,10 @@ app.post('/model', async (req, res) => {
 
                 const latestUserTurn = historyForMemory.pop();
                 const latestUserMessageText = latestUserTurn.parts.map(p => p.text).join(' ');
-                const memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+                let memoryMessageWithSystemPrompt = `${finalMemoryPrompt}\n\n--- CURRENT PROMPT ---\nUSER: ${latestUserMessageText}`;
+                if (mainModelResponse) {
+                    memoryMessageWithSystemPrompt += `\nMODEL RESPONSE: ${mainModelResponse}`;
+                }
 
                 latestUserTurn.parts = latestUserTurn.parts
                     .filter(p => p.text === undefined)
@@ -816,8 +818,6 @@ app.post('/model', async (req, res) => {
         }
 
         try {
-            const helperPromise = helper();
-
             const { isStream, result } = await mainModels();
 
             let hitCountIncremented = false;
@@ -827,6 +827,9 @@ app.post('/model', async (req, res) => {
                     try { await incrementHitCount(req); } catch (e) { console.error("Hit count error", e); }
                 }
             };
+
+            let mainModelResponseBuffer = '';
+            const MAX_BUFFER_SIZE = 2000 * 4;
 
             if (isStream) {
                 const streamSource = result.stream || result;
@@ -858,6 +861,9 @@ app.post('/model', async (req, res) => {
                         } else {
                             await doIncrement();
                             tokenBuffer += part.text;
+                            if (mainModelResponseBuffer.length < MAX_BUFFER_SIZE) {
+                                mainModelResponseBuffer += part.text;
+                            }
                             if (Date.now() - lastFlushTime >= 1) {
                                 flushBuffer();
                             }
@@ -891,13 +897,13 @@ app.post('/model', async (req, res) => {
                 } else {
                     mainText = answer;
                 }
+                if (mainModelResponseBuffer.length < MAX_BUFFER_SIZE) {
+                    mainModelResponseBuffer += mainText;
+                }
                 res.write(`data: ${JSON.stringify({ type: 'token', content: mainText })}\n\n`);
             }
 
-            // Signal that the main stream is done
-            res.write('data: [STREAM DONE]\n\n');
-
-            const helperOutput = await helperPromise;
+            const helperOutput = await helper(mainModelResponseBuffer);
 
             res.write(`data: ${JSON.stringify({ type: 'helper', content: helperOutput })}\n\n`);
             res.write('data: [DONE]\n\n');

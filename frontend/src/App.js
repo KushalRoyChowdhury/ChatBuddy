@@ -29,8 +29,8 @@ const decompress = (base64String) => {
 
 
 // --- Application Constants ---
-const MEMORY_LIMIT_CHARS = 1500 * 4;
-const TEMP_MEMORY_LIMIT_CHARS = 800 * 4;
+const MEMORY_LIMIT_CHARS = 2000 * 4;
+const TEMP_MEMORY_LIMIT_CHARS = 1500 * 4;
 const BACKEND_URL = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const getTextToRender = (msg) => {
@@ -980,8 +980,8 @@ export default function App() {
             const dataStr = line.slice(6);
             if (dataStr === '[DONE]') continue;
 
-            // Handle [STREAM DONE] signal
-            if (dataStr === '[STREAM DONE]') {
+            // Handle [DONE] signal
+            if (dataStr === '[DONE]') {
               setLoading(false); // Stop loading indicator, enable SEND button
               continue;
             }
@@ -1083,7 +1083,7 @@ export default function App() {
                 let permanentMemoryChanged = false;
                 let tempMemoryChanged = false;
 
-                if (isFirstMessage && title) {
+                if (title) {
                   setChatSessions(prevSessions => prevSessions.map(session =>
                     session.chatID === currentChatId
                       ? { ...session, title: title }
@@ -1091,23 +1091,12 @@ export default function App() {
                   ));
                 }
 
-                if (action === 'remember' && target[0] && !memories.includes(target[0])) {
-                  permanentMemoryChanged = true;
-                  setMemories(prev => [...prev, target[0]]);
-                } else if (action === 'forget' && target[0]) {
-                  permanentMemoryChanged = memories.includes(target[0]);
-                  setMemories(prev => prev.filter(m => m !== target[0]));
-                } else if (action === 'update' && Array.isArray(target) && target.length === 2) {
-                  const [oldMem, newMem] = target;
-                  if (memories.includes(oldMem)) {
-                    permanentMemoryChanged = true;
-                    setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
-                  }
-                } else if (action === 'temp') {
-                  // Append capturedFileContent to target[0] if available
-                  let contentToSave = target[0] || '';
+                // Helper to process temp memory (shared logic)
+                // eslint-disable-next-line no-loop-func
+                const processTemp = (content) => {
+                  let contentToSave = content || '';
                   if (capturedFileContent) {
-                    contentToSave = contentToSave ? `['file'=${capturedFileContent}] ${contentToSave}` : `['file'=${capturedFileContent}]`;
+                    contentToSave = contentToSave ? `${contentToSave}` : `['file'=${capturedFileContent}]`;
                   }
 
                   if (contentToSave) {
@@ -1126,6 +1115,25 @@ export default function App() {
                       });
                     }
                   }
+                };
+
+                if (action === 'remember' && target[0] && !memories.includes(target[0])) {
+                  permanentMemoryChanged = true;
+                  setMemories(prev => [...prev, target[0]]);
+                  if (target[1]) processTemp(target[1]);
+                } else if (action === 'forget' && target[0]) {
+                  permanentMemoryChanged = memories.includes(target[0]);
+                  setMemories(prev => prev.filter(m => m !== target[0]));
+                  if (target[1]) processTemp(target[1]);
+                } else if (action === 'update' && Array.isArray(target) && target.length >= 2) {
+                  const [oldMem, newMem] = target;
+                  if (memories.includes(oldMem)) {
+                    permanentMemoryChanged = true;
+                    setMemories(prev => prev.map(m => m === oldMem ? newMem : m));
+                  }
+                  if (target[2]) processTemp(target[2]);
+                } else if (action === 'temp') {
+                  processTemp(target[0]);
                 }
 
                 const finalContentObj = {
