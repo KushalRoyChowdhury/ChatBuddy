@@ -275,7 +275,7 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
 // --- Constants ---
 const MODELS = [
     'gemma-3-27b-it',   // Basic Model
-    'gemini-2.5-flash',    // Advanced Model
+    'gemini-2.5-flash-lite',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-3-27b-it'     // Memory & Format Handler
 ];
