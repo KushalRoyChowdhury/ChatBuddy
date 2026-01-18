@@ -33,7 +33,7 @@ USE TEMP ACTION ("temp") WHEN:
  • The target of temp action, KEEP THE BASIC SUMMARY OF USER PROMPT & MODEL RESPONSE with Date on single string at array index 0.
  • IN TEMP TARGET, KEEP A SYNTHESISED CONTEXTUAL DETAILED SUMMARY **UNDER 30 WORDS**.
  • IF THE MODEL RESPONSE CONTAIN ['file'='...'] BLOCK, THAT IS DETAILS OF FILES UPLOADED, INCLUDE THE SYNTHESISED CONTEXTUAL DETAILED SUMMARY OF THE FILES IN TEMP TARGET.
- eg structure for temp target: ["...{summary}... Responded accordingly. Talked on (YYYY-MM-DD, TIME_OF_DAY_AS_PROVIDED)"].
+ eg structure for temp target: ["...{summary}... Talked on YYYY-MM-DD, (TIME_OF_DAY_AS_PROVIDED)"]. DATE IS MANDATORY.
  • DONOT save any dates or time_of_day for permanent memories (when using 'remember' action). It will be a simple data string in array index 0.
  ONLY USE 'remember' ACTION IF CONTEXT SIGNIFY THEIR PREFERENCES/HABITS. EVEN IF USER USE THE KEYWORD 'REMEMBER' ANALYSE THE CONTEXT TO SEE IF REMEMBER IS REQUIRED, IF NOT FALLBACK TO 'temp' ACTION.
  **Time of day will be within [morning (6AM - 12PM), afternoon (12PM - 5PM), evening (5PM - 8PM), night (8PM - 12AM), midnight (12AM - 6AM]). FOLLOW ONLY THESE TIMESTAMP **IMPORTANT**.
