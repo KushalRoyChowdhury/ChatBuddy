@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-const { GoogleGenAI, createPartFromUri, createPartFromText, Modality } = require('@google/genai');
+const { GoogleGenAI, createPartFromUri, createPartFromText, Modality, ThinkingLevel } = require('@google/genai');
 const { google } = require('googleapis');
 const cookieParser = require('cookie-parser');
 const stream = require('stream');
@@ -275,7 +275,7 @@ app.post('/api/drive/write', setOAuthCredentials, async (req, res) => {
 // --- Constants ---
 const MODELS = [
     'gemma-3-27b-it',   // Basic Model
-    'gemini-2.5-flash-lite',    // Advanced Model
+    'gemini-3.1-flash-lite-preview',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-3-27b-it'     // Memory & Format Handler
 ];
@@ -358,9 +358,9 @@ function getIp(req) {
 }
 
 const limitConfigs = {
-    basic: { maxM: 5, maxD: 1000 },
+    basic: { maxM: 7, maxD: 1000 },
     advanced: { maxM: 3, maxD: 100 },
-    image: { maxM: 3, maxD: 25 },
+    image: { maxM: 5, maxD: 25 },
     basicUser: { maxM: 30, maxD: 14400 },
     advancedUser: { maxM: 15, maxD: 1000 },
     imageUser: { maxM: 10, maxD: 100 },
@@ -733,7 +733,7 @@ app.post('/model', async (req, res) => {
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingBudget: advanceReasoning ? -1 : 512,
+                            thinkingLevel: advanceReasoning ? ThinkingLevel.HIGH : ThinkingLevel.MINIMAL,
                             includeThoughts: advanceReasoning ? true : false,
                         },
                         ...(webSearch && {
