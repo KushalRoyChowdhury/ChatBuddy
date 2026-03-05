@@ -16,7 +16,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-3-27b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-2.5-flash-lite`*).
+-   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-3-27b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-3.1-flash-lite-preview`*).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
 -   **🔎 Google Search & URL Context**: The advanced model can access web for up-to-date information.
@@ -131,7 +131,7 @@ The hosted version's demo access has strict rate limits. It is **highly recommen
 | --------------------- | ----------------------------------- | --------------------------------- |
 | **Context Window**    | Basic: 4k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
 | **Rate Limits (RPM)** | Basic: 5 / Advanced: 3              | Basic: 30 / Advanced: 15          |
-| **Rate Limits (RPD)** | Basic: 1000 / Advanced: 100         | Basic: 14,400 / Advanced: 1000    |
+| **Rate Limits (RPD)** | Basic: 1000 / Advanced: 100         | Basic: 14,400 / Advanced: 500     |
 
 *Context Sizes mentioned here uses server-side truncation*.
 
@@ -139,12 +139,12 @@ For details on data handling, please refer to the [Privacy Policy](PrivacyPolicy
 
 ---
 
-Official API RateLimits for free tier of model used in this project *(Updated as of: September 2025)*:
+Official API RateLimits for free tier of model used in this project *(Updated as of: 2026 March)*:
 
-| MODEL (Free Tier)          | RPM    | RPD      | TPM      |
-| -------------------------- | ------ | -------- | -------- |
-| **gemma-3-27b-it**         | 30     | 14,400   | 15,000   |
-| **gemini-2.5-flash-lite**  | 15     | 1,000    | 250,000  |
+| MODEL (Free Tier)                  | RPM    | RPD      | TPM      |
+| ---------------------------------- | ------ | -------- | -------- |
+| **gemma-3-27b-it**                 | 30     | 14,400   | 15,000   |
+| **gemini-3.1-flash-lite-preview**  | 15     | 500      | 250,000  |
 
 ### How to get your Gemini API Key:
 
@@ -225,4 +225,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.5.0 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.5.1 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
