@@ -16,7 +16,7 @@ Welcome to ChatBuddy, a feature-rich web application that brings the power of ad
 -   **🖼️ Image Sharing**: Upload and discuss images directly in the chat.
 -   **🎬 Video & Audio Sharing**: Share video and audio files with the Advanced Model.
 -   **📂 File Sharing**: Share documents and text files (`PDF`, `TXT`, `DOCX`, etc.).
--   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-3-27b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-3.1-flash-lite-preview`*).
+-   **🧠 Multiple Models**: Seamlessly switch between a fast, general-purpose model (*`gemma-4-31b-it`*) and advanced model for complex tasks, tools, and features (*`gemini-3.1-flash-lite-preview`*).
 -   **💭 Advanced Reasoning Mode**: A special mode for the Advanced model to tackle complex problems step-by-step.
 -   **🤔 Model Thinking Transparency**: See the AI's reasoning process.
 -   **🔎 Google Search & URL Context**: The advanced model can access web for up-to-date information.
@@ -143,7 +143,7 @@ Official API RateLimits for free tier of model used in this project *(Updated as
 
 | MODEL (Free Tier)                  | RPM    | RPD      | TPM      |
 | ---------------------------------- | ------ | -------- | -------- |
-| **gemma-3-27b-it**                 | 30     | 14,400   | 15,000   |
+| **gemma-4-31b-it**                 | 30     | 14,400   | 15,000   |
 | **gemini-3.1-flash-lite-preview**  | 15     | 500      | 250,000  |
 
 ### How to get your Gemini API Key:
@@ -173,9 +173,7 @@ ChatBuddy uses a dual-model architecture. A helper model manages memory based on
 
 You can view and manage permanent memories from the `Saved Memories` modal.
 
-*Memory is managed by model `gemma-3-12b-it`*.
-
-> ***NOTICE:*** *`GEMMA 3 12B` IS EXPERIENCING MASSIVE LATENCY ISSUES DUE TO COLD STARTS IN `GENAI API`. TEMORARILY `GEMMA 3 27B` IS USED FOR MEMORY MANAGEMENT. THE FIX IS NOT POSSIBLE BY me UNTIL GOOGLE FIXES THE ISSUE. DEMO VERSION WILL BE ADJUSTED AUTOMATICALLY FOR THIS CHANGE. **IF YOU USE PERSONAL KEY IN DEMO VERSION YOU WILL GET FULL API LIMITS WITH NO RESTRICTIONS.*** IF YOU WANT TO USE THE APP LOCALLY, TEMPORARILY YOU WILL NEED **2 DIFFERENT GOOGLE CLOUD PROJECTS WITH DIFFERENT API KEYS**. THANK YOU FOR YOUR UNDERSTANDING. *(Changed from `v2.4.0`)*
+*Memory is managed by model `gemma-4-26b-a4b-it`*.
 
 ---
 
