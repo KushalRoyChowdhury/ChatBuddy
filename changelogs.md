@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate Limits re-adjusted.
 - UI Improvements.
 
+### Fixed
+- Issue where sending a integer can result in `400: Bad Request`.
+
 ## [2.5.1] - 2026-03-05
 
 ### Changed
