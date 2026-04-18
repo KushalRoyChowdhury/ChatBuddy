@@ -800,10 +800,12 @@ app.post('/model', async (req, res) => {
                     .concat(createPartFromText(memoryMessageWithSystemPrompt));
 
                 const memoryContents = [...historyForMemory, latestUserTurn];
+                console.log("[DEBUG] Helper Called: ", memoryContents);
                 const result = await genAI.models.generateContent({
                     model: MODELS[3],
                     contents: memoryContents
                 });
+                console.log("[DEBUG] Helper Responded");
 
                 if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
                     return JSON.stringify({ action: 'none', target: '', title: '' });
@@ -811,6 +813,7 @@ app.post('/model', async (req, res) => {
 
                 let text = result.candidates[0].content.parts[0].text;
                 text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
+                console.log("[DEBUG] Helper Response: ", text);
                 return text;
             } catch (error) {
                 console.error(`[${Date.now()}] Helper failed:`, error);
