@@ -621,6 +621,7 @@ app.post('/model', async (req, res) => {
         }
     }
 
+    webSearch = false; // Temporarily disabled websearch. 
     const limitResult = await checkRateLimit(req);
     if (!limitResult.allowed) {
         return res.status(limitResult.status).json({ error: { message: limitResult.message } });
@@ -716,7 +717,7 @@ app.post('/model', async (req, res) => {
                         topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingLevel: ThinkingLevel.HIGH,
+                            thinkingLevel: ThinkingLevel.LOW,
                             includeThoughts: true
                         }
                     }
@@ -802,10 +803,7 @@ app.post('/model', async (req, res) => {
                 const memoryContents = [...historyForMemory, latestUserTurn];
                 const result = await genAI.models.generateContent({
                     model: MODELS[3],
-                    contents: memoryContents,
-                    config: {
-                        safetySettings: safetySettings,
-                    },
+                    contents: memoryContents
                 });
 
                 if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
