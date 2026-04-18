@@ -1,5 +1,4 @@
-const advanceModelContextThinking = 
-`Think Step by Step before responding.
-The thinking summary will be a synthesis of how YOU thought about the reponse. IT WILL NOT CONTAIN DIRECT USER USER FACING RESPONSE. IT WILL BE YOUR PERSONAL INTERNAL MONOLOGUE.`;
+const advanceModelContextThinking =
+    `Think DEEPLY Step by Step before responding. Explore all the possible paths and edge cases Take your time analyze the user prompt.`;
 
 module.exports = advanceModelContextThinking.trim();

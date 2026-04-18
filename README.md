@@ -126,7 +126,7 @@ Powered by the official Google AI SDK (`@google/genai`).
 ### Public Version Limits
 
 The hosted version's demo access has strict rate limits. It is **highly recommended** to use your own free Gemini API key for a better experience.
- 
+
 | FEATURE               | DEMO ACCESS                         | PERSONAL API KEY                  |
 | --------------------- | ----------------------------------- | --------------------------------- |
 | **Context Window**    | Basic: 4k / Advanced: 64k           | Basic: 8k / Advanced: 128k        |
@@ -223,4 +223,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.5.1 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.5.2 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*

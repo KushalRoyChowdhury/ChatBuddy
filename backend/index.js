@@ -1,4 +1,4 @@
-// Update 2.5.0
+// Update 2.5.2
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -711,7 +711,7 @@ app.post('/model', async (req, res) => {
                     model: selectedModel,
                     contents: gemmaContents,
                     config: {
-                        temperature: creativeRP ? 1.7 : 1,
+                        temperature: creativeRP ? 1.5 : 1,
                         topP: creativeRP ? 1 : 0.9,
                         topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
@@ -732,15 +732,15 @@ app.post('/model', async (req, res) => {
                             role: "system",
                             parts: [{ text: finalSystemPrompt }]
                         },
-                        temperature: advanceReasoning ? 1 : 1.5,
+                        temperature: advanceReasoning ? 0.9 : 1.3,
                         topP: advanceReasoning ? 0.95 : 0.99,
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
                             thinkingLevel: advanceReasoning ? ThinkingLevel.HIGH : ThinkingLevel.LOW,
-                            includeThoughts: advanceReasoning ? true : false,
+                            includeThoughts: true,
                         },
-                        ...(webSearch && {
+                        ...(webSearch && !webSearch && { // Web Search is temporarily disabled
                             tools: [
                                 { urlContext: {} },
                                 { googleSearch: {} }
@@ -766,7 +766,7 @@ app.post('/model', async (req, res) => {
         }
 
         const helper = async (mainModelResponse) => {
-            const genAI = new GoogleGenAI({ apiKey: MODELS[3].includes('27') ? SERVER_API_KEY[1] : SERVER_API_KEY[0] });
+            const genAI = new GoogleGenAI({ apiKey: SERVER_API_KEY[0] });
             try {
                 let finalMemoryPrompt = INTERNAL_MEMORY_PROMPT(isFirst, zoneInfo);
                 if (memory && memory.length > 0) finalMemoryPrompt += `\n\n--- START LONG-TERM MEMORIES ---\n- ${memory.join('\n- ')}\n--- END LONG-TERM MEMORIES ---`;
@@ -800,7 +800,7 @@ app.post('/model', async (req, res) => {
                     .concat(createPartFromText(memoryMessageWithSystemPrompt));
 
                 const memoryContents = [...historyForMemory, latestUserTurn];
-                
+
                 const result = await genAI.models.generateContent({
                     model: MODELS[3],
                     contents: memoryContents,
@@ -811,14 +811,13 @@ app.post('/model', async (req, res) => {
                         }
                     }
                 });
-                
+
                 if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
                     return JSON.stringify({ action: 'none', target: '', title: '' });
                 }
 
-                let text = result.candidates[0].content.parts[0].text;
+                let text = result.candidates[0].content.parts[1].text;
                 text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-                console.log("[DEBUG] Helper Response: ", text);
                 return text;
             } catch (error) {
                 console.error(`[${Date.now()}] Helper failed:`, error);
@@ -846,16 +845,45 @@ app.post('/model', async (req, res) => {
                     throw new Error("Stream source is undefined");
                 }
                 let firstChunk = true;
-                let tokenBuffer = '';
-                let lastFlushTime = Date.now();
 
-                const flushBuffer = () => {
-                    if (tokenBuffer.length > 0) {
-                        res.write(`data: ${JSON.stringify({ type: 'token', content: tokenBuffer })}\n\n`);
-                        tokenBuffer = '';
-                        lastFlushTime = Date.now();
+                let tokenQueue = [];
+                let streamFinished = false;
+                let unfinishedWord = '';
+
+                const pushToQueue = (text) => {
+                    const combined = unfinishedWord + text;
+                    if (/\s$/.test(combined)) {
+                        const words = combined.match(/\S+\s*|\s+/g) || [];
+                        tokenQueue.push(...words);
+                        unfinishedWord = '';
+                    } else {
+                        const words = combined.match(/\S+\s*|\s+/g) || [];
+                        if (words.length > 0) {
+                            unfinishedWord = words.pop() || '';
+                            tokenQueue.push(...words);
+                        } else {
+                            unfinishedWord = '';
+                        }
                     }
                 };
+
+                const startSending = async () => {
+                    while (!streamFinished || tokenQueue.length > 0 || unfinishedWord.length > 0) {
+                        if (tokenQueue.length > 0) {
+                            const word = tokenQueue.shift();
+                            res.write(`data: ${JSON.stringify({ type: 'token', content: word })}\n\n`);
+                            const delay = Math.max(15, 50 - tokenQueue.length * 2);
+                            await new Promise(r => setTimeout(r, delay));
+                        } else if (streamFinished && unfinishedWord.length > 0) {
+                            res.write(`data: ${JSON.stringify({ type: 'token', content: unfinishedWord })}\n\n`);
+                            unfinishedWord = '';
+                        } else {
+                            await new Promise(r => setTimeout(r, 60));
+                        }
+                    }
+                };
+
+                const sendingPromise = startSending();
 
                 for await (const chunk of streamSource) {
                     if (firstChunk) {
@@ -865,21 +893,18 @@ app.post('/model', async (req, res) => {
                     if (part && part.text) {
                         if (part.thought) {
                             await doIncrement();
-                            flushBuffer();
                             res.write(`data: ${JSON.stringify({ type: 'thought', content: part.text })}\n\n`);
                         } else {
                             await doIncrement();
-                            tokenBuffer += part.text;
+                            pushToQueue(part.text);
                             if (mainModelResponseBuffer.length < MAX_BUFFER_SIZE) {
                                 mainModelResponseBuffer += part.text;
-                            }
-                            if (Date.now() - lastFlushTime >= 1) {
-                                flushBuffer();
                             }
                         }
                     }
                 }
-                flushBuffer();
+                streamFinished = true;
+                await sendingPromise;
             } else {
                 await doIncrement();
                 // Image model

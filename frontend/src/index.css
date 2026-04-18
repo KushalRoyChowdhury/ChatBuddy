@@ -24,7 +24,6 @@ code {
   padding: 0.1rem !important;
 }
 .language-poem {
-  font-family: cursive !important;
   font-style: italic !important;
   background-color: transparent !important;
 }
@@ -83,15 +82,23 @@ body::-webkit-scrollbar-thumb:hover {
   font-size: 1.25rem !important;
   line-height: 1.2em !important;
   max-width: 100% !important;
-  padding: 1rem !important;
   height: max-content;
-  display: block !important;
   overflow-y:hidden !important;
   overflow-x: auto !important;
   white-space: nowrap !important;
   /* For Firefox */
   scrollbar-width: thin;
   scrollbar-color: #a0a0a0 transparent;
+}
+
+/* show thinking, add 1rem margin bottom every alternating paragraph */
+.show-thinking p:nth-child(even) {
+  margin-bottom: 1.5rem;
+  display: block;
+}
+.show-thinking p strong {
+    margin-bottom: 0.3rem;
+    display: block;
 }
 
 /* For WebKit browsers (Chrome, Safari, Edge) */

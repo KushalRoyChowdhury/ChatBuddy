@@ -8,51 +8,52 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
 const CollapsibleThought = React.memo(({ thoughtContent, isThinkingComplete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-  if (!thoughtContent) return null;
+    if (!thoughtContent) return null;
 
-  const formattedContent = thoughtContent.replace(/\\n/g, '\n');
+    const formattedContent = thoughtContent.replace(/\\n/g, '\n');
 
-  const getDynamicHeader = () => {
-    if (isThinkingComplete) return "Show Thinking";
+    const getDynamicHeader = () => {
+        if (isThinkingComplete && isExpanded) return "Hide Thinking";
+        if (isThinkingComplete) return "Show Thinking";
 
-    const boldMatches = thoughtContent.match(/\*\*(.*?)\*\*/g);
-    if (boldMatches && boldMatches.length > 0) {
-      return boldMatches[boldMatches.length - 1].replace(/\*\*/g, '');
-    }
+        const boldMatches = thoughtContent.match(/\*\*(.*?)\*\*/g);
+        if (boldMatches && boldMatches.length > 0) {
+            return boldMatches[boldMatches.length - 1].replace(/\*\*/g, '');
+        }
 
-    return "Thinking Deeply...";
-  };
+        return "Thinking Deeply...";
+    };
 
-  return (
-    <div className="mb-2 border-b border-dashed border-gray-300 dark:border-gray-400 pb-2">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full text-left text-xs font-medium text-gray-500 dark:text-gray-300 dark:hover:text-gray-400 hover:text-gray-700 flex items-center gap-1"
-      >
-        {getDynamicHeader()}
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: 'auto', opacity: 1, marginTop: '8px' }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="prose prose-sm select-text selection:bg-purple-500/30 max-w-none p-2 bg-gray-100 dark:bg-[rgb(40,40,40)] rounded-md text-sm lg:text-base">
-              <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {formattedContent}
-              </ReactMarkdown>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+    return (
+        <div className="mb-2 border-b border-dashed border-gray-300 dark:border-gray-400 pb-2">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full text-left text-xs font-medium text-gray-500 dark:text-gray-300 dark:hover:text-gray-400 hover:text-gray-700 flex items-center gap-1"
+            >
+                {getDynamicHeader()}
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                        animate={{ height: 'auto', opacity: 1, marginTop: '8px' }}
+                        exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="prose prose-sm select-text show-thinking selection:bg-purple-500/30 max-w-none p-2 bg-gray-100 dark:bg-[rgb(40,40,40)] rounded-md text-sm lg:text-base">
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {formattedContent}
+                            </ReactMarkdown>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
 });
 
 export default CollapsibleThought;

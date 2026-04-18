@@ -336,7 +336,7 @@ const MessageInput = React.memo(({
                     </div>
                   </motion.button>
 
-                  <motion.button
+                  {/* <motion.button
                     type="button"
                     title="Search Web for latest info"
                     initial={{ opacity: 0.5 }}
@@ -356,7 +356,7 @@ const MessageInput = React.memo(({
                       <div className='block'>Web Search</div>
 
                     </div>
-                  </motion.button>
+                  </motion.button> */}
                 </>
               )}
             </AnimatePresence>

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Switched Basic model from Gemma 3 27B to Gemma 4 31B.
 - Improved Basic model for structured reasoning and long chat consistency with higher 12k context window across all user configs.
+- Rate Limits re-adjusted.
+- UI Improvements.
 
 ## [2.5.1] - 2026-03-05
 
@@ -61,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Performance in Dark Mode.
 - Tuned Glassmorphism.
 - UI Enhancements.
-- Improved and fast login flow. 
+- Improved and fast login flow.
 
 ## [2.3.0] - 2025-11-06
 
@@ -122,7 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved Data Compression *(Backward Compatible & Auto-Migration)*.
 - Real-Time local time awareness on models.
-- Clears localStorage on logout. 
+- Clears localStorage on logout.
 
 ## [2.2.1] - 2025-10-29
 
@@ -205,7 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Minor UI fixes.
-  
+
 
 ## [1.5] - 2025-09-18
 
@@ -229,13 +231,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4] - 2025-09-16
 
 ### Added
-- Added Image Sharing Feature *(All Models)*. 
+- Added Image Sharing Feature *(All Models)*.
 
 ### Fixed
 - All issues happened with v1.3 are now resolved and tested.
 - Public version updated to latest release.
 
-  
+
 ## [1.3] - 2025-09-15
 
 > *This is a huge upgrade architechtural upgrade, if you face any bugs or issues kindly mention in GitHub.*
