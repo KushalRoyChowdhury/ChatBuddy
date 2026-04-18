@@ -782,7 +782,7 @@ app.post('/model', async (req, res) => {
                     let content;
                     try {
                         content = JSON.parse(msg.content).response;
-                    } catch (err) { content = msg.content }
+                    } catch (err) { content = msg.content; console.log("[ERROR] Prompt JSON parse: ", err); }
                     parts.push(createPartFromText(content));
 
                     return { role, parts };
