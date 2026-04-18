@@ -805,7 +805,6 @@ app.post('/model', async (req, res) => {
                     model: MODELS[3],
                     contents: memoryContents,
                     config: {
-                        temperature: 0.5,
                         thinkingConfig: {
                             thinkingLevel: ThinkingLevel.MINIMAL,
                             includeThoughts: false
@@ -819,7 +818,7 @@ app.post('/model', async (req, res) => {
 
                 let text = result.candidates[0].content.parts[0].text;
                 text = text.replace(/^```json\s*([\s\S]*?)\s*```$/m, "$1");
-            
+                console.log("[DEBUG] Helper Response: ", text);
                 return text;
             } catch (error) {
                 console.error(`[${Date.now()}] Helper failed:`, error);
