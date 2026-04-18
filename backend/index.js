@@ -279,8 +279,8 @@ const MODELS = [
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
     'gemma-4-26b-a4b-it'     // Memory & Format Handler
 ];
-const GEMMA_HISTORY_LIMIT_CHARS = 4000 * 4;
-const GEMMA_PRO_HISTORY_LIMIT_CHARS = 8000 * 4;
+const GEMMA_HISTORY_LIMIT_CHARS = 12000 * 4;
+const GEMMA_PRO_HISTORY_LIMIT_CHARS = 12000 * 4;
 const GEMINI_HISTORY_LIMIT_CHARS = 64000 * 4;
 const GEMINI_PRO_HISTORY_LIMIT_CHARS = 128000 * 4;
 
@@ -715,6 +715,9 @@ app.post('/model', async (req, res) => {
                         topP: creativeRP ? 1 : 0.9,
                         topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
+                        thinkingConfig: {
+                            thinkingLevel: ThinkingLevel.ThinkingLevel.HIGH,
+                            includeThoughts: true,
                     }
                 });
                 return { isStream: true, result };
@@ -733,7 +736,7 @@ app.post('/model', async (req, res) => {
                         topK: advanceReasoning ? 128 : 256,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingLevel: advanceReasoning ? ThinkingLevel.HIGH : ThinkingLevel.MINIMAL,
+                            thinkingLevel: advanceReasoning ? ThinkingLevel.HIGH : ThinkingLevel.LOW,
                             includeThoughts: advanceReasoning ? true : false,
                         },
                         ...(webSearch && {
