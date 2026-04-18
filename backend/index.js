@@ -717,7 +717,7 @@ app.post('/model', async (req, res) => {
                         topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingLevel: ThinkingLevel.LOW,
+                            thinkingLevel: ThinkingLevel.MINIMAL,
                             includeThoughts: true
                         }
                     }
