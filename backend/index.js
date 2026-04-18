@@ -716,8 +716,9 @@ app.post('/model', async (req, res) => {
                         topK: creativeRP ? 256 : 128,
                         safetySettings: safetySettings,
                         thinkingConfig: {
-                            thinkingLevel: ThinkingLevel.ThinkingLevel.HIGH,
-                            includeThoughts: true,
+                            thinkingLevel: ThinkingLevel.HIGH,
+                            includeThoughts: true
+                        }
                     }
                 });
                 return { isStream: true, result };
