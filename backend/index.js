@@ -666,8 +666,11 @@ app.post('/model', async (req, res) => {
 
                 let content;
                 try {
-                    content = JSON.parse(msg.content).response;
-                } catch (err) { content = msg.content }
+                    const parsed = JSON.parse(msg.content);
+                    content = (parsed && typeof parsed === 'object' && parsed.response !== undefined) ? parsed.response : `${msg.content}`;
+                } catch (err) {
+                    content = `${msg.content}`;
+                }
                 parts.push(createPartFromText(content));
 
                 return { role, parts };
@@ -706,7 +709,6 @@ app.post('/model', async (req, res) => {
                     .concat(createPartFromText(gemmaMessageWithSystemPrompt)); // Add the combined prompt
 
                 const gemmaContents = [...historyForSDK_NEW, latestUserTurn];
-
                 result = await genAI.models.generateContentStream({
                     model: selectedModel,
                     contents: gemmaContents,
@@ -781,8 +783,11 @@ app.post('/model', async (req, res) => {
 
                     let content;
                     try {
-                        content = JSON.parse(msg.content).response;
-                    } catch (err) { content = msg.content; console.log("[ERROR] Prompt JSON parse: ", err); }
+                        const parsed = JSON.parse(msg.content);
+                        content = (parsed && typeof parsed === 'object' && parsed.response !== undefined) ? parsed.response : `${msg.content}`;
+                    } catch (err) {
+                        content = `${msg.content}`;
+                    }
                     parts.push(createPartFromText(content));
 
                     return { role, parts };
@@ -805,6 +810,7 @@ app.post('/model', async (req, res) => {
                     model: MODELS[3],
                     contents: memoryContents,
                     config: {
+                        temperature: 0.5,
                         thinkingConfig: {
                             thinkingLevel: ThinkingLevel.MINIMAL,
                             includeThoughts: false
@@ -944,7 +950,7 @@ app.post('/model', async (req, res) => {
             res.end();
 
         } catch (error) {
-            console.error("GEMINI API ERROR:: ", error);
+            console.error("GEMINI API ERROR:: ", error.message);
             let errorMessage = "An error occurred.";
             if (error.toString().includes('503')) errorMessage = "Server Overloaded. Try again later.";
             else if (error.toString().includes('429')) errorMessage = "Server Busy. Try again later.";

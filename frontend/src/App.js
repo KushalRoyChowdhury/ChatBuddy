@@ -310,7 +310,7 @@ export default function App() {
   }, [uploadedImages]); // Stores the image URI
   useEffect(() => {
     localStorage.setItem('messageImageMap', compress(JSON.stringify(messageImageMap), 9));
-  }, [messageImageMap]); // Stores the image data to show in chat. 
+  }, [messageImageMap]); // Stores the image data to show in chat.
 
   const isBottomAtView = useInView(chatEndRef);
 
@@ -751,7 +751,7 @@ export default function App() {
 
     if (fileImgs.length > 0) {
       if (fileName) {
-        // Logic for non-image files if they were in fileImgs? 
+        // Logic for non-image files if they were in fileImgs?
         // Actually fileImgs are images. fileDocs are docs.
         // Existing logic had fileName check.
       }
@@ -895,7 +895,7 @@ export default function App() {
           }
           return {
             ...msg,
-            content: `'${msg.content}'`
+            content: `${msg.content}`
           };
         }),
         memory: memories,
@@ -1023,7 +1023,7 @@ export default function App() {
                     isCollectingFile = false;
                   }
                 } else {
-                  // Not collecting file. 
+                  // Not collecting file.
                   const partials = ["['", "['f", "['fi", "['fil", "['file", "['file'", "['file'="];
                   let potentialMatch = false;
                   for (const p of partials) {
@@ -1299,12 +1299,12 @@ export default function App() {
     // Check if any file is not an image to set fileName (for docs)
     // Existing logic: if (!file.type.includes('image')) setFileName(file.name)
     // With multiple files, this simple boolean/string state might be insufficient if we mix types?
-    // But handleDocFileChange sets fileName. 
+    // But handleDocFileChange sets fileName.
     // Let's iterate.
     filesWithId.forEach(({ file }) => {
       if (!file.type.includes('image')) {
-        setFileName(file.name); // This might overwrite if multiple docs. 
-        // Ideally we should track filenames per file. 
+        setFileName(file.name); // This might overwrite if multiple docs.
+        // Ideally we should track filenames per file.
         // But for now let's keep it simple or just set it to the last one?
         // The fileName state seems used in sendMessage to add a placeholder in messageImageMap?
       }
@@ -1358,8 +1358,8 @@ export default function App() {
       setFileImgs(prev => prev.filter(item => !filesWithId.some(f => f.id === item.id)));
       setFileDocs(prev => prev.filter(item => !filesWithId.some(f => f.id === item.id)));
     } finally {
-      // Check if any other files are still uploading? 
-      // For simplicity, if this batch is done, we might turn off global uploading 
+      // Check if any other files are still uploading?
+      // For simplicity, if this batch is done, we might turn off global uploading
       // BUT if multiple batches are running, this might be wrong.
       // However, the current UI blocks interaction mostly.
       // Let's rely on the fact that we setUploading(false) here.
