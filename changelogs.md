@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 *The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)*.
 
+## [2.5.2] - 2026-04-18
+
+### Changed
+- Switched Basic model from Gemma 3 27B to Gemma 4 31B.
+- Improved Basic model for structured reasoning and long chat consistency with higher 12k context window across all user configs.
+
 ## [2.5.1] - 2026-03-05
 
 ### Changed
