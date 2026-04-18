@@ -277,7 +277,7 @@ const MODELS = [
     'gemma-4-31b-it',   // Basic Model
     'gemini-3.1-flash-lite-preview',    // Advanced Model
     'gemini-2.0-flash-preview-image-generation',    // Image Model (depreciated)
-    'gemma-4-26b-a4b-it'     // Memory & Format Handler
+    'gemma-3-27b-it'     // Memory & Format Handler
 ];
 const GEMMA_HISTORY_LIMIT_CHARS = 12000 * 4;
 const GEMMA_PRO_HISTORY_LIMIT_CHARS = 12000 * 4;
