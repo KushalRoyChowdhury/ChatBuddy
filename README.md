@@ -223,4 +223,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-*v2.5.2 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)*
+*v2.5.2 - By [KushalRoyChowdhury](https://github.com/KushalRoyChowdhury)* 
